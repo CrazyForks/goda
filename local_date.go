@@ -51,11 +51,11 @@ func (d *LocalDate) UnmarshalText(text []byte) (e error) {
 	}
 	var y int64
 	var m, dom int
-	m, e = parseInt(text[len(text)-2:])
+	dom, e = parseInt(text[len(text)-2:])
 	if e != nil {
 		return
 	}
-	dom, e = parseInt(text[len(text)-5 : len(text)-3])
+	m, e = parseInt(text[len(text)-5 : len(text)-3])
 	if e != nil {
 		return
 	}
