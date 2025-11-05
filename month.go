@@ -5,27 +5,33 @@ import (
 	"time"
 )
 
+// Month represents a month-of-year in the ISO-8601 calendar system,
+// such as January or December. It is compatible with time.Month.
 type Month time.Month
 
 const (
-	January Month = iota + 1
-	February
-	March
-	April
-	May
-	June
-	July
-	August
-	September
-	October
-	November
-	December
+	January   Month = iota + 1 // January (month 1)
+	February                   // February (month 2)
+	March                      // March (month 3)
+	April                      // April (month 4)
+	May                        // May (month 5)
+	June                       // June (month 6)
+	July                       // July (month 7)
+	August                     // August (month 8)
+	September                  // September (month 9)
+	October                    // October (month 10)
+	November                   // November (month 11)
+	December                   // December (month 12)
 )
 
+// IsZero returns true if this is the zero value (not a valid month).
 func (m Month) IsZero() bool {
 	return m == 0
 }
 
+// FirstDayOfYear returns the day-of-year (1-366) for the first day of this month.
+// The isLeap parameter indicates whether the year is a leap year.
+// For example, March 1st is day 60 in non-leap years and day 61 in leap years.
 func (m Month) FirstDayOfYear(isLeap bool) int {
 	var d int
 	switch m {
@@ -64,7 +70,9 @@ func (m Month) FirstDayOfYear(isLeap bool) int {
 	return d
 }
 
-// MaxDays returns the maximum days in the month. For February, it's 29.
+// MaxDays returns the maximum days in the month.
+// For February, it returns 29 (leap year maximum).
+// For other months, it returns the fixed number of days.
 func (m Month) MaxDays() int {
 	switch m {
 	case 0:
@@ -80,6 +88,10 @@ func (m Month) MaxDays() int {
 	}
 }
 
+// Length returns the number of days in this month for the specified year type.
+// The isLeap parameter indicates whether the year is a leap year.
+// February returns 29 for leap years and 28 for non-leap years.
+// Other months return their fixed number of days.
 func (m Month) Length(isLeap bool) int {
 	if m == February {
 		if isLeap {
@@ -90,6 +102,8 @@ func (m Month) Length(isLeap bool) int {
 	return m.MaxDays()
 }
 
+// String returns the English name of the month (e.g., "January", "February").
+// Returns empty string for zero value.
 func (m Month) String() string {
 	if m.IsZero() {
 		return ""

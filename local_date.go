@@ -9,10 +9,23 @@ import (
 	"time"
 )
 
+// LocalDate represents a date without a time zone in the ISO-8601 calendar system,
+// such as 2024-03-15. It stores the year, month, and day-of-month.
+//
+// LocalDate is comparable and can be used as a map key.
+// The zero value represents an unset date and IsZero returns true for it.
+//
+// LocalDate implements sql.Scanner and driver.Valuer for database operations,
+// encoding.TextMarshaler and encoding.TextUnmarshaler for text serialization,
+// and json.Marshaler and json.Unmarshaler for JSON serialization.
+// The text format is YYYY-MM-DD (ISO 8601).
 type LocalDate struct {
 	v int64
 }
 
+// Scan implements the sql.Scanner interface.
+// It supports scanning from nil, string, []byte, and time.Time.
+// Nil values are converted to the zero value of LocalDate.
 func (d *LocalDate) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -30,6 +43,8 @@ func (d *LocalDate) Scan(src any) error {
 	}
 }
 
+// Value implements the driver.Valuer interface.
+// It returns nil for zero values, otherwise returns the date as a string in YYYY-MM-DD format.
 func (d *LocalDate) Value() (driver.Value, error) {
 	if d.IsZero() {
 		return nil, nil
@@ -37,6 +52,8 @@ func (d *LocalDate) Value() (driver.Value, error) {
 	return d.String(), nil
 }
 
+// UnmarshalJSON implements the json.Unmarshaler interface.
+// It accepts JSON strings in YYYY-MM-DD format or JSON null.
 func (d *LocalDate) UnmarshalJSON(bytes []byte) error {
 	if len(bytes) == 4 && string(bytes) == "null" {
 		*d = LocalDate{}
@@ -45,6 +62,8 @@ func (d *LocalDate) UnmarshalJSON(bytes []byte) error {
 	return unmarshalJsonImpl(d, bytes)
 }
 
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// It parses dates in YYYY-MM-DD format. Empty input is treated as zero value.
 func (d *LocalDate) UnmarshalText(text []byte) (e error) {
 	if len(text) == 0 {
 		*d = LocalDate{}
@@ -75,18 +94,25 @@ func (d *LocalDate) UnmarshalText(text []byte) (e error) {
 	return
 }
 
+// MarshalText implements the encoding.TextMarshaler interface.
+// It returns the date in YYYY-MM-DD format, or empty for zero value.
 func (d LocalDate) MarshalText() (text []byte, err error) {
 	return marshalTextImpl(d)
 }
 
+// MarshalJSON implements the json.Marshaler interface.
+// It returns the date as a JSON string in YYYY-MM-DD format, or empty string for zero value.
 func (d LocalDate) MarshalJSON() ([]byte, error) {
 	return marshalJsonImpl(d)
 }
 
+// String returns the date in YYYY-MM-DD format, or empty string for zero value.
 func (d LocalDate) String() string {
 	return stringImpl(d)
 }
 
+// AppendText implements the encoding.TextAppender interface.
+// It appends the date in YYYY-MM-DD format to b and returns the extended buffer.
 func (d LocalDate) AppendText(b []byte) ([]byte, error) {
 	if d.IsZero() {
 		return b, nil
@@ -96,22 +122,29 @@ func (d LocalDate) AppendText(b []byte) ([]byte, error) {
 	return b, nil
 }
 
+// Year returns the year component of this date.
 func (d LocalDate) Year() Year {
 	return Year(d.v >> 16)
 }
 
+// IsLeapYear returns true if the year of this date is a leap year.
+// A leap year is divisible by 4, unless it's divisible by 100 (but not 400).
 func (d LocalDate) IsLeapYear() bool {
 	return d.Year().IsLeapYear()
 }
 
+// Month returns the month component of this date (1-12).
 func (d LocalDate) Month() Month {
 	return Month(d.v >> 8 & 0xff)
 }
 
+// DayOfMonth returns the day-of-month component of this date (1-31).
 func (d LocalDate) DayOfMonth() int {
 	return int(d.v & 0xff)
 }
 
+// DayOfWeek returns the day-of-week for this date.
+// Returns 0 for zero value, otherwise Monday=1 through Sunday=7.
 func (d LocalDate) DayOfWeek() DayOfWeek {
 	if d.IsZero() {
 		return 0
@@ -119,6 +152,8 @@ func (d LocalDate) DayOfWeek() DayOfWeek {
 	return DayOfWeek(floorMod(d.UnixEpochDays()+3, 7) + 1)
 }
 
+// DayOfYear returns the day-of-year for this date (1-366).
+// Returns 0 for zero value.
 func (d LocalDate) DayOfYear() int {
 	if d.IsZero() {
 		return 0
@@ -126,6 +161,8 @@ func (d LocalDate) DayOfYear() int {
 	return d.Month().FirstDayOfYear(d.IsLeapYear()) - 1 + d.DayOfMonth()
 }
 
+// PlusDays returns a copy of this date with the specified number of days added.
+// Negative values subtract days. Returns zero value if called on zero value.
 func (d LocalDate) PlusDays(days int) LocalDate {
 	if d.IsZero() {
 		return d
@@ -133,10 +170,17 @@ func (d LocalDate) PlusDays(days int) LocalDate {
 	return NewLocalDateByUnixEpochDays(d.UnixEpochDays() + int64(days))
 }
 
+// MinusDays returns a copy of this date with the specified number of days subtracted.
+// Equivalent to PlusDays(-days).
 func (d LocalDate) MinusDays(days int) LocalDate {
 	return d.PlusDays(-days)
 }
 
+// PlusMonths returns a copy of this date with the specified number of months added.
+// Negative values subtract months. If the resulting day-of-month is invalid,
+// it is adjusted to the last valid day of the month.
+// For example, 2024-01-31 plus 1 month becomes 2024-02-29 (leap year).
+// Returns zero value if called on zero value.
 func (d LocalDate) PlusMonths(months int) LocalDate {
 	if d.IsZero() {
 		return d
@@ -156,10 +200,16 @@ func (d LocalDate) PlusMonths(months int) LocalDate {
 	return MustNewLocalDate(Year(y), Month(m), min(d.DayOfMonth(), Month(m).Length(Year(y).IsLeapYear())))
 }
 
+// MinusMonths returns a copy of this date with the specified number of months subtracted.
+// Equivalent to PlusMonths(-months).
 func (d LocalDate) MinusMonths(months int) LocalDate {
 	return d.PlusMonths(-months)
 }
 
+// PlusYears returns a copy of this date with the specified number of years added.
+// Negative values subtract years. If the resulting day-of-month is invalid
+// (e.g., Feb 29 in a non-leap year), it is adjusted to the last valid day of the month.
+// Returns zero value if called on zero value.
 func (d LocalDate) PlusYears(years int) LocalDate {
 	if d.IsZero() {
 		return d
@@ -168,22 +218,31 @@ func (d LocalDate) PlusYears(years int) LocalDate {
 	return MustNewLocalDate(year, d.Month(), min(d.DayOfMonth(), d.Month().Length(year.IsLeapYear())))
 }
 
+// MinusYears returns a copy of this date with the specified number of years subtracted.
+// Equivalent to PlusYears(-years).
 func (d LocalDate) MinusYears(years int) LocalDate {
 	return d.PlusYears(-years)
 }
 
+// Compare compares this date with another date.
+// Returns -1 if this date is before other, 0 if equal, and 1 if after.
+// Zero values are considered less than non-zero values.
 func (d LocalDate) Compare(other LocalDate) int {
 	return doCompare(d, other, compareZero, comparing(LocalDate.Year), comparing(LocalDate.Month), comparing(LocalDate.DayOfMonth))
 }
 
+// IsBefore returns true if this date is before the specified date.
 func (d LocalDate) IsBefore(other LocalDate) bool {
 	return d.Compare(other) < 0
 }
 
+// IsAfter returns true if this date is after the specified date.
 func (d LocalDate) IsAfter(other LocalDate) bool {
 	return d.Compare(other) > 0
 }
 
+// GoTime converts this date to a time.Time at midnight UTC.
+// Returns time.Time{} (zero) for zero value.
 func (d LocalDate) GoTime() time.Time {
 	if d.IsZero() {
 		return time.Time{}
@@ -191,6 +250,9 @@ func (d LocalDate) GoTime() time.Time {
 	return time.Date(int(d.Year()), time.Month(d.Month()), d.DayOfMonth(), 0, 0, 0, 0, time.UTC)
 }
 
+// UnixEpochDays returns the number of days since Unix epoch (1970-01-01).
+// Positive values represent dates after the epoch, negative before.
+// Returns 0 for zero value.
 func (d LocalDate) UnixEpochDays() int64 {
 	if d.IsZero() {
 		return 0
@@ -203,7 +265,7 @@ func (d LocalDate) UnixEpochDays() int64 {
 	day := int64(d.DayOfMonth())
 	total := int64(0)
 
-	// 计算年
+	// Calculate year contribution
 	total += 365 * y
 	if y >= 0 {
 		total += (y+3)/4 - (y+99)/100 + (y+399)/400
@@ -211,13 +273,13 @@ func (d LocalDate) UnixEpochDays() int64 {
 		total -= y/-4 - y/-100 + y/-400
 	}
 
-	// 计算月
+	// Calculate month contribution
 	total += (367*m - 362) / 12
 
-	// 计算天数
+	// Calculate day contribution
 	total += day - 1
 
-	// 如果月份大于2，则进行闰年修正
+	// Adjust for leap year if month > February
 	if m > 2 {
 		total--
 		if !d.Year().IsLeapYear() {
@@ -228,6 +290,7 @@ func (d LocalDate) UnixEpochDays() int64 {
 	return total - Days0000To1970
 }
 
+// IsZero returns true if this is the zero value of LocalDate.
 func (d LocalDate) IsZero() bool {
 	return d.v == 0
 }
@@ -241,6 +304,9 @@ var _ json.Unmarshaler = (*LocalDate)(nil)
 var _ driver.Valuer = (*LocalDate)(nil)
 var _ sql.Scanner = (*LocalDate)(nil)
 
+// NewLocalDate creates a new LocalDate from the specified year, month, and day-of-month.
+// Returns an error if the date is invalid (e.g., month out of range 1-12,
+// day out of range for the month, or February 29 in a non-leap year).
 func NewLocalDate(year Year, month Month, dayOfMonth int) (d LocalDate, e error) {
 	if month < January || month > December {
 		e = newError("month %d out of range", month)
@@ -256,6 +322,8 @@ func NewLocalDate(year Year, month Month, dayOfMonth int) (d LocalDate, e error)
 	return
 }
 
+// MustNewLocalDate creates a new LocalDate from the specified year, month, and day-of-month.
+// Panics if the date is invalid. Use NewLocalDate for error handling.
 func MustNewLocalDate(year Year, month Month, dayOfMonth int) LocalDate {
 	nld, e := NewLocalDate(year, month, dayOfMonth)
 	if e != nil {
@@ -264,6 +332,9 @@ func MustNewLocalDate(year Year, month Month, dayOfMonth int) LocalDate {
 	return nld
 }
 
+// NewLocalDateByGoTime creates a LocalDate from a time.Time.
+// The time zone and time-of-day components are ignored.
+// Returns zero value if t.IsZero().
 func NewLocalDateByGoTime(t time.Time) LocalDate {
 	if t.IsZero() {
 		return LocalDate{}
@@ -271,38 +342,40 @@ func NewLocalDateByGoTime(t time.Time) LocalDate {
 	return MustNewLocalDate(Year(t.Year()), Month(t.Month()), t.Day())
 }
 
+// NewLocalDateByUnixEpochDays creates a LocalDate from the number of days since Unix epoch (1970-01-01).
+// Positive values represent dates after the epoch, negative before.
 func NewLocalDateByUnixEpochDays(days int64) LocalDate {
 	const DaysPerCycle = 365*400 + 97
 	const Days0000To1970 = (DaysPerCycle * 5) - (30*365 + 7)
 	zeroDay := days + Days0000To1970
 
-	// 调整为基于3月的年
-	zeroDay -= 60 // 将日期调整到 0000-03-01，保证闰日位于四年周期的末尾
+	// Adjust to March-based year (makes leap day fall at end of 4-year cycle)
+	zeroDay -= 60 // Shift to 0000-03-01 as base
 
 	var adjust int64
 	if zeroDay < 0 {
-		// 如果是负年份，调整为正年份进行计算
+		// For negative years, adjust to positive for calculation
 		adjustCycles := (zeroDay+1)/DaysPerCycle - 1
 		adjust = adjustCycles * 400
 		zeroDay += -adjustCycles * DaysPerCycle
 	}
 
-	// 估算年
+	// Estimate the year
 	yearEst := (400*zeroDay + 591) / DaysPerCycle
-	// 计算该年的天数
+	// Calculate day-of-year for estimated year
 	doyEst := zeroDay - (365*yearEst + yearEst/4 - yearEst/100 + yearEst/400)
 	if doyEst < 0 {
-		// 修正估算
+		// Correct the estimate
 		yearEst--
 		doyEst = zeroDay - (365*yearEst + yearEst/4 - yearEst/100 + yearEst/400)
 	}
 
-	yearEst += adjust // 复位负年份
+	yearEst += adjust // Restore negative year adjustment
 
-	// 转换为三月为基准的日期
+	// Convert from March-based day-of-year
 	marchDoy0 := int(doyEst)
 
-	// 转换回基于一月的月份和日期
+	// Convert back to January-based month and day
 	marchMonth0 := (marchDoy0*5 + 2) / 153
 	month := Month(marchMonth0 + 3)
 	if month > 12 {
