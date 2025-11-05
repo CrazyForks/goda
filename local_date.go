@@ -38,6 +38,10 @@ func (d *LocalDate) Value() (driver.Value, error) {
 }
 
 func (d *LocalDate) UnmarshalJSON(bytes []byte) error {
+	if len(bytes) == 4 && string(bytes) == "null" {
+		*d = LocalDate{}
+		return nil
+	}
 	return unmarshalJsonImpl(d, bytes)
 }
 
@@ -139,12 +143,15 @@ func (d LocalDate) PlusMonths(months int) LocalDate {
 	}
 	var m = int(d.Month()) + months
 	var y = d.Year().Int64()
-	if m > 12 && months > 0 {
-		y += int64(m / 12)
-		m = m%12 + 1
-	} else if m < 1 && months < 0 {
-		y += int64(m/12) - 1
-		m = m%12 + 12
+	if m > 12 {
+		y += int64((m - 1) / 12)
+		m = (m-1)%12 + 1
+	} else if m < 1 {
+		y += int64((m - 12) / 12)
+		m = (m-1)%12 + 1
+		if m < 1 {
+			m += 12
+		}
 	}
 	return MustNewLocalDate(Year(y), Month(m), min(d.DayOfMonth(), Month(m).Length(Year(y).IsLeapYear())))
 }
@@ -235,12 +242,12 @@ var _ driver.Valuer = (*LocalDate)(nil)
 var _ sql.Scanner = (*LocalDate)(nil)
 
 func NewLocalDate(year Year, month Month, dayOfMonth int) (d LocalDate, e error) {
-	if dayOfMonth < 1 || dayOfMonth > month.Length(year.IsLeapYear()) {
-		e = newError("day %d of month out of range", dayOfMonth)
-		return
-	}
 	if month < January || month > December {
 		e = newError("month %d out of range", month)
+		return
+	}
+	if dayOfMonth < 1 || dayOfMonth > month.Length(year.IsLeapYear()) {
+		e = newError("day %d of month out of range", dayOfMonth)
 		return
 	}
 	d = LocalDate{
