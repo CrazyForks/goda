@@ -1,4 +1,4 @@
-module goda
+module github.com/iseki0/goda
 
 go 1.25
 
