@@ -34,6 +34,7 @@ const (
 	localTimeValueMask int64 = 0x7FFFFFFFFFFFFFFF  // bits 0-62
 )
 
+// Value implements driver.Valuer for database serialization.
 func (t *LocalTime) Value() (driver.Value, error) {
 	if t.IsZero() {
 		return nil, nil
@@ -41,6 +42,7 @@ func (t *LocalTime) Value() (driver.Value, error) {
 	return t.String(), nil
 }
 
+// Scan implements sql.Scanner for database deserialization.
 func (t *LocalTime) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -56,6 +58,7 @@ func (t *LocalTime) Scan(src any) error {
 	}
 }
 
+// UnmarshalJSON implements json.Unmarshaler.
 func (t *LocalTime) UnmarshalJSON(bytes []byte) error {
 	if len(bytes) == 4 && string(bytes) == "null" {
 		*t = LocalTime{}
@@ -64,6 +67,7 @@ func (t *LocalTime) UnmarshalJSON(bytes []byte) error {
 	return unmarshalJsonImpl(t, bytes)
 }
 
+// UnmarshalText implements encoding.TextUnmarshaler.
 func (t *LocalTime) UnmarshalText(text []byte) error {
 	if len(text) == 0 {
 		*t = LocalTime{}
@@ -164,10 +168,12 @@ func (t LocalTime) AppendText(b []byte) ([]byte, error) {
 	return append(b, buf[:l]...), nil
 }
 
+// MarshalText implements encoding.TextMarshaler.
 func (t LocalTime) MarshalText() (text []byte, err error) {
 	return marshalTextImpl(t)
 }
 
+// MarshalJSON implements json.Marshaler.
 func (t LocalTime) MarshalJSON() ([]byte, error) {
 	return marshalJsonImpl(t)
 }
@@ -176,26 +182,31 @@ func (t LocalTime) String() string {
 	return stringImpl(t)
 }
 
+// Hour returns the hour component (0-23).
 func (t LocalTime) Hour() int {
 	ns := t.v & localTimeValueMask
 	return int(ns / int64(time.Hour))
 }
 
+// Minute returns the minute component (0-59).
 func (t LocalTime) Minute() int {
 	ns := t.v & localTimeValueMask
 	return int(ns / int64(time.Minute) % 60)
 }
 
+// Second returns the second component (0-59).
 func (t LocalTime) Second() int {
 	ns := t.v & localTimeValueMask
 	return int(ns / int64(time.Second) % 60)
 }
 
+// Millisecond returns the millisecond component (0-999).
 func (t LocalTime) Millisecond() int {
 	ns := t.v & localTimeValueMask
 	return int(ns / int64(time.Millisecond) % 1000)
 }
 
+// Nanosecond returns the nanosecond component (0-999999999).
 func (t LocalTime) Nanosecond() int {
 	ns := t.v & localTimeValueMask
 	return int(ns % int64(time.Second))

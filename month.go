@@ -9,6 +9,7 @@ import (
 // such as January or December. It is compatible with time.Month.
 type Month time.Month
 
+// Month constants.
 const (
 	January   Month = iota + 1 // January (month 1)
 	February                   // February (month 2)

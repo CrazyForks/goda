@@ -6,6 +6,7 @@ import "time"
 // where Monday=1 and Sunday=7. This differs from time.Weekday where Sunday=0.
 type DayOfWeek int
 
+// Days of the week constants.
 const (
 	Monday    DayOfWeek = iota + 1 // Monday (day 1)
 	Tuesday                        // Tuesday (day 2)
