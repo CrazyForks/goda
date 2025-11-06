@@ -9,9 +9,12 @@
 //   - Year, Month, DayOfWeek: Supporting types for date/time operations
 //
 // All types implement standard interfaces for serialization:
-//   - encoding.TextMarshaler and encoding.TextUnmarshaler (ISO 8601 format)
+//   - encoding.TextMarshaler and encoding.TextUnmarshaler (ISO 8601 basic format)
 //   - encoding.json.Marshaler and encoding.json.Unmarshaler
 //   - database/sql.Scanner and database/sql/driver.Valuer
+//
+// Note: This package uses ISO 8601 basic formats only (yyyy-MM-dd, HH:mm:ss[.nnnnnnnnn]),
+// not the full complex ISO 8601 specification (no week dates, ordinal dates, or timezone offsets).
 //
 // # Quick Start
 //
@@ -71,13 +74,17 @@
 //   - Use LocalTime when you only need a time (e.g., office hours, schedules)
 //   - Convert to/from time.Time when timezone information is needed
 //
-// # ISO 8601 Format
+// # Format Specification
 //
-// All types use ISO 8601 standard formats:
+// This package uses ISO 8601 basic calendar date and time formats (not the full specification):
 //
-//   - LocalDate: YYYY-MM-DD (e.g., "2024-03-15")
-//   - LocalTime: HH:MM:SS[.nnnnnnnnn] (e.g., "14:30:45.123456789")
+//   - LocalDate: yyyy-MM-dd (e.g., "2024-03-15")
+//     Only Gregorian calendar dates. No week dates (YYYY-Www-D) or ordinal dates (YYYY-DDD).
 //
-// Fractional seconds in LocalTime automatically trim trailing zeros while
-// maintaining precision (following Java LocalTime behavior).
+//   - LocalTime: HH:mm:ss[.nnnnnnnnn] (e.g., "14:30:45.123456789")
+//     24-hour format. Fractional seconds up to nanoseconds. No timezone offsets.
+//     Trailing zeros are automatically trimmed (14:30:45.1 instead of 14:30:45.100).
+//
+//   - LocalDateTime: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] (e.g., "2024-03-15T14:30:45.123456789")
+//     Combined with 'T' separator (lowercase 't' accepted when parsing). No timezone offsets.
 package goda

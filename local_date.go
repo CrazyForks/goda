@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// LocalDate represents a date without a time zone in the ISO-8601 calendar system,
+// LocalDate represents a date without a time zone in the Gregorian calendar system,
 // such as 2024-03-15. It stores the year, month, and day-of-month.
 //
 // LocalDate is comparable and can be used as a map key.
@@ -18,7 +18,9 @@ import (
 // LocalDate implements sql.Scanner and driver.Valuer for database operations,
 // encoding.TextMarshaler and encoding.TextUnmarshaler for text serialization,
 // and json.Marshaler and json.Unmarshaler for JSON serialization.
-// The text format is YYYY-MM-DD (ISO 8601).
+//
+// Format: yyyy-MM-dd (e.g., "2024-03-15"). Uses ISO 8601 basic calendar date format.
+// Week dates (YYYY-Www-D) and ordinal dates (YYYY-DDD) are not supported.
 type LocalDate struct {
 	v int64
 }
@@ -44,7 +46,7 @@ func (d *LocalDate) Scan(src any) error {
 }
 
 // Value implements the driver.Valuer interface.
-// It returns nil for zero values, otherwise returns the date as a string in YYYY-MM-DD format.
+// It returns nil for zero values, otherwise returns the date as a string in yyyy-MM-dd format.
 func (d *LocalDate) Value() (driver.Value, error) {
 	if d.IsZero() {
 		return nil, nil
@@ -53,7 +55,7 @@ func (d *LocalDate) Value() (driver.Value, error) {
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
-// It accepts JSON strings in YYYY-MM-DD format or JSON null.
+// It accepts JSON strings in yyyy-MM-dd format or JSON null.
 func (d *LocalDate) UnmarshalJSON(bytes []byte) error {
 	if len(bytes) == 4 && string(bytes) == "null" {
 		*d = LocalDate{}
@@ -63,7 +65,7 @@ func (d *LocalDate) UnmarshalJSON(bytes []byte) error {
 }
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
-// It parses dates in YYYY-MM-DD format. Empty input is treated as zero value.
+// It parses dates in yyyy-MM-dd format. Empty input is treated as zero value.
 func (d *LocalDate) UnmarshalText(text []byte) (e error) {
 	if len(text) == 0 {
 		*d = LocalDate{}
@@ -95,24 +97,24 @@ func (d *LocalDate) UnmarshalText(text []byte) (e error) {
 }
 
 // MarshalText implements the encoding.TextMarshaler interface.
-// It returns the date in YYYY-MM-DD format, or empty for zero value.
+// It returns the date in yyyy-MM-dd format, or empty for zero value.
 func (d LocalDate) MarshalText() (text []byte, err error) {
 	return marshalTextImpl(d)
 }
 
 // MarshalJSON implements the json.Marshaler interface.
-// It returns the date as a JSON string in YYYY-MM-DD format, or empty string for zero value.
+// It returns the date as a JSON string in yyyy-MM-dd format, or empty string for zero value.
 func (d LocalDate) MarshalJSON() ([]byte, error) {
 	return marshalJsonImpl(d)
 }
 
-// String returns the date in YYYY-MM-DD format, or empty string for zero value.
+// String returns the date in yyyy-MM-dd format, or empty string for zero value.
 func (d LocalDate) String() string {
 	return stringImpl(d)
 }
 
 // AppendText implements the encoding.TextAppender interface.
-// It appends the date in YYYY-MM-DD format to b and returns the extended buffer.
+// It appends the date in yyyy-MM-dd format to b and returns the extended buffer.
 func (d LocalDate) AppendText(b []byte) ([]byte, error) {
 	if d.IsZero() {
 		return b, nil
@@ -404,9 +406,11 @@ func LocalDateNowUTC() LocalDate {
 	return NewLocalDateByGoTime(time.Now().UTC())
 }
 
-// ParseLocalDate parses a date string in ISO 8601 format (YYYY-MM-DD).
+// ParseLocalDate parses a date string in yyyy-MM-dd format.
 // Returns an error if the string is invalid or represents an invalid date.
-// For lenient parsing that returns zero value on error, see ParseLocalDateOrZero.
+//
+// Supported format: yyyy-MM-dd (e.g., "2024-03-15")
+// Week dates and ordinal dates are not supported.
 //
 // Example:
 //
@@ -420,7 +424,7 @@ func ParseLocalDate(s string) (LocalDate, error) {
 	return d, err
 }
 
-// MustParseLocalDate parses a date string in ISO 8601 format (YYYY-MM-DD).
+// MustParseLocalDate parses a date string in yyyy-MM-dd format.
 // Panics if the string is invalid. Use ParseLocalDate for error handling.
 //
 // Example:

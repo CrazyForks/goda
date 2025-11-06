@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// LocalTime represents a time without a date or time zone in the ISO-8601 calendar system,
+// LocalTime represents a time without a date or time zone,
 // such as 14:30:45.123456789. It stores the hour, minute, second, and nanosecond.
 //
 // LocalTime is comparable and can be used as a map key.
@@ -19,7 +19,10 @@ import (
 // LocalTime implements sql.Scanner and driver.Valuer for database operations,
 // encoding.TextMarshaler and encoding.TextUnmarshaler for text serialization,
 // and json.Marshaler and json.Unmarshaler for JSON serialization.
-// The text format is HH:MM:SS[.nnnnnnnnn] (ISO 8601).
+//
+// Format: HH:mm:ss[.nnnnnnnnn] (e.g., "14:30:45.123456789"). Uses 24-hour format.
+// Fractional seconds support nanosecond precision. Trailing zeros are automatically trimmed.
+// Timezone offsets are not supported.
 //
 // Internally, v uses bit 63 (the highest bit) as a validity flag.
 // If bit 63 is set, the time is valid and bits 0-62 contain nanoseconds since midnight.
@@ -349,14 +352,16 @@ func LocalTimeNowUTC() LocalTime {
 	return NewLocalTimeByGoTime(time.Now().UTC())
 }
 
-// ParseLocalTime parses a time string in ISO 8601 format (HH:MM:SS[.nnnnnnnnn]).
+// ParseLocalTime parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
 // Returns an error if the string is invalid or represents an invalid time.
 //
 // Supported formats:
-//   - HH:MM:SS (e.g., "14:30:45")
-//   - HH:MM:SS.fff (milliseconds, e.g., "14:30:45.123")
-//   - HH:MM:SS.ffffff (microseconds, e.g., "14:30:45.123456")
-//   - HH:MM:SS.nnnnnnnnn (nanoseconds, e.g., "14:30:45.123456789")
+//   - HH:mm:ss (e.g., "14:30:45")
+//   - HH:mm:ss.fff (milliseconds, e.g., "14:30:45.123")
+//   - HH:mm:ss.ffffff (microseconds, e.g., "14:30:45.123456")
+//   - HH:mm:ss.nnnnnnnnn (nanoseconds, e.g., "14:30:45.123456789")
+//
+// Timezone offsets are not supported.
 //
 // Example:
 //
@@ -370,7 +375,7 @@ func ParseLocalTime(s string) (LocalTime, error) {
 	return t, err
 }
 
-// MustParseLocalTime parses a time string in ISO 8601 format (HH:MM:SS[.nnnnnnnnn]).
+// MustParseLocalTime parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
 // Panics if the string is invalid. Use ParseLocalTime for error handling.
 //
 // Example:

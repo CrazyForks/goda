@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// LocalDateTime represents a date-time without a time zone in the ISO-8601 calendar system,
+// LocalDateTime represents a date-time without a time zone,
 // such as 2024-03-15T14:30:45.123456789. It combines LocalDate and LocalTime.
 //
 // LocalDateTime is comparable and can be used as a map key.
@@ -18,7 +18,10 @@ import (
 // LocalDateTime implements sql.Scanner and driver.Valuer for database operations,
 // encoding.TextMarshaler and encoding.TextUnmarshaler for text serialization,
 // and json.Marshaler and json.Unmarshaler for JSON serialization.
-// The text format is YYYY-MM-DDTHH:MM:SS[.nnnnnnnnn] (ISO 8601).
+//
+// Format: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] (e.g., "2024-03-15T14:30:45.123456789").
+// Combined date and time with 'T' separator. Lowercase 't' is accepted when parsing.
+// Timezone offsets are not supported.
 type LocalDateTime struct {
 	date LocalDate
 	time LocalTime
@@ -83,19 +86,24 @@ func NewLocalDateTimeByGoTime(t time.Time) LocalDateTime {
 	)
 }
 
-// ParseLocalDateTime parses a date-time string in ISO 8601 format (YYYY-MM-DDTHH:MM:SS[.nnnnnnnnn]).
-// Returns an error if the string is invalid.
+// ParseLocalDateTime parses a date-time string in RFC3339-compatible format.
+// The date must be in yyyy-MM-dd form, and the time must be in HH:mm:ss or
+// HH:mm:ss[.nnnnnnnnn] form.
 //
-// Example:
+// The separator between the date and time may be 'T', 't', or a single space.
+//
+// Examples:
 //
 //	dt, err := ParseLocalDateTime("2024-03-15T14:30:45.123456789")
+//	dt, err := ParseLocalDateTime("2024-03-15 14:30:45")
+//	dt, err := ParseLocalDateTime("2024-03-15t14:30:45")
 func ParseLocalDateTime(s string) (LocalDateTime, error) {
 	var dt LocalDateTime
 	err := dt.UnmarshalText([]byte(s))
 	return dt, err
 }
 
-// MustParseLocalDateTime parses a date-time string in ISO 8601 format.
+// MustParseLocalDateTime parses a date-time string in yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] format.
 // Panics if the string is invalid.
 func MustParseLocalDateTime(s string) LocalDateTime {
 	dt, err := ParseLocalDateTime(s)
@@ -261,7 +269,7 @@ func (dt LocalDateTime) MinusYears(years int) LocalDateTime {
 	return dt.PlusYears(-years)
 }
 
-// String returns the ISO 8601 string representation (YYYY-MM-DDTHH:MM:SS[.nnnnnnnnn]).
+// String returns the ISO 8601 string representation (yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]).
 func (dt LocalDateTime) String() string {
 	return stringImpl(dt)
 }
@@ -283,7 +291,7 @@ func (dt LocalDateTime) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-// Accepts ISO 8601 format: YYYY-MM-DDTHH:MM:SS[.nnnnnnnnn]
+// Accepts ISO 8601 format: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]
 func (dt *LocalDateTime) UnmarshalText(text []byte) error {
 	if len(text) == 0 {
 		*dt = LocalDateTime{}

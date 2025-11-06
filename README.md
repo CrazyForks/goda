@@ -20,7 +20,8 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 
 ### Key Features
 
-- ✅ **ISO 8601** format support with smart fractional seconds handling
+- ✅ **ISO 8601 basic format** support (yyyy-MM-dd, HH:mm:ss[.nnnnnnnnn], combined with 'T')
+- ✅ **Smart fractional seconds**: Automatically trims trailing zeros (14:30:45.1 instead of 14:30:45.100)
 - ✅ **Full JSON and SQL** database integration
 - ✅ **Date arithmetic**: Add/subtract days, months, years with overflow handling
 - ✅ **Field access**: Get any field value (year, month, hour, nano-of-day, etc.)
@@ -174,7 +175,7 @@ This package follows the **ThreeTen/JSR-310** model (Java's `java.time` package)
 - **Immutable**: All operations return new values
 - **Type-safe**: Distinct types for date, time, and datetime
 - **Timezone-free**: No confusion about timezones
-- **Standard**: ISO 8601 format support
+- **Simple formats**: Uses ISO 8601 basic formats (not the full complex specification)
 - **Database-friendly**: Direct SQL integration
 - **Field-based access**: Universal field access pattern via `GetFieldInt64`
 - **Zero-value safe**: Zero values are properly handled throughout
