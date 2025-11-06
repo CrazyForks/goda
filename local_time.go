@@ -252,6 +252,25 @@ func NewLocalTimeByGoTime(t time.Time) LocalTime {
 	}
 }
 
+// LocalTimeNow returns the current time in the system's local time zone.
+// This is equivalent to NewLocalTimeByGoTime(time.Now()).
+// For UTC time, use LocalTimeNowUTC. For a specific timezone, use LocalTimeNowIn.
+func LocalTimeNow() LocalTime {
+	return NewLocalTimeByGoTime(time.Now())
+}
+
+// LocalTimeNowIn returns the current time in the specified time zone.
+// This is equivalent to NewLocalTimeByGoTime(time.Now().In(loc)).
+func LocalTimeNowIn(loc *time.Location) LocalTime {
+	return NewLocalTimeByGoTime(time.Now().In(loc))
+}
+
+// LocalTimeNowUTC returns the current time in UTC.
+// This is equivalent to NewLocalTimeByGoTime(time.Now().UTC()).
+func LocalTimeNowUTC() LocalTime {
+	return NewLocalTimeByGoTime(time.Now().UTC())
+}
+
 // IsZero returns true if this is the zero value of LocalTime.
 func (t LocalTime) IsZero() bool {
 	return t.v == 0

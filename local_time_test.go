@@ -650,3 +650,47 @@ func TestLocalTime_CompareConsistency(t *testing.T) {
 		assert.Equal(t, 0, lt.Compare(copy), "times[%d] should equal its copy", i)
 	}
 }
+
+func TestLocalTimeNow(t *testing.T) {
+	// Test that LocalTimeNow() returns a valid time
+	now := LocalTimeNow()
+	assert.False(t, now.IsZero(), "LocalTimeNow should not be zero")
+
+	// Test that it's reasonable (between midnight and end of day)
+	assert.True(t, now.Hour() >= 0 && now.Hour() < 24, "Hour should be valid")
+	assert.True(t, now.Minute() >= 0 && now.Minute() < 60, "Minute should be valid")
+	assert.True(t, now.Second() >= 0 && now.Second() < 60, "Second should be valid")
+}
+
+func TestLocalTimeNowUTC(t *testing.T) {
+	nowUTC := LocalTimeNowUTC()
+	assert.False(t, nowUTC.IsZero(), "LocalTimeNowUTC should not be zero")
+
+	// Test that it's reasonable
+	assert.True(t, nowUTC.Hour() >= 0 && nowUTC.Hour() < 24, "Hour should be valid")
+	assert.True(t, nowUTC.Minute() >= 0 && nowUTC.Minute() < 60, "Minute should be valid")
+	assert.True(t, nowUTC.Second() >= 0 && nowUTC.Second() < 60, "Second should be valid")
+}
+
+func TestLocalTimeNowIn(t *testing.T) {
+	// Test with different time zones
+	locations := []struct {
+		name string
+		loc  *time.Location
+	}{
+		{"UTC", time.UTC},
+		{"Local", time.Local},
+	}
+
+	for _, tt := range locations {
+		t.Run(tt.name, func(t *testing.T) {
+			nowIn := LocalTimeNowIn(tt.loc)
+			assert.False(t, nowIn.IsZero(), "LocalTimeNowIn should not be zero")
+
+			// Test that it's reasonable
+			assert.True(t, nowIn.Hour() >= 0 && nowIn.Hour() < 24, "Hour should be valid")
+			assert.True(t, nowIn.Minute() >= 0 && nowIn.Minute() < 60, "Minute should be valid")
+			assert.True(t, nowIn.Second() >= 0 && nowIn.Second() < 60, "Second should be valid")
+		})
+	}
+}

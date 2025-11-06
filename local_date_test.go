@@ -555,3 +555,54 @@ func TestLocalDate_MonthBoundaries(t *testing.T) {
 		})
 	}
 }
+
+func TestLocalDateNow(t *testing.T) {
+	// Test that LocalDateNow() returns a valid date
+	today := LocalDateNow()
+	assert.False(t, today.IsZero(), "LocalDateNow should not be zero")
+
+	// Test that it matches time.Now()
+	now := time.Now()
+	expected := NewLocalDateByGoTime(now)
+
+	// Allow for the possibility that the date changed between calls
+	// (very unlikely but possible at midnight)
+	diff := today.Compare(expected)
+	assert.True(t, diff >= -1 && diff <= 1, "LocalDateNow should be within 1 day of current time")
+}
+
+func TestLocalDateNowUTC(t *testing.T) {
+	todayUTC := LocalDateNowUTC()
+	assert.False(t, todayUTC.IsZero(), "LocalDateNowUTC should not be zero")
+
+	// Test that it matches time.Now().UTC()
+	now := time.Now().UTC()
+	expected := NewLocalDateByGoTime(now)
+
+	diff := todayUTC.Compare(expected)
+	assert.True(t, diff >= -1 && diff <= 1, "LocalDateNowUTC should be within 1 day of current UTC time")
+}
+
+func TestLocalDateNowIn(t *testing.T) {
+	// Test with different time zones
+	locations := []struct {
+		name string
+		loc  *time.Location
+	}{
+		{"UTC", time.UTC},
+		{"Local", time.Local},
+	}
+
+	for _, tt := range locations {
+		t.Run(tt.name, func(t *testing.T) {
+			todayIn := LocalDateNowIn(tt.loc)
+			assert.False(t, todayIn.IsZero(), "LocalDateNowIn should not be zero")
+
+			now := time.Now().In(tt.loc)
+			expected := NewLocalDateByGoTime(now)
+
+			diff := todayIn.Compare(expected)
+			assert.True(t, diff >= -1 && diff <= 1, "LocalDateNowIn should be within 1 day of current time in specified zone")
+		})
+	}
+}

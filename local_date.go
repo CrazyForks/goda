@@ -342,6 +342,25 @@ func NewLocalDateByGoTime(t time.Time) LocalDate {
 	return MustNewLocalDate(Year(t.Year()), Month(t.Month()), t.Day())
 }
 
+// LocalDateNow returns the current date in the system's local time zone.
+// This is equivalent to NewLocalDateByGoTime(time.Now()).
+// For UTC time, use LocalDateNowUTC. For a specific timezone, use LocalDateNowIn.
+func LocalDateNow() LocalDate {
+	return NewLocalDateByGoTime(time.Now())
+}
+
+// LocalDateNowIn returns the current date in the specified time zone.
+// This is equivalent to NewLocalDateByGoTime(time.Now().In(loc)).
+func LocalDateNowIn(loc *time.Location) LocalDate {
+	return NewLocalDateByGoTime(time.Now().In(loc))
+}
+
+// LocalDateNowUTC returns the current date in UTC.
+// This is equivalent to NewLocalDateByGoTime(time.Now().UTC()).
+func LocalDateNowUTC() LocalDate {
+	return NewLocalDateByGoTime(time.Now().UTC())
+}
+
 // NewLocalDateByUnixEpochDays creates a LocalDate from the number of days since Unix epoch (1970-01-01).
 // Positive values represent dates after the epoch, negative before.
 func NewLocalDateByUnixEpochDays(days int64) LocalDate {
