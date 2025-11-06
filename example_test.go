@@ -1,6 +1,7 @@
 package goda_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -34,20 +35,26 @@ func Example() {
 func ExampleLocalDateNow() {
 	// Get current date in local timezone
 	today := goda.LocalDateNow()
-	fmt.Printf("%T\n", today)
+
+	// Check that we got a valid date
+	fmt.Printf("Got valid date: %v\n", !today.IsZero())
+	fmt.Printf("Has year component: %v\n", today.Year() != 0)
 
 	// Output:
-	// goda.LocalDate
+	// Got valid date: true
+	// Has year component: true
 }
 
 // ExampleLocalDateNowUTC demonstrates how to get the current date in UTC.
 func ExampleLocalDateNowUTC() {
 	// Get current date in UTC
 	todayUTC := goda.LocalDateNowUTC()
-	fmt.Printf("%T\n", todayUTC)
+
+	// Verify it's a valid date
+	fmt.Printf("Valid: %v\n", !todayUTC.IsZero())
 
 	// Output:
-	// goda.LocalDate
+	// Valid: true
 }
 
 // ExampleLocalDateNowIn demonstrates how to get the current date in a specific timezone.
@@ -55,10 +62,12 @@ func ExampleLocalDateNowIn() {
 	// Get current date in Tokyo timezone
 	tokyo, _ := time.LoadLocation("Asia/Tokyo")
 	todayTokyo := goda.LocalDateNowIn(tokyo)
-	fmt.Printf("%T\n", todayTokyo)
+
+	// Verify it's valid
+	fmt.Printf("Valid: %v\n", !todayTokyo.IsZero())
 
 	// Output:
-	// goda.LocalDate
+	// Valid: true
 }
 
 // ExampleNewLocalDate demonstrates how to create a date.
@@ -158,20 +167,26 @@ func ExampleLocalDate_DayOfWeek() {
 func ExampleLocalTimeNow() {
 	// Get current time in local timezone
 	now := goda.LocalTimeNow()
-	fmt.Printf("%T\n", now)
+
+	// Verify it's valid and within range
+	fmt.Printf("Valid: %v\n", !now.IsZero())
+	fmt.Printf("Hour in range: %v\n", now.Hour() >= 0 && now.Hour() < 24)
 
 	// Output:
-	// goda.LocalTime
+	// Valid: true
+	// Hour in range: true
 }
 
 // ExampleLocalTimeNowUTC demonstrates how to get the current time in UTC.
 func ExampleLocalTimeNowUTC() {
 	// Get current time in UTC
 	nowUTC := goda.LocalTimeNowUTC()
-	fmt.Printf("%T\n", nowUTC)
+
+	// Verify it's valid
+	fmt.Printf("Valid: %v\n", !nowUTC.IsZero())
 
 	// Output:
-	// goda.LocalTime
+	// Valid: true
 }
 
 // ExampleLocalTimeNowIn demonstrates how to get the current time in a specific timezone.
@@ -179,10 +194,12 @@ func ExampleLocalTimeNowIn() {
 	// Get current time in Tokyo timezone
 	tokyo, _ := time.LoadLocation("Asia/Tokyo")
 	nowTokyo := goda.LocalTimeNowIn(tokyo)
-	fmt.Printf("%T\n", nowTokyo)
+
+	// Verify it's valid
+	fmt.Printf("Valid: %v\n", !nowTokyo.IsZero())
 
 	// Output:
-	// goda.LocalTime
+	// Valid: true
 }
 
 // ExampleNewLocalTime demonstrates how to create a time.
@@ -327,7 +344,7 @@ func ExampleYear_IsLeapYear() {
 // ExampleLocalDate_MarshalJSON demonstrates JSON serialization.
 func ExampleLocalDate_MarshalJSON() {
 	date := goda.MustNewLocalDate(2024, goda.March, 15)
-	jsonBytes, _ := date.MarshalJSON()
+	jsonBytes, _ := json.Marshal(date)
 	fmt.Println(string(jsonBytes))
 
 	// Output:
@@ -338,7 +355,7 @@ func ExampleLocalDate_MarshalJSON() {
 func ExampleLocalDate_UnmarshalJSON() {
 	var date goda.LocalDate
 	jsonData := []byte(`"2024-03-15"`)
-	err := date.UnmarshalJSON(jsonData)
+	err := json.Unmarshal(jsonData, &date)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -352,7 +369,7 @@ func ExampleLocalDate_UnmarshalJSON() {
 // ExampleLocalTime_MarshalJSON demonstrates JSON serialization.
 func ExampleLocalTime_MarshalJSON() {
 	t := goda.MustNewLocalTime(14, 30, 45, 123456789)
-	jsonBytes, _ := t.MarshalJSON()
+	jsonBytes, _ := json.Marshal(t)
 	fmt.Println(string(jsonBytes))
 
 	// Output:
@@ -363,7 +380,7 @@ func ExampleLocalTime_MarshalJSON() {
 func ExampleLocalTime_UnmarshalJSON() {
 	var t goda.LocalTime
 	jsonData := []byte(`"14:30:45.123456789"`)
-	err := t.UnmarshalJSON(jsonData)
+	err := json.Unmarshal(jsonData, &t)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
