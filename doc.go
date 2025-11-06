@@ -1,10 +1,11 @@
 // Package goda provides date and time types without timezone information,
 // following the ThreeTen/JSR-310 model (java.time package).
 //
-// This package implements three main types:
+// This package implements four main types:
 //
 //   - LocalDate: A date without time or timezone (e.g., 2024-03-15)
 //   - LocalTime: A time without date or timezone (e.g., 14:30:45.123456789)
+//   - LocalDateTime: A date-time without timezone (e.g., 2024-03-15T14:30:45.123456789)
 //   - Year, Month, DayOfWeek: Supporting types for date/time operations
 //
 // All types implement standard interfaces for serialization:
@@ -19,12 +20,19 @@
 //	// Specific date and time
 //	date := goda.MustNewLocalDate(2024, goda.March, 15)
 //	time := goda.MustNewLocalTime(14, 30, 45, 0)
+//	datetime := goda.NewLocalDateTime(date, time)
 //
 //	// Current date and time
 //	today := goda.LocalDateNow()
 //	now := goda.LocalTimeNow()
+//	currentDateTime := goda.LocalDateTimeNow()
 //
-// Date arithmetic:
+//	// Parse from string
+//	date = goda.MustParseLocalDate("2024-03-15")
+//	time = goda.MustParseLocalTime("14:30:45.123456789")
+//	datetime = goda.MustParseLocalDateTime("2024-03-15T14:30:45.123456789")
+//
+// LocalDate arithmetic:
 //
 //	tomorrow := today.PlusDays(1)
 //	nextMonth := today.PlusMonths(1)

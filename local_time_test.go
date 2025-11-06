@@ -437,7 +437,7 @@ func TestLocalTime_Scan(t *testing.T) {
 		assert.Equal(t, MustNewLocalTime(14, 30, 45, 123456789), lt)
 	})
 
-	t.Run("time.Time value", func(t *testing.T) {
+	t.Run("time.LocalTime value", func(t *testing.T) {
 		var lt LocalTime
 		goTime := time.Date(2024, time.March, 15, 14, 30, 45, 123456789, time.UTC)
 		err := lt.Scan(goTime)
@@ -471,22 +471,22 @@ func TestLocalTime_Value(t *testing.T) {
 
 func TestLocalTime_AppendText(t *testing.T) {
 	lt := MustNewLocalTime(14, 30, 45, 123456789)
-	buf := []byte("Time: ")
+	buf := []byte("LocalTime: ")
 	buf, err := lt.AppendText(buf)
 	require.NoError(t, err)
-	assert.Equal(t, "Time: 14:30:45.123456789", string(buf))
+	assert.Equal(t, "LocalTime: 14:30:45.123456789", string(buf))
 
 	lt = MustNewLocalTime(9, 5, 7, 0)
-	buf = []byte("Time: ")
+	buf = []byte("LocalTime: ")
 	buf, err = lt.AppendText(buf)
 	require.NoError(t, err)
-	assert.Equal(t, "Time: 09:05:07", string(buf))
+	assert.Equal(t, "LocalTime: 09:05:07", string(buf))
 
 	var zero LocalTime
-	buf = []byte("Time: ")
+	buf = []byte("LocalTime: ")
 	buf, err = zero.AppendText(buf)
 	require.NoError(t, err)
-	assert.Equal(t, "Time: ", string(buf))
+	assert.Equal(t, "LocalTime: ", string(buf))
 }
 
 func TestLocalTime_SpecialCases(t *testing.T) {

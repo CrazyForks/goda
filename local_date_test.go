@@ -468,7 +468,7 @@ func TestLocalDate_Scan(t *testing.T) {
 		assert.Equal(t, MustNewLocalDate(2024, March, 15), d)
 	})
 
-	t.Run("time.Time value", func(t *testing.T) {
+	t.Run("time.LocalTime value", func(t *testing.T) {
 		var d LocalDate
 		goTime := time.Date(2024, time.March, 15, 14, 30, 0, 0, time.UTC)
 		err := d.Scan(goTime)
@@ -491,16 +491,16 @@ func TestLocalDate_Value(t *testing.T) {
 
 func TestLocalDate_AppendText(t *testing.T) {
 	d := MustNewLocalDate(2024, March, 15)
-	buf := []byte("Date: ")
+	buf := []byte("LocalDate: ")
 	buf, err := d.AppendText(buf)
 	require.NoError(t, err)
-	assert.Equal(t, "Date: 2024-03-15", string(buf))
+	assert.Equal(t, "LocalDate: 2024-03-15", string(buf))
 
 	var zero LocalDate
-	buf = []byte("Date: ")
+	buf = []byte("LocalDate: ")
 	buf, err = zero.AppendText(buf)
 	require.NoError(t, err)
-	assert.Equal(t, "Date: ", string(buf))
+	assert.Equal(t, "LocalDate: ", string(buf))
 }
 
 func TestLocalDate_SpecialDates(t *testing.T) {
