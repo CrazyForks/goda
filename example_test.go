@@ -70,6 +70,30 @@ func ExampleLocalDateNowIn() {
 	// Valid: true
 }
 
+// ExampleParseLocalDate demonstrates parsing a date from a string.
+func ExampleParseLocalDate() {
+	// Parse a date string
+	date, err := goda.ParseLocalDate("2024-03-15")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(date)
+
+	// Output:
+	// 2024-03-15
+}
+
+// ExampleMustParseLocalDate demonstrates parsing a date that panics on error.
+func ExampleMustParseLocalDate() {
+	// Parse a date string (panics if invalid)
+	date := goda.MustParseLocalDate("2024-03-15")
+	fmt.Println(date)
+
+	// Output:
+	// 2024-03-15
+}
+
 // ExampleNewLocalDate demonstrates how to create a date.
 func ExampleNewLocalDate() {
 	// Create a valid date
@@ -200,6 +224,30 @@ func ExampleLocalTimeNowIn() {
 
 	// Output:
 	// Valid: true
+}
+
+// ExampleParseLocalTime demonstrates parsing a time from a string.
+func ExampleParseLocalTime() {
+	// Parse a time string
+	t, err := goda.ParseLocalTime("14:30:45.123456789")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(t)
+
+	// Output:
+	// 14:30:45.123456789
+}
+
+// ExampleMustParseLocalTime demonstrates parsing a time that panics on error.
+func ExampleMustParseLocalTime() {
+	// Parse a time string (panics if invalid)
+	t := goda.MustParseLocalTime("14:30:45")
+	fmt.Println(t)
+
+	// Output:
+	// 14:30:45
 }
 
 // ExampleNewLocalTime demonstrates how to create a time.

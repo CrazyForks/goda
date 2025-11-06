@@ -672,6 +672,87 @@ func TestLocalTimeNowUTC(t *testing.T) {
 	assert.True(t, nowUTC.Second() >= 0 && nowUTC.Second() < 60, "Second should be valid")
 }
 
+func TestParseLocalTime(t *testing.T) {
+	t.Run("valid times", func(t *testing.T) {
+		time, err := ParseLocalTime("14:30:45")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(14, 30, 45, 0), time)
+
+		time, err = ParseLocalTime("09:05:07")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(9, 5, 7, 0), time)
+
+		time, err = ParseLocalTime("00:00:00")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(0, 0, 0, 0), time)
+
+		time, err = ParseLocalTime("23:59:59")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(23, 59, 59, 0), time)
+	})
+
+	t.Run("with fractional seconds", func(t *testing.T) {
+		time, err := ParseLocalTime("14:30:45.123")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(14, 30, 45, 123000000), time)
+
+		time, err = ParseLocalTime("14:30:45.123456")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(14, 30, 45, 123456000), time)
+
+		time, err = ParseLocalTime("14:30:45.123456789")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(14, 30, 45, 123456789), time)
+	})
+
+	t.Run("invalid format", func(t *testing.T) {
+		_, err := ParseLocalTime("14-30-45")
+		assert.Error(t, err)
+
+		_, err = ParseLocalTime("14:30")
+		assert.Error(t, err)
+
+		_, err = ParseLocalTime("not-a-time")
+		assert.Error(t, err)
+	})
+
+	t.Run("invalid values", func(t *testing.T) {
+		_, err := ParseLocalTime("24:00:00")
+		assert.Error(t, err)
+
+		_, err = ParseLocalTime("23:60:00")
+		assert.Error(t, err)
+
+		_, err = ParseLocalTime("23:59:60")
+		assert.Error(t, err)
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		time, err := ParseLocalTime("")
+		require.NoError(t, err)
+		assert.True(t, time.IsZero())
+	})
+}
+
+func TestMustParseLocalTime(t *testing.T) {
+	t.Run("valid time", func(t *testing.T) {
+		assert.NotPanics(t, func() {
+			time := MustParseLocalTime("14:30:45.123456789")
+			assert.Equal(t, MustNewLocalTime(14, 30, 45, 123456789), time)
+		})
+	})
+
+	t.Run("invalid time panics", func(t *testing.T) {
+		assert.Panics(t, func() {
+			MustParseLocalTime("24:00:00")
+		})
+
+		assert.Panics(t, func() {
+			MustParseLocalTime("invalid")
+		})
+	})
+}
+
 func TestLocalTimeNowIn(t *testing.T) {
 	// Test with different time zones
 	locations := []struct {

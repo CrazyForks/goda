@@ -583,6 +583,66 @@ func TestLocalDateNowUTC(t *testing.T) {
 	assert.True(t, diff >= -1 && diff <= 1, "LocalDateNowUTC should be within 1 day of current UTC time")
 }
 
+func TestParseLocalDate(t *testing.T) {
+	t.Run("valid dates", func(t *testing.T) {
+		date, err := ParseLocalDate("2024-03-15")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalDate(2024, March, 15), date)
+
+		date, err = ParseLocalDate("1999-12-31")
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalDate(1999, December, 31), date)
+
+		date, err = ParseLocalDate("2000-02-29") // leap year
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalDate(2000, February, 29), date)
+	})
+
+	t.Run("invalid format", func(t *testing.T) {
+		_, err := ParseLocalDate("2024/03/15")
+		assert.Error(t, err)
+
+		_, err = ParseLocalDate("2024-3-15")
+		assert.Error(t, err)
+
+		_, err = ParseLocalDate("not-a-date")
+		assert.Error(t, err)
+	})
+
+	t.Run("invalid date", func(t *testing.T) {
+		_, err := ParseLocalDate("2024-02-30")
+		assert.Error(t, err)
+
+		_, err = ParseLocalDate("2024-13-01")
+		assert.Error(t, err)
+	})
+
+	t.Run("empty string", func(t *testing.T) {
+		date, err := ParseLocalDate("")
+		require.NoError(t, err)
+		assert.True(t, date.IsZero())
+	})
+}
+
+func TestMustParseLocalDate(t *testing.T) {
+	t.Run("valid date", func(t *testing.T) {
+		assert.NotPanics(t, func() {
+			date := MustParseLocalDate("2024-03-15")
+			assert.Equal(t, MustNewLocalDate(2024, March, 15), date)
+		})
+	})
+
+	t.Run("invalid date panics", func(t *testing.T) {
+		assert.Panics(t, func() {
+			MustParseLocalDate("2024-02-30")
+		})
+
+		assert.Panics(t, func() {
+			MustParseLocalDate("invalid")
+		})
+	})
+}
+
 func TestLocalDateNowIn(t *testing.T) {
 	// Test with different time zones
 	locations := []struct {

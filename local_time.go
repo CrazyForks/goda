@@ -271,6 +271,41 @@ func LocalTimeNowUTC() LocalTime {
 	return NewLocalTimeByGoTime(time.Now().UTC())
 }
 
+// ParseLocalTime parses a time string in ISO 8601 format (HH:MM:SS[.nnnnnnnnn]).
+// Returns an error if the string is invalid or represents an invalid time.
+//
+// Supported formats:
+//   - HH:MM:SS (e.g., "14:30:45")
+//   - HH:MM:SS.fff (milliseconds, e.g., "14:30:45.123")
+//   - HH:MM:SS.ffffff (microseconds, e.g., "14:30:45.123456")
+//   - HH:MM:SS.nnnnnnnnn (nanoseconds, e.g., "14:30:45.123456789")
+//
+// Example:
+//
+//	time, err := ParseLocalTime("14:30:45.123")
+//	if err != nil {
+//	    // handle error
+//	}
+func ParseLocalTime(s string) (LocalTime, error) {
+	var t LocalTime
+	err := t.UnmarshalText([]byte(s))
+	return t, err
+}
+
+// MustParseLocalTime parses a time string in ISO 8601 format (HH:MM:SS[.nnnnnnnnn]).
+// Panics if the string is invalid. Use ParseLocalTime for error handling.
+//
+// Example:
+//
+//	time := MustParseLocalTime("14:30:45.123456789")
+func MustParseLocalTime(s string) LocalTime {
+	t, err := ParseLocalTime(s)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
 // IsZero returns true if this is the zero value of LocalTime.
 func (t LocalTime) IsZero() bool {
 	return t.v == 0

@@ -361,6 +361,36 @@ func LocalDateNowUTC() LocalDate {
 	return NewLocalDateByGoTime(time.Now().UTC())
 }
 
+// ParseLocalDate parses a date string in ISO 8601 format (YYYY-MM-DD).
+// Returns an error if the string is invalid or represents an invalid date.
+// For lenient parsing that returns zero value on error, see ParseLocalDateOrZero.
+//
+// Example:
+//
+//	date, err := ParseLocalDate("2024-03-15")
+//	if err != nil {
+//	    // handle error
+//	}
+func ParseLocalDate(s string) (LocalDate, error) {
+	var d LocalDate
+	err := d.UnmarshalText([]byte(s))
+	return d, err
+}
+
+// MustParseLocalDate parses a date string in ISO 8601 format (YYYY-MM-DD).
+// Panics if the string is invalid. Use ParseLocalDate for error handling.
+//
+// Example:
+//
+//	date := MustParseLocalDate("2024-03-15")
+func MustParseLocalDate(s string) LocalDate {
+	d, err := ParseLocalDate(s)
+	if err != nil {
+		panic(err)
+	}
+	return d
+}
+
 // NewLocalDateByUnixEpochDays creates a LocalDate from the number of days since Unix epoch (1970-01-01).
 // Positive values represent dates after the epoch, negative before.
 func NewLocalDateByUnixEpochDays(days int64) LocalDate {
