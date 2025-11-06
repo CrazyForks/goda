@@ -555,3 +555,78 @@ func ExampleLocalDateTime_UnmarshalJSON() {
 	// Output:
 	// 2024-03-15T14:30:45.123456789
 }
+
+// ExampleField demonstrates working with Field constants.
+func ExampleField() {
+	// Time fields
+	fmt.Println(goda.HourOfDay)
+	fmt.Println(goda.MinuteOfHour)
+	fmt.Println(goda.SecondOfMinute)
+	fmt.Println(goda.NanoOfSecond)
+
+	// Date fields
+	fmt.Println(goda.YearField)
+	fmt.Println(goda.MonthOfYear)
+	fmt.Println(goda.DayOfMonth)
+	fmt.Println(goda.DayOfWeekField)
+
+	// Output:
+	// HourOfDay
+	// MinuteOfHour
+	// SecondOfMinute
+	// NanoOfSecond
+	// Year
+	// MonthOfYear
+	// DayOfMonth
+	// DayOfWeek
+}
+
+// ExampleLocalDateTime_IsSupportedField demonstrates checking field support.
+func ExampleLocalDateTime_IsSupportedField() {
+	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 0)
+
+	fmt.Printf("Supports HourOfDay: %v\n", dt.IsSupportedField(goda.HourOfDay))
+	fmt.Printf("Supports DayOfMonth: %v\n", dt.IsSupportedField(goda.DayOfMonth))
+	fmt.Printf("Supports OffsetSeconds: %v\n", dt.IsSupportedField(goda.OffsetSeconds))
+
+	// Output:
+	// Supports HourOfDay: true
+	// Supports DayOfMonth: true
+	// Supports OffsetSeconds: false
+}
+
+// ExampleLocalDate_GetFieldInt64 demonstrates getting field values from a date.
+func ExampleLocalDate_GetFieldInt64() {
+	date := goda.MustNewLocalDate(2024, goda.March, 15) // Friday
+
+	fmt.Printf("Year: %d\n", date.GetFieldInt64(goda.YearField))
+	fmt.Printf("Month: %d\n", date.GetFieldInt64(goda.MonthOfYear))
+	fmt.Printf("Day: %d\n", date.GetFieldInt64(goda.DayOfMonth))
+	fmt.Printf("Day of week: %d\n", date.GetFieldInt64(goda.DayOfWeekField))
+	fmt.Printf("Day of year: %d\n", date.GetFieldInt64(goda.DayOfYear))
+
+	// Output:
+	// Year: 2024
+	// Month: 3
+	// Day: 15
+	// Day of week: 5
+	// Day of year: 75
+}
+
+// ExampleLocalTime_GetFieldInt64 demonstrates getting field values from a time.
+func ExampleLocalTime_GetFieldInt64() {
+	t := goda.MustNewLocalTime(14, 30, 45, 123456789)
+
+	fmt.Printf("Hour: %d\n", t.GetFieldInt64(goda.HourOfDay))
+	fmt.Printf("Minute: %d\n", t.GetFieldInt64(goda.MinuteOfHour))
+	fmt.Printf("Second: %d\n", t.GetFieldInt64(goda.SecondOfMinute))
+	fmt.Printf("Millisecond: %d\n", t.GetFieldInt64(goda.MilliOfSecond))
+	fmt.Printf("AM/PM: %d\n", t.GetFieldInt64(goda.AmPmOfDay))
+
+	// Output:
+	// Hour: 14
+	// Minute: 30
+	// Second: 45
+	// Millisecond: 123
+	// AM/PM: 1
+}

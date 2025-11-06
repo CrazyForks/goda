@@ -212,6 +212,73 @@ func (t LocalTime) Nanosecond() int {
 	return int(ns % int64(time.Second))
 }
 
+// IsSupportedField returns true if the field is supported by LocalTime.
+func (t LocalTime) IsSupportedField(field Field) bool {
+	switch field {
+	case NanoOfSecond, NanoOfDay, MicroOfSecond, MicroOfDay,
+		MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay,
+		MinuteOfHour, MinuteOfDay, HourOfAmPm, ClockHourOfAmPm,
+		HourOfDay, ClockHourOfDay, AmPmOfDay:
+		return true
+	default:
+		return false
+	}
+}
+
+// GetFieldInt64 returns the value of the specified field as an int64.
+// Returns 0 if the field is not supported or the time is zero.
+func (t LocalTime) GetFieldInt64(field Field) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	ns := t.v & localTimeValueMask
+	switch field {
+	case NanoOfSecond:
+		return ns % int64(time.Second)
+	case NanoOfDay:
+		return ns
+	case MicroOfSecond:
+		return ns % int64(time.Second) / int64(time.Microsecond)
+	case MicroOfDay:
+		return ns / int64(time.Microsecond)
+	case MilliOfSecond:
+		return ns % int64(time.Second) / int64(time.Millisecond)
+	case MilliOfDay:
+		return ns / int64(time.Millisecond)
+	case SecondOfMinute:
+		return ns / int64(time.Second) % 60
+	case SecondOfDay:
+		return ns / int64(time.Second)
+	case MinuteOfHour:
+		return ns / int64(time.Minute) % 60
+	case MinuteOfDay:
+		return ns / int64(time.Minute)
+	case HourOfDay:
+		return ns / int64(time.Hour)
+	case ClockHourOfDay:
+		h := ns / int64(time.Hour)
+		if h == 0 {
+			return 24
+		}
+		return h
+	case HourOfAmPm:
+		return ns / int64(time.Hour) % 12
+	case ClockHourOfAmPm:
+		h := ns / int64(time.Hour) % 12
+		if h == 0 {
+			return 12
+		}
+		return h
+	case AmPmOfDay:
+		if ns/int64(time.Hour) < 12 {
+			return 0 // AM
+		}
+		return 1 // PM
+	default:
+		return 0
+	}
+}
+
 // NewLocalTime creates a new LocalTime from the specified hour, minute, second, and nanosecond.
 // Returns an error if any component is out of range:
 // - hour must be 0-23

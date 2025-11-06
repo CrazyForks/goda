@@ -175,6 +175,24 @@ func (dt LocalDateTime) IsLeapYear() bool {
 	return dt.date.IsLeapYear()
 }
 
+// IsSupportedField returns true if the field is supported by LocalDateTime.
+// LocalDateTime supports all fields from both LocalDate and LocalTime.
+func (dt LocalDateTime) IsSupportedField(field Field) bool {
+	return dt.date.IsSupportedField(field) || dt.time.IsSupportedField(field)
+}
+
+// GetFieldInt64 returns the value of the specified field as an int64.
+// Returns 0 if the field is not supported or the datetime is zero.
+func (dt LocalDateTime) GetFieldInt64(field Field) int64 {
+	if dt.IsZero() {
+		return 0
+	}
+	if dt.time.IsSupportedField(field) {
+		return dt.time.GetFieldInt64(field)
+	}
+	return dt.date.GetFieldInt64(field)
+}
+
 // GoTime converts this date-time to a time.Time in UTC.
 // Returns time.Time{} (zero) for zero value.
 func (dt LocalDateTime) GoTime() time.Time {

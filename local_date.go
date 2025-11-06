@@ -133,6 +133,49 @@ func (d LocalDate) IsLeapYear() bool {
 	return d.Year().IsLeapYear()
 }
 
+// IsSupportedField returns true if the field is supported by LocalDate.
+func (d LocalDate) IsSupportedField(field Field) bool {
+	switch field {
+	case DayOfWeekField, DayOfMonth, DayOfYear, EpochDay,
+		MonthOfYear, ProlepticMonth, YearOfEra, YearField, Era:
+		return true
+	default:
+		return false
+	}
+}
+
+// GetFieldInt64 returns the value of the specified field as an int64.
+// Returns 0 if the field is not supported or the date is zero.
+func (d LocalDate) GetFieldInt64(field Field) int64 {
+	if d.IsZero() {
+		return 0
+	}
+	switch field {
+	case DayOfWeekField:
+		return int64(d.DayOfWeek())
+	case DayOfMonth:
+		return int64(d.DayOfMonth())
+	case DayOfYear:
+		return int64(d.DayOfYear())
+	case MonthOfYear:
+		return int64(d.Month())
+	case YearField, YearOfEra:
+		return int64(d.Year())
+	case Era:
+		if d.Year() >= 1 {
+			return 1 // CE (Common Era)
+		}
+		return 0 // BCE (Before Common Era)
+	case EpochDay:
+		return d.UnixEpochDays()
+	case ProlepticMonth:
+		// Calculate proleptic month (months since year 0)
+		return int64(d.Year())*12 + int64(d.Month()) - 1
+	default:
+		return 0
+	}
+}
+
 // Month returns the month component of this date (1-12).
 func (d LocalDate) Month() Month {
 	return Month(d.v >> 8 & 0xff)
