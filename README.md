@@ -3,7 +3,7 @@
 [![CI](https://github.com/iseki0/goda/workflows/CI/badge.svg)](https://github.com/iseki0/goda/actions?query=workflow%3ACI)
 [![Go Reference](https://pkg.go.dev/badge/github.com/iseki0/goda.svg)](https://pkg.go.dev/github.com/iseki0/goda)
 [![Go Report Card](https://goreportcard.com/badge/github.com/iseki0/goda)](https://goreportcard.com/report/github.com/iseki0/goda)
-[![codecov](https://codecov.io/gh/iseki0/goda/branch/main/graph/badge.svg)](https://codecov.io/gh/iseki0/goda)
+[![codecov](https://codecov.io/gh/iseki0/goda/graph/badge.svg?token=TBHUZUY561)](https://codecov.io/gh/iseki0/goda)
 
 > **ThreeTen/JSR-310** model in Go - Date and time types without timezone information.
 
