@@ -5,17 +5,17 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/iseki0/goda)](https://goreportcard.com/report/github.com/iseki0/goda)
 [![codecov](https://codecov.io/gh/iseki0/goda/graph/badge.svg?token=TBHUZUY561)](https://codecov.io/gh/iseki0/goda)
 
-> **ThreeTen/JSR-310** model in Go - Date and time types without timezone information.
+> **ThreeTen/JSR-310** model in Go
 
-A Go implementation inspired by Java's `java.time` package (JSR-310), providing immutable date and time types that are **timezone-free**, **type-safe**, and **easy to use**.
+A Go implementation inspired by Java's `java.time` package (JSR-310), providing immutable date and time types that are **type-safe** and **easy to use**.
 
 ## Features
 
 ### Core Types
 
-- 📅 **LocalDate**: Date without time or timezone (e.g., `2024-03-15`)
-- ⏰ **LocalTime**: Time without date or timezone (e.g., `14:30:45.123456789`)
-- 📆 **LocalDateTime**: Date-time without timezone (e.g., `2024-03-15T14:30:45.123456789`)
+- 📅 **LocalDate**: Date without time (e.g., `2024-03-15`)
+- ⏰ **LocalTime**: Time without date (e.g., `14:30:45.123456789`)
+- 📆 **LocalDateTime**: Date-time (e.g., `2024-03-15T14:30:45.123456789`)
 - 🔢 **Field**: Enumeration of date-time fields (like Java's `ChronoField`)
 
 ### Key Features
@@ -143,9 +143,9 @@ db.QueryRow("SELECT id, created_at, date FROM records WHERE id = ?", 1).Scan(
 
 | Type | Description | Example |
 |------|-------------|---------|
-| `LocalDate` | Date without time/timezone | `2024-03-15` |
-| `LocalTime` | Time without date/timezone | `14:30:45.123456789` |
-| `LocalDateTime` | Date-time without timezone | `2024-03-15T14:30:45` |
+| `LocalDate` | Date without time | `2024-03-15` |
+| `LocalTime` | Time without date | `14:30:45.123456789` |
+| `LocalDateTime` | Date-time | `2024-03-15T14:30:45` |
 | `Month` | Month of year (1-12) | `March` |
 | `Year` | Year | `2024` |
 | `DayOfWeek` | Day of week (1=Monday, 7=Sunday) | `Friday` |
@@ -174,19 +174,20 @@ This package follows the **ThreeTen/JSR-310** model (Java's `java.time` package)
 
 - **Immutable**: All operations return new values
 - **Type-safe**: Distinct types for date, time, and datetime
-- **Timezone-free**: No confusion about timezones
 - **Simple formats**: Uses ISO 8601 basic formats (not the full complex specification)
 - **Database-friendly**: Direct SQL integration
 - **Field-based access**: Universal field access pattern via `GetFieldInt64`
 - **Zero-value safe**: Zero values are properly handled throughout
 
-### Why Timezone-Free?
+### When to Use LocalDate, LocalTime, LocalDateTime
 
-Many applications deal with dates and times that are independent of timezones:
+Use the local types when you only need the date/time without timezone information:
 - **Birthdays**: "March 15" means March 15 everywhere
 - **Business hours**: "9:00 AM - 5:00 PM" in local context
 - **Schedules**: "Meeting at 2:30 PM" without timezone concerns
 - **Calendar dates**: Historical dates, recurring events
+
+For timezone-aware operations, use `ZonedDateTime` (coming soon).
 
 ## Documentation
 

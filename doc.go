@@ -1,11 +1,10 @@
-// Package goda provides date and time types without timezone information,
-// following the ThreeTen/JSR-310 model (java.time package).
+// Package goda provides date and time types following the ThreeTen/JSR-310 model (java.time package).
 //
 // This package implements four main types:
 //
-//   - LocalDate: A date without time or timezone (e.g., 2024-03-15)
-//   - LocalTime: A time without date or timezone (e.g., 14:30:45.123456789)
-//   - LocalDateTime: A date-time without timezone (e.g., 2024-03-15T14:30:45.123456789)
+//   - LocalDate: A date without time (e.g., 2024-03-15)
+//   - LocalTime: A time without date (e.g., 14:30:45.123456789)
+//   - LocalDateTime: A date-time (e.g., 2024-03-15T14:30:45.123456789)
 //   - Year, Month, DayOfWeek: Supporting types for date/time operations
 //
 // All types implement standard interfaces for serialization:
@@ -64,7 +63,6 @@
 //   - Immutable: All operations return new instances
 //   - Type-safe: Strong typing prevents mixing dates and times
 //   - Zero-value safe: Zero values are clearly invalid and IsZero() returns true
-//   - Timezone-free: These types represent local date/time without timezone information
 //
 // # Comparison with time.Time
 //
@@ -82,9 +80,9 @@
 //     Only Gregorian calendar dates. No week dates (YYYY-Www-D) or ordinal dates (YYYY-DDD).
 //
 //   - LocalTime: HH:mm:ss[.nnnnnnnnn] (e.g., "14:30:45.123456789")
-//     24-hour format. Fractional seconds up to nanoseconds. No timezone offsets.
+//     24-hour format. Fractional seconds up to nanoseconds.
 //     Trailing zeros are automatically trimmed (14:30:45.1 instead of 14:30:45.100).
 //
 //   - LocalDateTime: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] (e.g., "2024-03-15T14:30:45.123456789")
-//     Combined with 'T' separator (lowercase 't' accepted when parsing). No timezone offsets.
+//     Combined with 'T' separator (lowercase 't' accepted when parsing).
 package goda
