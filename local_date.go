@@ -335,6 +335,15 @@ func (d LocalDate) UnixEpochDays() int64 {
 	return total - Days0000To1970
 }
 
+// AtTime returns a LocalDateTime formed by combining this date with the specified time.
+// Returns zero value if either the date or time is zero.
+func (d LocalDate) AtTime(time LocalTime) LocalDateTime {
+	if d.IsZero() || time.IsZero() {
+		return LocalDateTime{}
+	}
+	return NewLocalDateTime(d, time)
+}
+
 // IsZero returns true if this is the zero value of LocalDate.
 func (d LocalDate) IsZero() bool {
 	return d.v == 0

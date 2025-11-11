@@ -775,3 +775,28 @@ func TestLocalTimeNowIn(t *testing.T) {
 		})
 	}
 }
+
+func TestLocalTime_AtDate(t *testing.T) {
+	date := MustNewLocalDate(2024, March, 15)
+	time := MustNewLocalTime(14, 30, 45, 123456789)
+
+	// Test combining valid date and time
+	dt := time.AtDate(date)
+	assert.Equal(t, date, dt.LocalDate())
+	assert.Equal(t, time, dt.LocalTime())
+	assert.Equal(t, "2024-03-15T14:30:45.123456789", dt.String())
+
+	// Test with zero time
+	var zeroTime LocalTime
+	dt = zeroTime.AtDate(date)
+	assert.True(t, dt.IsZero())
+
+	// Test with zero date
+	var zeroDate LocalDate
+	dt = time.AtDate(zeroDate)
+	assert.True(t, dt.IsZero())
+
+	// Test with both zero
+	dt = zeroTime.AtDate(zeroDate)
+	assert.True(t, dt.IsZero())
+}

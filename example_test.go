@@ -187,6 +187,22 @@ func ExampleLocalDate_DayOfWeek() {
 	// Is Friday? true
 }
 
+// ExampleLocalDate_AtTime demonstrates combining a date with a time to create a datetime.
+func ExampleLocalDate_AtTime() {
+	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+
+	dateTime := date.AtTime(time)
+	fmt.Println("Date:", date)
+	fmt.Println("Time:", time)
+	fmt.Println("DateTime:", dateTime)
+
+	// Output:
+	// Date: 2024-03-15
+	// Time: 14:30:45.123456789
+	// DateTime: 2024-03-15T14:30:45.123456789
+}
+
 // ExampleLocalTimeNow demonstrates how to get the current time.
 func ExampleLocalTimeNow() {
 	// Get current time in local timezone
@@ -326,6 +342,22 @@ func ExampleLocalTime_Compare() {
 	// t1 < t2: true
 	// t1 > t2: false
 	// t1 == t3: true
+}
+
+// ExampleLocalTime_AtDate demonstrates combining a time with a date to create a datetime.
+func ExampleLocalTime_AtDate() {
+	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+
+	dateTime := time.AtDate(date)
+	fmt.Println("Date:", date)
+	fmt.Println("Time:", time)
+	fmt.Println("DateTime:", dateTime)
+
+	// Output:
+	// Date: 2024-03-15
+	// Time: 14:30:45.123456789
+	// DateTime: 2024-03-15T14:30:45.123456789
 }
 
 // ExampleLocalTime_String demonstrates the string format with fractional seconds.

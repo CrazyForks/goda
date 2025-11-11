@@ -88,6 +88,23 @@ func main() {
 }
 ```
 
+### Combining Date and Time
+
+You can combine LocalDate and LocalTime to create LocalDateTime:
+
+```go
+date := goda.MustNewLocalDate(2024, goda.March, 15)
+time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+
+// Combine date with time
+dateTime := date.AtTime(time)
+fmt.Println(dateTime) // 2024-03-15T14:30:45.123456789
+
+// Combine time with date
+dateTime2 := time.AtDate(date)
+fmt.Println(dateTime2) // 2024-03-15T14:30:45.123456789
+```
+
 ### Field Access
 
 Access individual date-time fields using the `Field` enumeration:

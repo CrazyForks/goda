@@ -397,6 +397,15 @@ func MustParseLocalTime(s string) LocalTime {
 	return t
 }
 
+// AtDate returns a LocalDateTime formed by combining this time with the specified date.
+// Returns zero value if either the time or date is zero.
+func (t LocalTime) AtDate(date LocalDate) LocalDateTime {
+	if t.IsZero() || date.IsZero() {
+		return LocalDateTime{}
+	}
+	return NewLocalDateTime(date, t)
+}
+
 // IsZero returns true if this is the zero value of LocalTime.
 func (t LocalTime) IsZero() bool {
 	return t.v == 0
