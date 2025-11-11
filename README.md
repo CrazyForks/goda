@@ -107,19 +107,21 @@ ampm := time.GetFieldInt64(goda.AmPmOfDay)           // 1 (PM)
 
 ```go
 type Event struct {
-    Name string             `json:"name"`
-    Date goda.LocalDate     `json:"date"`
-    Time goda.LocalTime     `json:"time"`
+    Name      string              `json:"name"`
+    Date      goda.LocalDate      `json:"date"`
+    Time      goda.LocalTime      `json:"time"`
+    CreatedAt goda.LocalDateTime  `json:"created_at"`
 }
 
 event := Event{
-    Name: "Meeting",
-    Date: goda.MustNewLocalDate(2024, goda.March, 15),
-    Time: goda.MustNewLocalTime(14, 30, 0, 0),
+    Name:      "Meeting",
+    Date:      goda.MustNewLocalDate(2024, goda.March, 15),
+    Time:      goda.MustNewLocalTime(14, 30, 0, 0),
+    CreatedAt: goda.MustParseLocalDateTime("2024-03-15T14:30:00"),
 }
 
 jsonData, _ := json.Marshal(event)
-// {"name":"Meeting","date":"2024-03-15","time":"14:30:00"}
+// {"name":"Meeting","date":"2024-03-15","time":"14:30:00","created_at":"2024-03-15T14:30:00"}
 ```
 
 ### Database Integration
