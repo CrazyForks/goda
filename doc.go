@@ -1,10 +1,11 @@
 // Package goda provides date and time types following the ThreeTen/JSR-310 model (java.time package).
 //
-// This package implements four main types:
+// This package implements five main types:
 //
 //   - LocalDate: A date without time (e.g., 2024-03-15)
 //   - LocalTime: A time without date (e.g., 14:30:45.123456789)
 //   - LocalDateTime: A date-time (e.g., 2024-03-15T14:30:45.123456789)
+//   - OffsetDateTime: A date-time with UTC offset (e.g., 2024-03-15T14:30:45.123456789+09:00)
 //   - Year, Month, DayOfWeek: Supporting types for date/time operations
 //
 // All types implement standard interfaces for serialization:
@@ -33,6 +34,7 @@
 //	date = goda.MustParseLocalDate("2024-03-15")
 //	time = goda.MustParseLocalTime("14:30:45.123456789")
 //	datetime = goda.MustParseLocalDateTime("2024-03-15T14:30:45.123456789")
+//	offsetDateTime := goda.MustParseOffsetDateTime("2024-03-15T14:30:45.123456789+09:00")
 //
 // LocalDate arithmetic:
 //
@@ -87,4 +89,8 @@
 //
 //   - LocalDateTime: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] (e.g., "2024-03-15T14:30:45.123456789")
 //     Combined with 'T' separator (lowercase 't' accepted when parsing).
+//
+//   - OffsetDateTime: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]±HH:mm (e.g., "2024-03-15T14:30:45.123456789+09:00")
+//     Date-time with UTC offset. 'Z' represents UTC (zero offset).
+//     Offset format: ±HH:mm, ±HH:mm:ss, ±HHmm, ±HH, or Z for UTC.
 package goda

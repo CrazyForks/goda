@@ -630,3 +630,285 @@ func ExampleLocalTime_GetFieldInt64() {
 	// Millisecond: 123
 	// AM/PM: 1
 }
+
+// ExampleOffsetDateTime demonstrates basic OffsetDateTime usage.
+func ExampleOffsetDateTime() {
+	// Create from components with offset
+	odt := goda.MustNewOffsetDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 123456789, goda.MustNewZoneOffsetHours(9))
+	fmt.Println(odt)
+
+	// Access parts
+	fmt.Printf("LocalDateTime: %s\n", odt.LocalDateTime())
+	fmt.Printf("Offset: %s\n", odt.Offset())
+	fmt.Printf("Hour: %d\n", odt.Hour())
+
+	// Output:
+	// 2024-03-15T14:30:45.123456789+09:00
+	// LocalDateTime: 2024-03-15T14:30:45.123456789
+	// Offset: +09:00
+	// Hour: 14
+}
+
+// ExampleParseOffsetDateTime demonstrates parsing an offset datetime from a string.
+func ExampleParseOffsetDateTime() {
+	// Parse with positive offset
+	odt1, err := goda.ParseOffsetDateTime("2024-03-15T14:30:45.123456789+09:00")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(odt1)
+
+	// Parse with UTC (Z)
+	odt2, err := goda.ParseOffsetDateTime("2024-03-15T14:30:45Z")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(odt2)
+
+	// Output:
+	// 2024-03-15T14:30:45.123456789+09:00
+	// 2024-03-15T14:30:45Z
+}
+
+// ExampleMustParseOffsetDateTime demonstrates parsing that panics on error.
+func ExampleMustParseOffsetDateTime() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+	fmt.Println(odt)
+
+	// Output:
+	// 2024-03-15T14:30:45+09:00
+}
+
+// ExampleOffsetDateTimeNow demonstrates getting the current offset datetime.
+func ExampleOffsetDateTimeNow() {
+	now := goda.OffsetDateTimeNow()
+
+	// Verify it's valid
+	fmt.Printf("Valid: %v\n", !now.IsZero())
+	fmt.Printf("Has offset: %v\n", true)
+
+	// Output:
+	// Valid: true
+	// Has offset: true
+}
+
+// ExampleOffsetDateTimeNowUTC demonstrates getting the current UTC datetime.
+func ExampleOffsetDateTimeNowUTC() {
+	utc := goda.OffsetDateTimeNowUTC()
+
+	// Verify it's UTC
+	fmt.Printf("Valid: %v\n", !utc.IsZero())
+	fmt.Printf("Is UTC: %v\n", utc.Offset().IsZero())
+
+	// Output:
+	// Valid: true
+	// Is UTC: true
+}
+
+// ExampleNewOffsetDateTime demonstrates creating an offset datetime.
+func ExampleNewOffsetDateTime() {
+	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	dateTime := goda.NewLocalDateTime(date, time)
+	offset := goda.MustNewZoneOffsetHours(9)
+
+	odt := goda.NewOffsetDateTime(dateTime, offset)
+	fmt.Println(odt)
+
+	// Output:
+	// 2024-03-15T14:30:45.123456789+09:00
+}
+
+// ExampleOffsetDateTime_Compare demonstrates comparing offset datetimes.
+func ExampleOffsetDateTime_Compare() {
+	// Same instant, different offsets
+	odt1 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+	odt2 := goda.MustParseOffsetDateTime("2024-03-15T05:30:45Z")
+
+	fmt.Printf("Same instant: %v\n", odt1.IsEqual(odt2))
+
+	// Different instants
+	odt3 := goda.MustParseOffsetDateTime("2024-03-15T14:30:46+09:00")
+	fmt.Printf("odt1 < odt3: %v\n", odt1.IsBefore(odt3))
+	fmt.Printf("odt1 > odt3: %v\n", odt1.IsAfter(odt3))
+
+	// Output:
+	// Same instant: true
+	// odt1 < odt3: true
+	// odt1 > odt3: false
+}
+
+// ExampleOffsetDateTime_ToUTC demonstrates converting to UTC.
+func ExampleOffsetDateTime_ToUTC() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+	utc := odt.ToUTC()
+
+	fmt.Println("Original:", odt)
+	fmt.Println("UTC:", utc)
+	fmt.Printf("Same instant: %v\n", odt.IsEqual(utc))
+
+	// Output:
+	// Original: 2024-03-15T14:30:45+09:00
+	// UTC: 2024-03-15T05:30:45Z
+	// Same instant: true
+}
+
+// ExampleOffsetDateTime_WithOffsetSameLocal demonstrates changing offset keeping local time.
+func ExampleOffsetDateTime_WithOffsetSameLocal() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+	newOffset := goda.MustNewZoneOffsetHours(-5)
+	newOdt := odt.WithOffsetSameLocal(newOffset)
+
+	fmt.Println("Original:", odt)
+	fmt.Println("New offset, same local:", newOdt)
+	fmt.Printf("Same local time: %v\n", odt.LocalDateTime() == newOdt.LocalDateTime())
+	fmt.Printf("Same instant: %v\n", odt.IsEqual(newOdt))
+
+	// Output:
+	// Original: 2024-03-15T14:30:45+09:00
+	// New offset, same local: 2024-03-15T14:30:45-05:00
+	// Same local time: true
+	// Same instant: false
+}
+
+// ExampleOffsetDateTime_WithOffsetSameInstant demonstrates changing offset keeping the instant.
+func ExampleOffsetDateTime_WithOffsetSameInstant() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+	newOffset := goda.MustNewZoneOffsetHours(-5)
+	newOdt := odt.WithOffsetSameInstant(newOffset)
+
+	fmt.Println("Original:", odt)
+	fmt.Println("New offset, same instant:", newOdt)
+	fmt.Printf("Same local time: %v\n", odt.LocalDateTime() == newOdt.LocalDateTime())
+	fmt.Printf("Same instant: %v\n", odt.IsEqual(newOdt))
+
+	// Output:
+	// Original: 2024-03-15T14:30:45+09:00
+	// New offset, same instant: 2024-03-15T00:30:45-05:00
+	// Same local time: false
+	// Same instant: true
+}
+
+// ExampleOffsetDateTime_PlusDays demonstrates adding days.
+func ExampleOffsetDateTime_PlusDays() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+	future := odt.PlusDays(10)
+	past := odt.MinusDays(10)
+
+	fmt.Println("Original:", odt)
+	fmt.Println("Plus 10 days:", future)
+	fmt.Println("Minus 10 days:", past)
+
+	// Output:
+	// Original: 2024-03-15T14:30:45+09:00
+	// Plus 10 days: 2024-03-25T14:30:45+09:00
+	// Minus 10 days: 2024-03-05T14:30:45+09:00
+}
+
+// ExampleOffsetDateTime_PlusHours demonstrates adding hours.
+func ExampleOffsetDateTime_PlusHours() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+	future := odt.PlusHours(5)
+
+	fmt.Println("Original:", odt)
+	fmt.Println("Plus 5 hours:", future)
+
+	// Output:
+	// Original: 2024-03-15T14:30:45+09:00
+	// Plus 5 hours: 2024-03-15T19:30:45+09:00
+}
+
+// ExampleOffsetDateTime_MarshalJSON demonstrates JSON serialization.
+func ExampleOffsetDateTime_MarshalJSON() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45.123456789+09:00")
+	jsonBytes, _ := json.Marshal(odt)
+	fmt.Println(string(jsonBytes))
+
+	// Output:
+	// "2024-03-15T14:30:45.123456789+09:00"
+}
+
+// ExampleOffsetDateTime_UnmarshalJSON demonstrates JSON deserialization.
+func ExampleOffsetDateTime_UnmarshalJSON() {
+	var odt goda.OffsetDateTime
+	jsonData := []byte(`"2024-03-15T14:30:45.123456789+09:00"`)
+	err := json.Unmarshal(jsonData, &odt)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(odt)
+
+	// Output:
+	// 2024-03-15T14:30:45.123456789+09:00
+}
+
+// ExampleZoneOffset demonstrates working with zone offsets.
+func ExampleZoneOffset() {
+	// Create offsets
+	utc := goda.ZoneOffsetUTC
+	tokyo := goda.MustNewZoneOffsetHours(9)
+	india := goda.MustNewZoneOffset(5, 30, 0)
+	newYork := goda.MustNewZoneOffsetHours(-5)
+
+	fmt.Println("UTC:", utc)
+	fmt.Println("Tokyo:", tokyo)
+	fmt.Println("India:", india)
+	fmt.Println("New York:", newYork)
+
+	// Output:
+	// UTC: Z
+	// Tokyo: +09:00
+	// India: +05:30
+	// New York: -05:00
+}
+
+// ExampleParseZoneOffset demonstrates parsing zone offsets.
+func ExampleParseZoneOffset() {
+	// Parse various formats
+	zo1, _ := goda.ParseZoneOffset("Z")
+	zo2, _ := goda.ParseZoneOffset("+09:00")
+	zo3, _ := goda.ParseZoneOffset("-05:00")
+	zo4, _ := goda.ParseZoneOffset("+0530")
+
+	fmt.Println(zo1)
+	fmt.Println(zo2)
+	fmt.Println(zo3)
+	fmt.Println(zo4)
+
+	// Output:
+	// Z
+	// +09:00
+	// -05:00
+	// +05:30
+}
+
+// ExampleOffsetDateTime_IsSupportedField demonstrates checking field support.
+func ExampleOffsetDateTime_IsSupportedField() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+
+	fmt.Printf("Supports HourOfDay: %v\n", odt.IsSupportedField(goda.HourOfDay))
+	fmt.Printf("Supports OffsetSeconds: %v\n", odt.IsSupportedField(goda.OffsetSeconds))
+	fmt.Printf("Supports InstantSeconds: %v\n", odt.IsSupportedField(goda.InstantSeconds))
+
+	// Output:
+	// Supports HourOfDay: true
+	// Supports OffsetSeconds: true
+	// Supports InstantSeconds: true
+}
+
+// ExampleOffsetDateTime_GetFieldInt64 demonstrates getting field values.
+func ExampleOffsetDateTime_GetFieldInt64() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
+
+	fmt.Printf("Year: %d\n", odt.GetFieldInt64(goda.YearField))
+	fmt.Printf("Hour: %d\n", odt.GetFieldInt64(goda.HourOfDay))
+	fmt.Printf("Offset seconds: %d\n", odt.GetFieldInt64(goda.OffsetSeconds))
+
+	// Output:
+	// Year: 2024
+	// Hour: 14
+	// Offset seconds: 32400
+}
