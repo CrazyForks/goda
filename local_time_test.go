@@ -248,8 +248,8 @@ func TestLocalTime_String(t *testing.T) {
 		{MustNewLocalTime(14, 30, 45, 123000000), "14:30:45.123"},
 		{MustNewLocalTime(14, 30, 45, 123456000), "14:30:45.123456"},
 		{MustNewLocalTime(14, 30, 45, 123456789), "14:30:45.123456789"},
-		{MustNewLocalTime(14, 30, 45, 100000000), "14:30:45.1"},
-		{MustNewLocalTime(14, 30, 45, 120000000), "14:30:45.12"},
+		{MustNewLocalTime(14, 30, 45, 100000000), "14:30:45.100"},
+		{MustNewLocalTime(14, 30, 45, 120000000), "14:30:45.120"},
 		{MustNewLocalTime(14, 30, 45, 1), "14:30:45.000000001"},
 	}
 
@@ -528,17 +528,17 @@ func TestLocalTime_SpecialCases(t *testing.T) {
 		lt = MustNewLocalTime(12, 0, 0, 123456789)
 		assert.Equal(t, "12:00:00.123456789", lt.String())
 
-		// Single digit fractional second
+		// Single digit fractional second (aligned to milliseconds)
 		lt = MustNewLocalTime(12, 0, 0, 100000000)
-		assert.Equal(t, "12:00:00.1", lt.String())
+		assert.Equal(t, "12:00:00.100", lt.String())
 
-		// Trailing zeros should be trimmed
+		// Trailing zeros aligned to 3-digit boundaries
 		lt = MustNewLocalTime(12, 0, 0, 120000000)
-		assert.Equal(t, "12:00:00.12", lt.String())
+		assert.Equal(t, "12:00:00.120", lt.String())
 
-		// More trailing zero examples
+		// More trailing zero examples (aligned to microseconds)
 		lt = MustNewLocalTime(12, 0, 0, 123400000)
-		assert.Equal(t, "12:00:00.1234", lt.String())
+		assert.Equal(t, "12:00:00.123400", lt.String())
 	})
 }
 

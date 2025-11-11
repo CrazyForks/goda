@@ -21,7 +21,8 @@ import (
 // and json.Marshaler and json.Unmarshaler for JSON serialization.
 //
 // Format: HH:mm:ss[.nnnnnnnnn] (e.g., "14:30:45.123456789"). Uses 24-hour format.
-// Fractional seconds support nanosecond precision. Trailing zeros are automatically trimmed.
+// Fractional seconds support nanosecond precision and are aligned to 3-digit boundaries
+// (milliseconds, microseconds, nanoseconds) for Java.time compatibility.
 // Timezone offsets are not supported.
 //
 // Internally, v uses bit 63 (the highest bit) as a validity flag.
@@ -162,11 +163,16 @@ func (t LocalTime) AppendText(b []byte) ([]byte, error) {
 		ns /= 10
 	}
 
-	// Trim trailing zeros (following Java LocalTime behavior and ISO 8601)
-	// This means 100000000ns -> ".1" not ".100"
+	// Trim trailing zeros in groups of 3 (align to milliseconds, microseconds, nanoseconds)
+	// This follows Java LocalTime behavior: 100000000ns -> ".100" not ".1"
 	l := 18
 	for l > 9 && buf[l-1] == '0' {
 		l--
+	}
+	// Align to 3-digit boundaries (9, 12, 15, 18 total length)
+	remainder := (l - 9) % 3
+	if remainder != 0 {
+		l += (3 - remainder)
 	}
 	return append(b, buf[:l]...), nil
 }
@@ -355,12 +361,14 @@ func LocalTimeNowUTC() LocalTime {
 // ParseLocalTime parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
 // Returns an error if the string is invalid or represents an invalid time.
 //
-// Supported formats:
+// Accepts fractional seconds of any length (1-9 digits):
 //   - HH:mm:ss (e.g., "14:30:45")
-//   - HH:mm:ss.fff (milliseconds, e.g., "14:30:45.123")
-//   - HH:mm:ss.ffffff (microseconds, e.g., "14:30:45.123456")
-//   - HH:mm:ss.nnnnnnnnn (nanoseconds, e.g., "14:30:45.123456789")
+//   - HH:mm:ss.f (e.g., "14:30:45.1" → 100 milliseconds)
+//   - HH:mm:ss.fff (e.g., "14:30:45.123" → 123 milliseconds)
+//   - HH:mm:ss.ffffff (e.g., "14:30:45.123456" → 123.456 milliseconds)
+//   - HH:mm:ss.nnnnnnnnn (e.g., "14:30:45.123456789" → full nanosecond precision)
 //
+// Note: Output formatting aligns to 3-digit boundaries (milliseconds, microseconds, nanoseconds).
 // Timezone offsets are not supported.
 //
 // Example:

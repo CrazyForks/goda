@@ -21,7 +21,7 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 ### Key Features
 
 - ✅ **ISO 8601 basic format** support (yyyy-MM-dd, HH:mm:ss[.nnnnnnnnn], combined with 'T')
-- ✅ **Smart fractional seconds**: Automatically trims trailing zeros (14:30:45.1 instead of 14:30:45.100)
+- ✅ **Java.time compatible formatting**: Fractional seconds aligned to 3-digit boundaries (milliseconds, microseconds, nanoseconds)
 - ✅ **Full JSON and SQL** database integration
 - ✅ **Date arithmetic**: Add/subtract days, months, years with overflow handling
 - ✅ **Field access**: Get any field value (year, month, hour, nano-of-day, etc.)
@@ -150,6 +150,19 @@ db.QueryRow("SELECT id, created_at, date FROM records WHERE id = ?", 1).Scan(
 | `Year` | Year | `2024` |
 | `DayOfWeek` | Day of week (1=Monday, 7=Sunday) | `Friday` |
 | `Field` | Date-time field enumeration | `HourOfDay`, `DayOfMonth` |
+
+### Time Formatting
+
+Time values use ISO 8601 format with **Java.time compatible** fractional second alignment:
+
+| Precision | Digits | Example |
+|-----------|--------|---------|
+| Whole seconds | 0 | `14:30:45` |
+| Milliseconds | 3 | `14:30:45.100`, `14:30:45.123` |
+| Microseconds | 6 | `14:30:45.123400`, `14:30:45.123456` |
+| Nanoseconds | 9 | `14:30:45.000000001`, `14:30:45.123456789` |
+
+Fractional seconds are automatically aligned to 3-digit boundaries (milliseconds, microseconds, nanoseconds), matching Java's `LocalTime` behavior. Parsing accepts any length of fractional seconds.
 
 ### Field Constants (30 fields)
 

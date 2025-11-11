@@ -346,7 +346,7 @@ func ExampleLocalTime_String() {
 	t4 := goda.MustNewLocalTime(14, 30, 45, 123456789)
 	fmt.Println(t4)
 
-	// LocalTime with trailing zeros removed
+	// LocalTime with trailing zeros aligned to 3-digit boundaries
 	t5 := goda.MustNewLocalTime(14, 30, 45, 100000000)
 	fmt.Println(t5)
 
@@ -355,7 +355,7 @@ func ExampleLocalTime_String() {
 	// 14:30:45.123
 	// 14:30:45.123456
 	// 14:30:45.123456789
-	// 14:30:45.1
+	// 14:30:45.100
 }
 
 // ExampleMonth demonstrates working with months.

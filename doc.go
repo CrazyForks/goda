@@ -81,7 +81,9 @@
 //
 //   - LocalTime: HH:mm:ss[.nnnnnnnnn] (e.g., "14:30:45.123456789")
 //     24-hour format. Fractional seconds up to nanoseconds.
-//     Trailing zeros are automatically trimmed (14:30:45.1 instead of 14:30:45.100).
+//     Fractional seconds are aligned to 3-digit boundaries (milliseconds, microseconds, nanoseconds)
+//     for Java.time compatibility: 100ms → "14:30:45.100", 123.4ms → "14:30:45.123400".
+//     Parsing accepts any length of fractional seconds (e.g., "14:30:45.1" → 100ms).
 //
 //   - LocalDateTime: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] (e.g., "2024-03-15T14:30:45.123456789")
 //     Combined with 'T' separator (lowercase 't' accepted when parsing).
