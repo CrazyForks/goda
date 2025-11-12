@@ -2,6 +2,7 @@ module github.com/iseki0/goda
 
 go 1.24
 
+retract v0.0.6
 require github.com/stretchr/testify v1.11.1
 
 require (
