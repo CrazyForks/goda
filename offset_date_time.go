@@ -297,6 +297,8 @@ func (odt OffsetDateTime) IsAfter(other OffsetDateTime) bool {
 }
 
 // IsEqual returns true if this date-time represents the same instant as the specified date-time.
+//
+// Deprecated: Use == operator directly
 func (odt OffsetDateTime) IsEqual(other OffsetDateTime) bool {
 	return odt.Compare(other) == 0
 }
