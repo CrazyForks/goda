@@ -7,8 +7,6 @@
 
 > **ThreeTen/JSR-310** model in Go
 
-> [中文版本](README.zh-CN.md)
-
 A Go implementation inspired by Java's `java.time` package (JSR-310), providing immutable date and time types that are **type-safe** and **easy to use**.
 
 ## Features
