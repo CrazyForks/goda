@@ -16,7 +16,6 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 - 📅 **LocalDate**: Date without time (e.g., `2024-03-15`)
 - ⏰ **LocalTime**: Time without date (e.g., `14:30:45.123456789`)
 - 📆 **LocalDateTime**: Date-time (e.g., `2024-03-15T14:30:45.123456789`)
-- 🌍 **OffsetDateTime**: Date-time with UTC offset (e.g., `2024-03-15T14:30:45.123456789+09:00`)
 - 🔢 **Field**: Enumeration of date-time fields (like Java's `ChronoField`)
 
 ### Key Features
@@ -59,22 +58,15 @@ func main() {
     fmt.Println(time)     // 14:30:45.123456789
     fmt.Println(datetime) // 2024-03-15T14:30:45.123456789
     
-    // Create offset datetime
-    offset := goda.MustNewZoneOffsetHours(9)
-    offsetDateTime := goda.NewOffsetDateTime(datetime, offset)
-    fmt.Println(offsetDateTime) // 2024-03-15T14:30:45.123456789+09:00
-    
     // Parse from strings
     date, _ = goda.ParseLocalDate("2024-03-15")
     time = goda.MustParseLocalTime("14:30:45.123456789")
     datetime = goda.MustParseLocalDateTime("2024-03-15T14:30:45")
-    offsetDateTime = goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
     
     // Get current date/time
     today := goda.LocalDateNow()
     now := goda.LocalTimeNow()
     currentDateTime := goda.LocalDateTimeNow()
-    currentOffsetDateTime := goda.OffsetDateTimeNow()
     
     // Date arithmetic
     tomorrow := today.PlusDays(1)
@@ -111,40 +103,14 @@ nanoOfDay := time.GetFieldInt64(goda.NanoOfDay)      // Total nanoseconds since 
 ampm := time.GetFieldInt64(goda.AmPmOfDay)           // 1 (PM)
 ```
 
-### Working with OffsetDateTime
-
-```go
-// Create with offset
-offset := goda.MustNewZoneOffsetHours(9) // Tokyo: UTC+9
-odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
-
-// Convert between offsets
-utc := odt.ToUTC()
-fmt.Println(utc) // 2024-03-15T05:30:45Z
-
-// Change offset, keeping the same instant
-newYork := goda.MustNewZoneOffsetHours(-5)
-odtNY := odt.WithOffsetSameInstant(newYork)
-fmt.Println(odtNY) // 2024-03-15T00:30:45-05:00
-
-// Compare instants (ignores offset difference)
-odt1 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+09:00")
-odt2 := goda.MustParseOffsetDateTime("2024-03-15T05:30:45Z")
-fmt.Println(odt1.IsEqual(odt2)) // true (same instant)
-
-// Time arithmetic (adjusts across day boundaries)
-later := odt.PlusHours(10) // Adds 10 hours to the instant
-```
-
 ### JSON Serialization
 
 ```go
 type Event struct {
-    Name      string                `json:"name"`
-    Date      goda.LocalDate        `json:"date"`
-    Time      goda.LocalTime        `json:"time"`
-    CreatedAt goda.LocalDateTime    `json:"created_at"`
-    Scheduled goda.OffsetDateTime   `json:"scheduled"`
+    Name      string              `json:"name"`
+    Date      goda.LocalDate      `json:"date"`
+    Time      goda.LocalTime      `json:"time"`
+    CreatedAt goda.LocalDateTime  `json:"created_at"`
 }
 
 event := Event{
@@ -152,11 +118,10 @@ event := Event{
     Date:      goda.MustNewLocalDate(2024, goda.March, 15),
     Time:      goda.MustNewLocalTime(14, 30, 0, 0),
     CreatedAt: goda.MustParseLocalDateTime("2024-03-15T14:30:00"),
-    Scheduled: goda.MustParseOffsetDateTime("2024-03-15T14:30:00+09:00"),
 }
 
 jsonData, _ := json.Marshal(event)
-// {"name":"Meeting","date":"2024-03-15","time":"14:30:00","created_at":"2024-03-15T14:30:00","scheduled":"2024-03-15T14:30:00+09:00"}
+// {"name":"Meeting","date":"2024-03-15","time":"14:30:00","created_at":"2024-03-15T14:30:00"}
 ```
 
 ### Database Integration
@@ -166,12 +131,11 @@ type Record struct {
     ID        int64
     CreatedAt goda.LocalDateTime
     Date      goda.LocalDate
-    Timestamp goda.OffsetDateTime
 }
 
 // Works with database/sql - implements sql.Scanner and driver.Valuer
-db.QueryRow("SELECT id, created_at, date, timestamp FROM records WHERE id = ?", 1).Scan(
-    &record.ID, &record.CreatedAt, &record.Date, &record.Timestamp,
+db.QueryRow("SELECT id, created_at, date FROM records WHERE id = ?", 1).Scan(
+    &record.ID, &record.CreatedAt, &record.Date,
 )
 ```
 
@@ -184,8 +148,6 @@ db.QueryRow("SELECT id, created_at, date, timestamp FROM records WHERE id = ?", 
 | `LocalDate` | Date without time | `2024-03-15` |
 | `LocalTime` | Time without date | `14:30:45.123456789` |
 | `LocalDateTime` | Date-time | `2024-03-15T14:30:45` |
-| `OffsetDateTime` | Date-time with UTC offset | `2024-03-15T14:30:45+09:00` |
-| `ZoneOffset` | UTC offset | `+09:00`, `Z` |
 | `Month` | Month of year (1-12) | `March` |
 | `Year` | Year | `2024` |
 | `DayOfWeek` | Day of week (1=Monday, 7=Sunday) | `Friday` |
@@ -232,9 +194,7 @@ This package follows the **ThreeTen/JSR-310** model (Java's `java.time` package)
 - **Field-based access**: Universal field access pattern via `GetFieldInt64`
 - **Zero-value safe**: Zero values are properly handled throughout
 
-### When to Use Each Type
-
-**LocalDate, LocalTime, LocalDateTime**
+### When to Use LocalDate, LocalTime, LocalDateTime
 
 Use the local types when you only need the date/time without timezone information:
 - **Birthdays**: "March 15" means March 15 everywhere
@@ -242,15 +202,7 @@ Use the local types when you only need the date/time without timezone informatio
 - **Schedules**: "Meeting at 2:30 PM" without timezone concerns
 - **Calendar dates**: Historical dates, recurring events
 
-**OffsetDateTime**
-
-Use OffsetDateTime when you need to represent an instant with a specific UTC offset:
-- **API responses**: Timestamps with timezone information
-- **Scheduled events**: Events that occur at a specific instant (e.g., "2024-03-15T14:30:00+09:00")
-- **Database timestamps**: When storing timestamps with offset information
-- **International coordination**: When you need to know both the local time and UTC offset
-
-For full timezone-aware operations with DST handling, use `ZonedDateTime` (coming soon).
+For timezone-aware operations, use `ZonedDateTime` (coming soon).
 
 ## Documentation
 
