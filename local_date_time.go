@@ -302,6 +302,18 @@ func (dt LocalDateTime) MinusYears(years int) LocalDateTime {
 	return dt.PlusYears(-years)
 }
 
+func (dt LocalDateTime) Between(to LocalDateTime) Duration {
+	if dt.IsZero() || to.IsZero() {
+		return Duration{}
+	}
+	// Calculate days difference
+	daysDiff := to.date.UnixEpochDays() - dt.date.UnixEpochDays()
+	// Calculate time difference in nanoseconds
+	timeDiff := to.time.GetField(NanoOfDay).Int64() - dt.time.GetField(NanoOfDay).Int64()
+
+	return NewDurationOfSeconds(daysDiff*86400, timeDiff)
+}
+
 // String returns the ISO 8601 string representation (yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]).
 func (dt LocalDateTime) String() string {
 	return stringImpl(dt)

@@ -172,7 +172,7 @@ func (t LocalTime) AppendText(b []byte) ([]byte, error) {
 	// Align to 3-digit boundaries (9, 12, 15, 18 total length)
 	remainder := (l - 9) % 3
 	if remainder != 0 {
-		l += (3 - remainder)
+		l += 3 - remainder
 	}
 	return append(b, buf[:l]...), nil
 }
@@ -224,10 +224,7 @@ func (t LocalTime) Nanosecond() int {
 // IsSupportedField returns true if the field is supported by LocalTime.
 func (t LocalTime) IsSupportedField(field Field) bool {
 	switch field {
-	case NanoOfSecond, NanoOfDay, MicroOfSecond, MicroOfDay,
-		MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay,
-		MinuteOfHour, MinuteOfDay, HourOfAmPm, ClockHourOfAmPm,
-		HourOfDay, ClockHourOfDay, AmPmOfDay:
+	case NanoOfSecond, NanoOfDay, MicroOfSecond, MicroOfDay, MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay, MinuteOfHour, MinuteOfDay, HourOfAmPm, ClockHourOfAmPm, HourOfDay, ClockHourOfDay, AmPmOfDay:
 		return true
 	default:
 		return false
@@ -486,6 +483,21 @@ func (t LocalTime) IsBefore(other LocalTime) bool {
 // IsAfter returns true if this time is after the specified time.
 func (t LocalTime) IsAfter(other LocalTime) bool {
 	return t.Compare(other) > 0
+}
+
+// Between returns the duration between this time and the specified time.
+// The result is positive if the specified time is after this time,
+// and negative if before.
+//
+// If either time is zero, a zero Duration is returned.
+//
+// The calculation is based on the nanosecond difference between the two times.
+func (t LocalTime) Between(to LocalTime) Duration {
+	if t.IsZero() || to.IsZero() {
+		return Duration{}
+	}
+	diff := (to.v & localTimeValueMask) - (t.v & localTimeValueMask)
+	return NewDurationByGoDuration(time.Duration(diff))
 }
 
 var _ encoding.TextAppender = (*LocalTime)(nil)
