@@ -17,6 +17,8 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 - ⏰ **LocalTime**: Time without date (e.g., `14:30:45.123456789`)
 - 📆 **LocalDateTime**: Date-time (e.g., `2024-03-15T14:30:45.123456789`)
 - 🔢 **Field**: Enumeration of date-time fields (like Java's `ChronoField`)
+- 🔍 **TemporalAccessor**: Universal interface for querying temporal objects
+- 📊 **TemporalValue**: Type-safe wrapper for field values with validation state
 
 ### Key Features
 
@@ -24,7 +26,8 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 - ✅ **Java.time compatible formatting**: Fractional seconds aligned to 3-digit boundaries (milliseconds, microseconds, nanoseconds)
 - ✅ **Full JSON and SQL** database integration
 - ✅ **Date arithmetic**: Add/subtract days, months, years with overflow handling
-- ✅ **Field access**: Get any field value (year, month, hour, nano-of-day, etc.)
+- ✅ **Type-safe field access**: Query any field with `TemporalValue` return type that validates support and overflow
+- ✅ **TemporalAccessor interface**: Universal query pattern across all temporal types
 - ✅ **Zero-copy text marshaling** with `encoding.TextAppender`
 - ✅ **Immutable**: All operations return new values
 - ✅ **Type-safe**: Compile-time safety with distinct types
@@ -80,9 +83,9 @@ func main() {
 }
 ```
 
-### Field Access
+### Field Access with TemporalValue
 
-Access individual date-time fields using the `Field` enumeration:
+Access individual date-time fields using the `Field` enumeration with type-safe `TemporalValue` returns:
 
 ```go
 date := goda.MustNewLocalDate(2024, goda.March, 15)
@@ -91,16 +94,73 @@ date := goda.MustNewLocalDate(2024, goda.March, 15)
 fmt.Println(date.IsSupportedField(goda.DayOfMonth))  // true
 fmt.Println(date.IsSupportedField(goda.HourOfDay))   // false
 
-// Get field values
-year := date.GetFieldInt64(goda.YearField)           // 2024
-dayOfWeek := date.GetFieldInt64(goda.DayOfWeekField) // 5 (Friday)
-dayOfYear := date.GetFieldInt64(goda.DayOfYear)      // 75
-epochDays := date.GetFieldInt64(goda.EpochDay)       // Days since Unix epoch
+// Get field values with validation
+year := date.GetField(goda.YearField)
+if year.Valid() {
+    fmt.Println("Year:", year.Int64())  // 2024
+}
 
+dayOfWeek := date.GetField(goda.DayOfWeekField)
+if dayOfWeek.Valid() {
+    fmt.Println("Day of week:", dayOfWeek.Int())  // 5 (Friday)
+}
+
+// Unsupported fields return unsupported TemporalValue
+hourOfDay := date.GetField(goda.HourOfDay)
+if hourOfDay.Unsupported() {
+    fmt.Println("Hour field is not supported for LocalDate")
+}
+
+// Time fields
 time := goda.MustNewLocalTime(14, 30, 45, 123456789)
-hour := time.GetFieldInt64(goda.HourOfDay)           // 14
-nanoOfDay := time.GetFieldInt64(goda.NanoOfDay)      // Total nanoseconds since midnight
-ampm := time.GetFieldInt64(goda.AmPmOfDay)           // 1 (PM)
+hour := time.GetField(goda.HourOfDay)
+if hour.Valid() {
+    fmt.Println("Hour:", hour.Int())  // 14
+}
+
+nanoOfDay := time.GetField(goda.NanoOfDay)
+if nanoOfDay.Valid() {
+    fmt.Println("Nanoseconds since midnight:", nanoOfDay.Int64())
+}
+```
+
+**TemporalValue API:**
+- `Valid() bool`: Returns true if the field is supported and no overflow occurred
+- `Unsupported() bool`: Returns true if the field is not supported by this temporal type
+- `Overflow() bool`: Returns true if the field value overflowed (reserved for future use)
+- `Int64() int64`: Get the raw value as int64
+- `Int() int`: Get the value as int (for convenience)
+
+**Why TemporalValue?**
+
+The `TemporalValue` return type provides type-safe field queries that prevent silent errors:
+- **Explicit validation**: Check `Valid()` before using the value
+- **Clear error semantics**: Distinguish between unsupported fields and actual errors
+- **Future-proof**: Ready for overflow detection when needed
+- **No silent zeros**: Unlike raw `int64` returns, you can distinguish between "0" and "unsupported"
+
+### TemporalAccessor Interface
+
+All temporal types implement the `TemporalAccessor` interface, providing a uniform query pattern:
+
+```go
+// TemporalAccessor provides read-only access to temporal fields
+type TemporalAccessor interface {
+    IsZero() bool
+    IsSupportedField(field Field) bool
+    GetField(field Field) TemporalValue
+}
+
+// Write generic functions that work with any temporal type
+func printYear(t goda.TemporalAccessor) {
+    if year := t.GetField(goda.YearField); year.Valid() {
+        fmt.Printf("Year: %d\n", year.Int())
+    }
+}
+
+// Works with LocalDate, LocalTime, or LocalDateTime
+printYear(goda.LocalDateNow())
+printYear(goda.LocalDateTimeNow())
 ```
 
 ### JSON Serialization
@@ -152,6 +212,8 @@ db.QueryRow("SELECT id, created_at, date FROM records WHERE id = ?", 1).Scan(
 | `Year` | Year | `2024` |
 | `DayOfWeek` | Day of week (1=Monday, 7=Sunday) | `Friday` |
 | `Field` | Date-time field enumeration | `HourOfDay`, `DayOfMonth` |
+| `TemporalAccessor` | Interface for querying temporal objects | Implemented by all temporal types |
+| `TemporalValue` | Type-safe field value with validation | Returned by `GetField()` |
 
 ### Time Formatting
 
@@ -176,7 +238,8 @@ Fractional seconds are automatically aligned to 3-digit boundaries (milliseconds
 
 ### Implemented Interfaces
 
-All types implement:
+All temporal types (`LocalDate`, `LocalTime`, `LocalDateTime`) implement:
+- `TemporalAccessor`: Universal query interface with `GetField(field Field) TemporalValue`
 - `fmt.Stringer`
 - `encoding.TextMarshaler` / `encoding.TextUnmarshaler`
 - `encoding.TextAppender` (zero-copy text marshaling)
@@ -191,7 +254,8 @@ This package follows the **ThreeTen/JSR-310** model (Java's `java.time` package)
 - **Type-safe**: Distinct types for date, time, and datetime
 - **Simple formats**: Uses ISO 8601 basic formats (not the full complex specification)
 - **Database-friendly**: Direct SQL integration
-- **Field-based access**: Universal field access pattern via `GetFieldInt64`
+- **Field-based access**: Universal field access pattern via `TemporalAccessor` interface
+- **Safe field queries**: `TemporalValue` return type validates field support and prevents silent errors
 - **Zero-value safe**: Zero values are properly handled throughout
 
 ### When to Use LocalDate, LocalTime, LocalDateTime

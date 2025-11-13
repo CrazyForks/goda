@@ -189,16 +189,49 @@ func (dt LocalDateTime) IsSupportedField(field Field) bool {
 	return dt.date.IsSupportedField(field) || dt.time.IsSupportedField(field)
 }
 
-// GetFieldInt64 returns the value of the specified field as an int64.
-// Returns 0 if the field is not supported or the datetime is zero.
-func (dt LocalDateTime) GetFieldInt64(field Field) int64 {
+// GetField returns the value of the specified field as a TemporalValue.
+// This method queries the date-time for the value of the specified field.
+// The returned value may be unsupported if the field is not supported by LocalDateTime.
+//
+// If the date-time is zero (IsZero() returns true), an unsupported TemporalValue is returned.
+//
+// LocalDateTime supports all fields from both LocalDate and LocalTime.
+// For fields that are supported by the underlying LocalDate or LocalTime,
+// this method delegates to the appropriate component.
+//
+// Supported fields include all date fields (DayOfWeekField, DayOfMonth, DayOfYear, MonthOfYear,
+// YearField, YearOfEra, Era, EpochDay, ProlepticMonth) and all time fields (NanoOfSecond,
+// NanoOfDay, MicroOfSecond, MicroOfDay, MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay,
+// MinuteOfHour, MinuteOfDay, HourOfDay, ClockHourOfDay, HourOfAmPm, ClockHourOfAmPm, AmPmOfDay).
+//
+// Overflow Analysis:
+// LocalDateTime delegates to LocalDate and LocalTime, both of which have no overflow issues
+// for their supported fields. Therefore, LocalDateTime.GetField cannot overflow:
+//   - All date fields are handled by LocalDate.GetField (see LocalDate overflow analysis)
+//   - All time fields are handled by LocalTime.GetField (see LocalTime overflow analysis)
+//   - No LocalDateTime-specific fields exist that could cause overflow
+func (dt LocalDateTime) GetField(field Field) TemporalValue {
 	if dt.IsZero() {
-		return 0
+		return TemporalValue{v: 0, unsupported: true}
 	}
+
+	// Delegate to LocalDate for date-based fields
+	// LocalDate handles: DayOfWeekField, DayOfMonth, DayOfYear, MonthOfYear,
+	// YearField, YearOfEra, Era, EpochDay, ProlepticMonth
+	if dt.date.IsSupportedField(field) {
+		return dt.date.GetField(field)
+	}
+
+	// Delegate to LocalTime for time-based fields
+	// LocalTime handles: NanoOfSecond, NanoOfDay, MicroOfSecond, MicroOfDay,
+	// MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay, MinuteOfHour,
+	// MinuteOfDay, HourOfDay, ClockHourOfDay, HourOfAmPm, ClockHourOfAmPm, AmPmOfDay
 	if dt.time.IsSupportedField(field) {
-		return dt.time.GetFieldInt64(field)
+		return dt.time.GetField(field)
 	}
-	return dt.date.GetFieldInt64(field)
+
+	// Unsupported field (e.g., InstantSeconds, OffsetSeconds)
+	return TemporalValue{unsupported: true}
 }
 
 // GoTime converts this date-time to a time.Time in UTC.

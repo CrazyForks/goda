@@ -146,36 +146,77 @@ func (d LocalDate) IsSupportedField(field Field) bool {
 	}
 }
 
-// GetFieldInt64 returns the value of the specified field as an int64.
-// Returns 0 if the field is not supported or the date is zero.
-func (d LocalDate) GetFieldInt64(field Field) int64 {
+// GetField returns the value of the specified field as a TemporalValue.
+// This method queries the date for the value of the specified field.
+// The returned value may be unsupported if the field is not supported by LocalDate.
+//
+// If the date is zero (IsZero() returns true), an unsupported TemporalValue is returned.
+// For fields not supported by LocalDate (such as time fields), an unsupported TemporalValue is returned.
+//
+// Supported fields include:
+//   - DayOfWeekField: returns the day of week (1=Monday, 7=Sunday)
+//   - DayOfMonth: returns the day of month (1-31)
+//   - DayOfYear: returns the day of year (1-366)
+//   - MonthOfYear: returns the month (1=January, 12=December)
+//   - YearField: returns the proleptic year
+//   - YearOfEra: returns the year within the era (same as YearField for CE dates)
+//   - Era: returns the era (0=BCE, 1=CE)
+//   - EpochDay: returns the number of days since Unix epoch (1970-01-01)
+//   - ProlepticMonth: returns the number of months since year 0
+//
+// Overflow Analysis:
+// None of the supported fields can overflow int64 in practice:
+//   - DayOfWeekField: range 1-7, cannot overflow
+//   - DayOfMonth: range 1-31, cannot overflow
+//   - DayOfYear: range 1-366, cannot overflow
+//   - MonthOfYear: range 1-12, cannot overflow
+//   - YearField/YearOfEra: Year is int64, direct cast, cannot overflow
+//   - Era: values 0 or 1, cannot overflow
+//   - EpochDay: int64, calculated from year/month/day which are bounded by LocalDate's internal representation
+//   - ProlepticMonth: Year * 12 + Month. Year is int64, so max value is approximately int64_max * 12,
+//     which would overflow. However, LocalDate stores Year in the upper 48 bits of a 64-bit value,
+//     limiting the practical range to approximately ±140 trillion years, making overflow impossible
+//     in any realistic scenario.
+func (d LocalDate) GetField(field Field) TemporalValue {
 	if d.IsZero() {
-		return 0
+		return TemporalValue{v: 0, unsupported: true}
 	}
+	var v int64
 	switch field {
 	case DayOfWeekField:
-		return int64(d.DayOfWeek())
+		// Range: 1-7, no overflow possible
+		v = int64(d.DayOfWeek())
 	case DayOfMonth:
-		return int64(d.DayOfMonth())
+		// Range: 1-31, no overflow possible
+		v = int64(d.DayOfMonth())
 	case DayOfYear:
-		return int64(d.DayOfYear())
+		// Range: 1-366, no overflow possible
+		v = int64(d.DayOfYear())
 	case MonthOfYear:
-		return int64(d.Month())
+		// Range: 1-12, no overflow possible
+		v = int64(d.Month())
 	case YearField, YearOfEra:
-		return int64(d.Year())
+		// Year is already int64, direct cast, no overflow possible
+		v = int64(d.Year())
 	case Era:
+		// Values: 0 or 1, no overflow possible
 		if d.Year() >= 1 {
-			return 1 // CE (Common Era)
+			v = 1 // CE (Common Era)
+		} else {
+			v = 0 // BCE (Before Common Era)
 		}
-		return 0 // BCE (Before Common Era)
 	case EpochDay:
-		return d.UnixEpochDays()
+		// Returns int64, computed from bounded year/month/day values, no overflow in practice
+		v = d.UnixEpochDays()
 	case ProlepticMonth:
 		// Calculate proleptic month (months since year 0)
-		return int64(d.Year())*12 + int64(d.Month()) - 1
+		// Year is stored in 48 bits internally, limiting range to ±140 trillion years
+		// Year * 12 cannot overflow int64 in this constrained range
+		v = int64(d.Year())*12 + int64(d.Month()) - 1
 	default:
-		return 0
+		return TemporalValue{unsupported: true}
 	}
+	return TemporalValue{v: v}
 }
 
 // Month returns the month component of this date (1-12).
