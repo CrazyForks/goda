@@ -194,9 +194,14 @@ func (d LocalDate) GetField(field Field) TemporalValue {
 	case FieldMonthOfYear:
 		// Range: 1-12, no overflow possible
 		v = int64(d.Month())
-	case FieldYear, FieldYearOfEra:
+	case FieldYear:
 		// Year is already int64, direct cast, no overflow possible
 		v = int64(d.Year())
+	case FieldYearOfEra:
+		v = int64(d.Year())
+		if v < 0 {
+			v = -v + 1
+		}
 	case FieldEra:
 		// Values: 0 or 1, no overflow possible
 		if d.Year() >= 1 {

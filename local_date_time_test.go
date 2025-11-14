@@ -1,7 +1,10 @@
 package goda
 
 import (
+	_ "embed"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -447,4 +450,32 @@ func TestLocalDateTime_IsLeapYear(t *testing.T) {
 
 	assert.True(t, dt2024.IsLeapYear())
 	assert.False(t, dt2023.IsLeapYear())
+}
+
+//go:embed TestFieldGetter.txt
+var TestFieldGetterData string
+
+func TestFieldGetter(t *testing.T) {
+	var fields = []Field{FieldNanoOfSecond, FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay, FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay, FieldMinuteOfHour, FieldMinuteOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldHourOfDay, FieldClockHourOfDay, FieldAmPmOfDay, FieldDayOfWeek, FieldAlignedDayOfWeekInMonth, FieldAlignedDayOfWeekInYear, FieldDayOfMonth, FieldDayOfYear, FieldEpochDay, FieldAlignedWeekOfMonth, FieldAlignedWeekOfYear, FieldMonthOfYear, FieldProlepticMonth, FieldYearOfEra, FieldYear, FieldEra}
+	for _, line := range strings.Split(TestFieldGetterData, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		cols := strings.Split(line, ",")
+		dt, e := ParseLocalDateTime(cols[0])
+		if e != nil {
+			t.Fatal(e)
+		}
+		for i, v := range cols[1:] {
+			if dt.GetField(fields[i]).Unsupported() {
+				continue
+			}
+			if !assert.Equal(t, v, fmt.Sprint(dt.GetField(fields[i]).Int64())) {
+				t.Log(fields[i].String(), line)
+				t.Failed()
+				return
+			}
+		}
+	}
 }
