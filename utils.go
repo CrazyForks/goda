@@ -54,14 +54,6 @@ func floorMod(a, b int64) int64 {
 	return r
 }
 
-func floorDiv(a, b int64) int64 {
-	var q = a / b
-	if (a^b) < 0 && q*b != a {
-		q--
-	}
-	return q
-}
-
 func comparing[E any, T cmp.Ordered](f func(E) T) func(E, E) int {
 	return func(a, b E) int {
 		return cmp.Compare(f(a), f(b))
