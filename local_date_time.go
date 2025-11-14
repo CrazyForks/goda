@@ -133,7 +133,7 @@ func (dt LocalDateTime) Month() Month {
 	return dt.date.Month()
 }
 
-// DayOfMonth returns the day-of-month component.
+// FieldDayOfMonth returns the day-of-month component.
 func (dt LocalDateTime) DayOfMonth() int {
 	return dt.date.DayOfMonth()
 }
@@ -143,7 +143,7 @@ func (dt LocalDateTime) DayOfWeek() DayOfWeek {
 	return dt.date.DayOfWeek()
 }
 
-// DayOfYear returns the day-of-year.
+// FieldDayOfYear returns the day-of-year.
 func (dt LocalDateTime) DayOfYear() int {
 	return dt.date.DayOfYear()
 }
@@ -199,10 +199,10 @@ func (dt LocalDateTime) IsSupportedField(field Field) bool {
 // For fields that are supported by the underlying LocalDate or LocalTime,
 // this method delegates to the appropriate component.
 //
-// Supported fields include all date fields (DayOfWeekField, DayOfMonth, DayOfYear, MonthOfYear,
-// YearField, YearOfEra, Era, EpochDay, ProlepticMonth) and all time fields (NanoOfSecond,
-// NanoOfDay, MicroOfSecond, MicroOfDay, MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay,
-// MinuteOfHour, MinuteOfDay, HourOfDay, ClockHourOfDay, HourOfAmPm, ClockHourOfAmPm, AmPmOfDay).
+// Supported fields include all date fields (FieldDayOfWeek, FieldDayOfMonth, FieldDayOfYear, FieldMonthOfYear,
+// FieldYear, FieldYearOfEra, FieldEra, FieldEpochDay, FieldProlepticMonth) and all time fields (FieldNanoOfSecond,
+// FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay, FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay,
+// FieldMinuteOfHour, FieldMinuteOfDay, FieldHourOfDay, FieldClockHourOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldAmPmOfDay).
 //
 // Overflow Analysis:
 // LocalDateTime delegates to LocalDate and LocalTime, both of which have no overflow issues
@@ -216,21 +216,21 @@ func (dt LocalDateTime) GetField(field Field) TemporalValue {
 	}
 
 	// Delegate to LocalDate for date-based fields
-	// LocalDate handles: DayOfWeekField, DayOfMonth, DayOfYear, MonthOfYear,
-	// YearField, YearOfEra, Era, EpochDay, ProlepticMonth
+	// LocalDate handles: FieldDayOfWeek, FieldDayOfMonth, FieldDayOfYear, FieldMonthOfYear,
+	// FieldYear, FieldYearOfEra, FieldEra, FieldEpochDay, FieldProlepticMonth
 	if dt.date.IsSupportedField(field) {
 		return dt.date.GetField(field)
 	}
 
 	// Delegate to LocalTime for time-based fields
-	// LocalTime handles: NanoOfSecond, NanoOfDay, MicroOfSecond, MicroOfDay,
-	// MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay, MinuteOfHour,
-	// MinuteOfDay, HourOfDay, ClockHourOfDay, HourOfAmPm, ClockHourOfAmPm, AmPmOfDay
+	// LocalTime handles: FieldNanoOfSecond, FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay,
+	// FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay, FieldMinuteOfHour,
+	// FieldMinuteOfDay, FieldHourOfDay, FieldClockHourOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldAmPmOfDay
 	if dt.time.IsSupportedField(field) {
 		return dt.time.GetField(field)
 	}
 
-	// Unsupported field (e.g., InstantSeconds, OffsetSeconds)
+	// Unsupported field (e.g., FieldInstantSeconds, FieldOffsetSeconds)
 	return TemporalValue{unsupported: true}
 }
 

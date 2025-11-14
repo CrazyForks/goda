@@ -556,43 +556,18 @@ func ExampleLocalDateTime_UnmarshalJSON() {
 	// 2024-03-15T14:30:45.123456789
 }
 
-// ExampleField demonstrates working with Field constants.
-func ExampleField() {
-	// Time fields
-	fmt.Println(goda.HourOfDay)
-	fmt.Println(goda.MinuteOfHour)
-	fmt.Println(goda.SecondOfMinute)
-	fmt.Println(goda.NanoOfSecond)
-
-	// Date fields
-	fmt.Println(goda.YearField)
-	fmt.Println(goda.MonthOfYear)
-	fmt.Println(goda.DayOfMonth)
-	fmt.Println(goda.DayOfWeekField)
-
-	// Output:
-	// HourOfDay
-	// MinuteOfHour
-	// SecondOfMinute
-	// NanoOfSecond
-	// Year
-	// MonthOfYear
-	// DayOfMonth
-	// DayOfWeek
-}
-
 // ExampleLocalDateTime_IsSupportedField demonstrates checking field support.
 func ExampleLocalDateTime_IsSupportedField() {
 	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 0)
 
-	fmt.Printf("Supports HourOfDay: %v\n", dt.IsSupportedField(goda.HourOfDay))
-	fmt.Printf("Supports DayOfMonth: %v\n", dt.IsSupportedField(goda.DayOfMonth))
-	fmt.Printf("Supports OffsetSeconds: %v\n", dt.IsSupportedField(goda.OffsetSeconds))
+	fmt.Printf("Supports FieldHourOfDay: %v\n", dt.IsSupportedField(goda.FieldHourOfDay))
+	fmt.Printf("Supports FieldDayOfMonth: %v\n", dt.IsSupportedField(goda.FieldDayOfMonth))
+	fmt.Printf("Supports FieldOffsetSeconds: %v\n", dt.IsSupportedField(goda.FieldOffsetSeconds))
 
 	// Output:
-	// Supports HourOfDay: true
-	// Supports DayOfMonth: true
-	// Supports OffsetSeconds: false
+	// Supports FieldHourOfDay: true
+	// Supports FieldDayOfMonth: true
+	// Supports FieldOffsetSeconds: false
 }
 
 // ExampleLocalDate_GetField demonstrates querying date fields with TemporalValue.
@@ -600,23 +575,23 @@ func ExampleLocalDate_GetField() {
 	date := goda.MustNewLocalDate(2024, goda.March, 15) // Friday
 
 	// Query various date fields
-	dayOfWeek := date.GetField(goda.DayOfWeekField)
+	dayOfWeek := date.GetField(goda.FieldDayOfWeek)
 	if dayOfWeek.Valid() {
 		fmt.Printf("Day of week: %d (1=Monday, 7=Sunday)\n", dayOfWeek.Int())
 	}
 
-	month := date.GetField(goda.MonthOfYear)
+	month := date.GetField(goda.FieldMonthOfYear)
 	if month.Valid() {
 		fmt.Printf("Month: %d\n", month.Int())
 	}
 
-	year := date.GetField(goda.YearField)
+	year := date.GetField(goda.FieldYear)
 	if year.Valid() {
 		fmt.Printf("Year: %d\n", year.Int())
 	}
 
 	// Query unsupported field (time field on date)
-	hour := date.GetField(goda.HourOfDay)
+	hour := date.GetField(goda.FieldHourOfDay)
 	if hour.Unsupported() {
 		fmt.Println("Hour field is not supported for LocalDate")
 	}
@@ -633,28 +608,28 @@ func ExampleLocalDate_GetField_advancedFields() {
 	date := goda.MustNewLocalDate(2024, goda.March, 15)
 
 	// Day of year (1-366)
-	dayOfYear := date.GetField(goda.DayOfYear)
+	dayOfYear := date.GetField(goda.FieldDayOfYear)
 	fmt.Printf("Day of year: %d\n", dayOfYear.Int())
 
 	// Epoch days (days since 1970-01-01)
-	epochDay := date.GetField(goda.EpochDay)
+	epochDay := date.GetField(goda.FieldEpochDay)
 	fmt.Printf("Days since Unix epoch: %d\n", epochDay.Int64())
 
 	// Proleptic month (months since year 0)
-	prolepticMonth := date.GetField(goda.ProlepticMonth)
+	prolepticMonth := date.GetField(goda.FieldProlepticMonth)
 	fmt.Printf("Proleptic month: %d\n", prolepticMonth.Int64())
 
-	// Era (0=BCE, 1=CE)
-	era := date.GetField(goda.Era)
+	// FieldEra (0=BCE, 1=CE)
+	era := date.GetField(goda.FieldEra)
 	if era.Int() == 1 {
-		fmt.Println("Era: CE (Common Era)")
+		fmt.Println("FieldEra: CE (Common FieldEra)")
 	}
 
 	// Output:
 	// Day of year: 75
 	// Days since Unix epoch: 19797
 	// Proleptic month: 24290
-	// Era: CE (Common Era)
+	// FieldEra: CE (Common FieldEra)
 }
 
 // ExampleLocalTime_GetField demonstrates querying time fields with TemporalValue.
@@ -662,30 +637,30 @@ func ExampleLocalTime_GetField() {
 	t := goda.MustNewLocalTime(14, 30, 45, 123456789)
 
 	// Query various time fields
-	hour := t.GetField(goda.HourOfDay)
+	hour := t.GetField(goda.FieldHourOfDay)
 	if hour.Valid() {
 		fmt.Printf("Hour of day (0-23): %d\n", hour.Int())
 	}
 
-	minute := t.GetField(goda.MinuteOfHour)
+	minute := t.GetField(goda.FieldMinuteOfHour)
 	if minute.Valid() {
 		fmt.Printf("Minute of hour: %d\n", minute.Int())
 	}
 
-	second := t.GetField(goda.SecondOfMinute)
+	second := t.GetField(goda.FieldSecondOfMinute)
 	if second.Valid() {
 		fmt.Printf("Second of minute: %d\n", second.Int())
 	}
 
-	nanos := t.GetField(goda.NanoOfSecond)
+	nanos := t.GetField(goda.FieldNanoOfSecond)
 	if nanos.Valid() {
 		fmt.Printf("Nanoseconds: %d\n", nanos.Int())
 	}
 
 	// Query unsupported field (date field on time)
-	dayOfMonth := t.GetField(goda.DayOfMonth)
+	dayOfMonth := t.GetField(goda.FieldDayOfMonth)
 	if dayOfMonth.Unsupported() {
-		fmt.Println("DayOfMonth field is not supported for LocalTime")
+		fmt.Println("FieldDayOfMonth field is not supported for LocalTime")
 	}
 
 	// Output:
@@ -693,7 +668,7 @@ func ExampleLocalTime_GetField() {
 	// Minute of hour: 30
 	// Second of minute: 45
 	// Nanoseconds: 123456789
-	// DayOfMonth field is not supported for LocalTime
+	// FieldDayOfMonth field is not supported for LocalTime
 }
 
 // ExampleLocalTime_GetField_clockHours demonstrates 12-hour clock field queries.
@@ -702,12 +677,12 @@ func ExampleLocalTime_GetField_clockHours() {
 	afternoon := goda.MustNewLocalTime(14, 30, 0, 0)
 
 	// 24-hour format
-	hourOfDay := afternoon.GetField(goda.HourOfDay)
+	hourOfDay := afternoon.GetField(goda.FieldHourOfDay)
 	fmt.Printf("24-hour format: %d:30\n", hourOfDay.Int())
 
 	// 12-hour format components
-	hourOfAmPm := afternoon.GetField(goda.HourOfAmPm)
-	amPm := afternoon.GetField(goda.AmPmOfDay)
+	hourOfAmPm := afternoon.GetField(goda.FieldHourOfAmPm)
+	amPm := afternoon.GetField(goda.FieldAmPmOfDay)
 	amPmStr := "AM"
 	if amPm.Int() == 1 {
 		amPmStr = "PM"
@@ -715,12 +690,12 @@ func ExampleLocalTime_GetField_clockHours() {
 	fmt.Printf("12-hour format: %d:30 %s\n", hourOfAmPm.Int(), amPmStr)
 
 	// Clock hour (1-12 instead of 0-11)
-	clockHour := afternoon.GetField(goda.ClockHourOfAmPm)
+	clockHour := afternoon.GetField(goda.FieldClockHourOfAmPm)
 	fmt.Printf("Clock hour (1-12): %d:30 %s\n", clockHour.Int(), amPmStr)
 
 	// Midnight special case
 	midnight := goda.MustNewLocalTime(0, 0, 0, 0)
-	midnightClock := midnight.GetField(goda.ClockHourOfDay)
+	midnightClock := midnight.GetField(goda.FieldClockHourOfDay)
 	fmt.Printf("Midnight clock hour: %d:00\n", midnightClock.Int())
 
 	// Output:
@@ -735,19 +710,19 @@ func ExampleLocalTime_GetField_ofDayFields() {
 	t := goda.MustNewLocalTime(14, 30, 45, 500000000) // 2:30:45.5 PM
 
 	// Total seconds elapsed since midnight
-	secondOfDay := t.GetField(goda.SecondOfDay)
+	secondOfDay := t.GetField(goda.FieldSecondOfDay)
 	fmt.Printf("Seconds since midnight: %d\n", secondOfDay.Int())
 
 	// Total minutes elapsed since midnight
-	minuteOfDay := t.GetField(goda.MinuteOfDay)
+	minuteOfDay := t.GetField(goda.FieldMinuteOfDay)
 	fmt.Printf("Minutes since midnight: %d\n", minuteOfDay.Int())
 
 	// Total milliseconds elapsed since midnight
-	milliOfDay := t.GetField(goda.MilliOfDay)
+	milliOfDay := t.GetField(goda.FieldMilliOfDay)
 	fmt.Printf("Milliseconds since midnight: %d\n", milliOfDay.Int64())
 
 	// Total nanoseconds elapsed since midnight
-	nanoOfDay := t.GetField(goda.NanoOfDay)
+	nanoOfDay := t.GetField(goda.FieldNanoOfDay)
 	fmt.Printf("Nanoseconds since midnight: %d\n", nanoOfDay.Int64())
 
 	// Output:
@@ -762,25 +737,25 @@ func ExampleLocalDateTime_GetField() {
 	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 123456789)
 
 	// Query date fields
-	year := dt.GetField(goda.YearField)
-	month := dt.GetField(goda.MonthOfYear)
-	day := dt.GetField(goda.DayOfMonth)
+	year := dt.GetField(goda.FieldYear)
+	month := dt.GetField(goda.FieldMonthOfYear)
+	day := dt.GetField(goda.FieldDayOfMonth)
 
 	if year.Valid() && month.Valid() && day.Valid() {
 		fmt.Printf("Date: %04d-%02d-%02d\n", year.Int(), month.Int(), day.Int())
 	}
 
 	// Query time fields
-	hour := dt.GetField(goda.HourOfDay)
-	minute := dt.GetField(goda.MinuteOfHour)
-	second := dt.GetField(goda.SecondOfMinute)
+	hour := dt.GetField(goda.FieldHourOfDay)
+	minute := dt.GetField(goda.FieldMinuteOfHour)
+	second := dt.GetField(goda.FieldSecondOfMinute)
 
 	if hour.Valid() && minute.Valid() && second.Valid() {
 		fmt.Printf("Time: %02d:%02d:%02d\n", hour.Int(), minute.Int(), second.Int())
 	}
 
 	// Query day of week
-	dayOfWeek := dt.GetField(goda.DayOfWeekField)
+	dayOfWeek := dt.GetField(goda.FieldDayOfWeek)
 	if dayOfWeek.Valid() {
 		fmt.Printf("Day of week: %d (Friday)\n", dayOfWeek.Int())
 	}
@@ -796,21 +771,21 @@ func ExampleLocalDateTime_GetField_delegation() {
 	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 0)
 
 	// LocalDateTime delegates date fields to LocalDate
-	dayOfYear := dt.GetField(goda.DayOfYear)
+	dayOfYear := dt.GetField(goda.FieldDayOfYear)
 	fmt.Printf("Day of year: %d\n", dayOfYear.Int())
 
 	// LocalDateTime delegates time fields to LocalTime
-	nanoOfDay := dt.GetField(goda.NanoOfDay)
+	nanoOfDay := dt.GetField(goda.FieldNanoOfDay)
 	fmt.Printf("Nanoseconds of day: %d\n", nanoOfDay.Int64())
 
 	// Unsupported fields return unsupported TemporalValue
-	offsetSeconds := dt.GetField(goda.OffsetSeconds)
+	offsetSeconds := dt.GetField(goda.FieldOffsetSeconds)
 	if offsetSeconds.Unsupported() {
-		fmt.Println("OffsetSeconds is not supported for LocalDateTime")
+		fmt.Println("FieldOffsetSeconds is not supported for LocalDateTime")
 	}
 
 	// Output:
 	// Day of year: 75
 	// Nanoseconds of day: 52245000000000
-	// OffsetSeconds is not supported for LocalDateTime
+	// FieldOffsetSeconds is not supported for LocalDateTime
 }

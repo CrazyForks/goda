@@ -138,7 +138,7 @@ func (d LocalDate) IsLeapYear() bool {
 // IsSupportedField returns true if the field is supported by LocalDate.
 func (d LocalDate) IsSupportedField(field Field) bool {
 	switch field {
-	case DayOfWeekField, DayOfMonth, DayOfYear, EpochDay, MonthOfYear, ProlepticMonth, YearOfEra, YearField, Era:
+	case FieldDayOfWeek, FieldDayOfMonth, FieldDayOfYear, FieldEpochDay, FieldMonthOfYear, FieldProlepticMonth, FieldYearOfEra, FieldYear, FieldEra:
 		return true
 	default:
 		return false
@@ -153,26 +153,26 @@ func (d LocalDate) IsSupportedField(field Field) bool {
 // For fields not supported by LocalDate (such as time fields), an unsupported TemporalValue is returned.
 //
 // Supported fields include:
-//   - DayOfWeekField: returns the day of week (1=Monday, 7=Sunday)
-//   - DayOfMonth: returns the day of month (1-31)
-//   - DayOfYear: returns the day of year (1-366)
-//   - MonthOfYear: returns the month (1=January, 12=December)
-//   - YearField: returns the proleptic year
-//   - YearOfEra: returns the year within the era (same as YearField for CE dates)
-//   - Era: returns the era (0=BCE, 1=CE)
-//   - EpochDay: returns the number of days since Unix epoch (1970-01-01)
-//   - ProlepticMonth: returns the number of months since year 0
+//   - FieldDayOfWeek: returns the day of week (1=Monday, 7=Sunday)
+//   - FieldDayOfMonth: returns the day of month (1-31)
+//   - FieldDayOfYear: returns the day of year (1-366)
+//   - FieldMonthOfYear: returns the month (1=January, 12=December)
+//   - FieldYear: returns the proleptic year
+//   - FieldYearOfEra: returns the year within the era (same as FieldYear for CE dates)
+//   - FieldEra: returns the era (0=BCE, 1=CE)
+//   - FieldEpochDay: returns the number of days since Unix epoch (1970-01-01)
+//   - FieldProlepticMonth: returns the number of months since year 0
 //
 // Overflow Analysis:
 // None of the supported fields can overflow int64 in practice:
-//   - DayOfWeekField: range 1-7, cannot overflow
-//   - DayOfMonth: range 1-31, cannot overflow
-//   - DayOfYear: range 1-366, cannot overflow
-//   - MonthOfYear: range 1-12, cannot overflow
-//   - YearField/YearOfEra: Year is int64, direct cast, cannot overflow
-//   - Era: values 0 or 1, cannot overflow
-//   - EpochDay: int64, calculated from year/month/day which are bounded by LocalDate's internal representation
-//   - ProlepticMonth: Year * 12 + Month. Year is int64, so max value is approximately int64_max * 12,
+//   - FieldDayOfWeek: range 1-7, cannot overflow
+//   - FieldDayOfMonth: range 1-31, cannot overflow
+//   - FieldDayOfYear: range 1-366, cannot overflow
+//   - FieldMonthOfYear: range 1-12, cannot overflow
+//   - FieldYear/FieldYearOfEra: Year is int64, direct cast, cannot overflow
+//   - FieldEra: values 0 or 1, cannot overflow
+//   - FieldEpochDay: int64, calculated from year/month/day which are bounded by LocalDate's internal representation
+//   - FieldProlepticMonth: Year * 12 + Month. Year is int64, so max value is approximately int64_max * 12,
 //     which would overflow. However, LocalDate stores Year in the upper 48 bits of a 64-bit value,
 //     limiting the practical range to approximately ±140 trillion years, making overflow impossible
 //     in any realistic scenario.
@@ -182,32 +182,32 @@ func (d LocalDate) GetField(field Field) TemporalValue {
 	}
 	var v int64
 	switch field {
-	case DayOfWeekField:
+	case FieldDayOfWeek:
 		// Range: 1-7, no overflow possible
 		v = int64(d.DayOfWeek())
-	case DayOfMonth:
+	case FieldDayOfMonth:
 		// Range: 1-31, no overflow possible
 		v = int64(d.DayOfMonth())
-	case DayOfYear:
+	case FieldDayOfYear:
 		// Range: 1-366, no overflow possible
 		v = int64(d.DayOfYear())
-	case MonthOfYear:
+	case FieldMonthOfYear:
 		// Range: 1-12, no overflow possible
 		v = int64(d.Month())
-	case YearField, YearOfEra:
+	case FieldYear, FieldYearOfEra:
 		// Year is already int64, direct cast, no overflow possible
 		v = int64(d.Year())
-	case Era:
+	case FieldEra:
 		// Values: 0 or 1, no overflow possible
 		if d.Year() >= 1 {
-			v = 1 // CE (Common Era)
+			v = 1 // CE (Common FieldEra)
 		} else {
-			v = 0 // BCE (Before Common Era)
+			v = 0 // BCE (Before Common FieldEra)
 		}
-	case EpochDay:
+	case FieldEpochDay:
 		// Returns int64, computed from bounded year/month/day values, no overflow in practice
 		v = d.UnixEpochDays()
-	case ProlepticMonth:
+	case FieldProlepticMonth:
 		// Calculate proleptic month (months since year 0)
 		// Year is stored in 48 bits internally, limiting range to ±140 trillion years
 		// Year * 12 cannot overflow int64 in this constrained range
@@ -223,7 +223,7 @@ func (d LocalDate) Month() Month {
 	return Month(d.v >> 8 & 0xff)
 }
 
-// DayOfMonth returns the day-of-month component of this date (1-31).
+// FieldDayOfMonth returns the day-of-month component of this date (1-31).
 func (d LocalDate) DayOfMonth() int {
 	return int(d.v & 0xff)
 }
@@ -237,7 +237,7 @@ func (d LocalDate) DayOfWeek() DayOfWeek {
 	return DayOfWeek(floorMod(d.UnixEpochDays()+3, 7) + 1)
 }
 
-// DayOfYear returns the day-of-year for this date (1-366).
+// FieldDayOfYear returns the day-of-year for this date (1-366).
 // Returns 0 for zero value.
 func (d LocalDate) DayOfYear() int {
 	if d.IsZero() {

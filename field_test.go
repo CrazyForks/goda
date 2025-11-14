@@ -6,197 +6,142 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestField_String(t *testing.T) {
-	tests := []struct {
-		field    Field
-		expected string
-	}{
-		// Time fields
-		{NanoOfSecond, "NanoOfSecond"},
-		{NanoOfDay, "NanoOfDay"},
-		{MicroOfSecond, "MicroOfSecond"},
-		{MicroOfDay, "MicroOfDay"},
-		{MilliOfSecond, "MilliOfSecond"},
-		{MilliOfDay, "MilliOfDay"},
-		{SecondOfMinute, "SecondOfMinute"},
-		{SecondOfDay, "SecondOfDay"},
-		{MinuteOfHour, "MinuteOfHour"},
-		{MinuteOfDay, "MinuteOfDay"},
-		{HourOfAmPm, "HourOfAmPm"},
-		{ClockHourOfAmPm, "ClockHourOfAmPm"},
-		{HourOfDay, "HourOfDay"},
-		{ClockHourOfDay, "ClockHourOfDay"},
-		{AmPmOfDay, "AmPmOfDay"},
-
-		// Date fields
-		{DayOfWeekField, "DayOfWeek"},
-		{AlignedDayOfWeekInMonth, "AlignedDayOfWeekInMonth"},
-		{AlignedDayOfWeekInYear, "AlignedDayOfWeekInYear"},
-		{DayOfMonth, "DayOfMonth"},
-		{DayOfYear, "DayOfYear"},
-		{EpochDay, "EpochDay"},
-		{AlignedWeekOfMonth, "AlignedWeekOfMonth"},
-		{AlignedWeekOfYear, "AlignedWeekOfYear"},
-		{MonthOfYear, "MonthOfYear"},
-		{ProlepticMonth, "ProlepticMonth"},
-		{YearOfEra, "YearOfEra"},
-		{YearField, "Year"},
-		{Era, "Era"},
-
-		// Other fields
-		{InstantSeconds, "InstantSeconds"},
-		{OffsetSeconds, "OffsetSeconds"},
-
-		// Zero value
-		{Field(0), ""},
-
-		// Unknown field
-		{Field(9999), ""},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.expected, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.field.String())
-		})
-	}
-}
-
 func TestLocalDate_IsSupportedField(t *testing.T) {
 	date := MustNewLocalDate(2024, March, 15)
 
 	// Supported fields
-	assert.True(t, date.IsSupportedField(DayOfWeekField))
-	assert.True(t, date.IsSupportedField(DayOfMonth))
-	assert.True(t, date.IsSupportedField(DayOfYear))
-	assert.True(t, date.IsSupportedField(EpochDay))
-	assert.True(t, date.IsSupportedField(MonthOfYear))
-	assert.True(t, date.IsSupportedField(ProlepticMonth))
-	assert.True(t, date.IsSupportedField(YearOfEra))
-	assert.True(t, date.IsSupportedField(YearField))
-	assert.True(t, date.IsSupportedField(Era))
+	assert.True(t, date.IsSupportedField(FieldDayOfWeek))
+	assert.True(t, date.IsSupportedField(FieldDayOfMonth))
+	assert.True(t, date.IsSupportedField(FieldDayOfYear))
+	assert.True(t, date.IsSupportedField(FieldEpochDay))
+	assert.True(t, date.IsSupportedField(FieldMonthOfYear))
+	assert.True(t, date.IsSupportedField(FieldProlepticMonth))
+	assert.True(t, date.IsSupportedField(FieldYearOfEra))
+	assert.True(t, date.IsSupportedField(FieldYear))
+	assert.True(t, date.IsSupportedField(FieldEra))
 
 	// Unsupported fields (time fields)
-	assert.False(t, date.IsSupportedField(HourOfDay))
-	assert.False(t, date.IsSupportedField(MinuteOfHour))
-	assert.False(t, date.IsSupportedField(SecondOfMinute))
-	assert.False(t, date.IsSupportedField(NanoOfSecond))
+	assert.False(t, date.IsSupportedField(FieldHourOfDay))
+	assert.False(t, date.IsSupportedField(FieldMinuteOfHour))
+	assert.False(t, date.IsSupportedField(FieldSecondOfMinute))
+	assert.False(t, date.IsSupportedField(FieldNanoOfSecond))
 }
 
 func TestLocalTime_IsSupportedField(t *testing.T) {
 	time := MustNewLocalTime(14, 30, 45, 123456789)
 
 	// Supported fields
-	assert.True(t, time.IsSupportedField(NanoOfSecond))
-	assert.True(t, time.IsSupportedField(NanoOfDay))
-	assert.True(t, time.IsSupportedField(MicroOfSecond))
-	assert.True(t, time.IsSupportedField(MicroOfDay))
-	assert.True(t, time.IsSupportedField(MilliOfSecond))
-	assert.True(t, time.IsSupportedField(MilliOfDay))
-	assert.True(t, time.IsSupportedField(SecondOfMinute))
-	assert.True(t, time.IsSupportedField(SecondOfDay))
-	assert.True(t, time.IsSupportedField(MinuteOfHour))
-	assert.True(t, time.IsSupportedField(MinuteOfDay))
-	assert.True(t, time.IsSupportedField(HourOfAmPm))
-	assert.True(t, time.IsSupportedField(ClockHourOfAmPm))
-	assert.True(t, time.IsSupportedField(HourOfDay))
-	assert.True(t, time.IsSupportedField(ClockHourOfDay))
-	assert.True(t, time.IsSupportedField(AmPmOfDay))
+	assert.True(t, time.IsSupportedField(FieldNanoOfSecond))
+	assert.True(t, time.IsSupportedField(FieldNanoOfDay))
+	assert.True(t, time.IsSupportedField(FieldMicroOfSecond))
+	assert.True(t, time.IsSupportedField(FieldMicroOfDay))
+	assert.True(t, time.IsSupportedField(FieldMilliOfSecond))
+	assert.True(t, time.IsSupportedField(FieldMilliOfDay))
+	assert.True(t, time.IsSupportedField(FieldSecondOfMinute))
+	assert.True(t, time.IsSupportedField(FieldSecondOfDay))
+	assert.True(t, time.IsSupportedField(FieldMinuteOfHour))
+	assert.True(t, time.IsSupportedField(FieldMinuteOfDay))
+	assert.True(t, time.IsSupportedField(FieldHourOfAmPm))
+	assert.True(t, time.IsSupportedField(FieldClockHourOfAmPm))
+	assert.True(t, time.IsSupportedField(FieldHourOfDay))
+	assert.True(t, time.IsSupportedField(FieldClockHourOfDay))
+	assert.True(t, time.IsSupportedField(FieldAmPmOfDay))
 
 	// Unsupported fields (date fields)
-	assert.False(t, time.IsSupportedField(DayOfMonth))
-	assert.False(t, time.IsSupportedField(MonthOfYear))
-	assert.False(t, time.IsSupportedField(YearField))
+	assert.False(t, time.IsSupportedField(FieldDayOfMonth))
+	assert.False(t, time.IsSupportedField(FieldMonthOfYear))
+	assert.False(t, time.IsSupportedField(FieldYear))
 }
 
 func TestLocalDateTime_IsSupportedField(t *testing.T) {
 	dt := MustNewLocalDateTimeFromComponents(2024, March, 15, 14, 30, 45, 123456789)
 
 	// Should support both date and time fields
-	assert.True(t, dt.IsSupportedField(DayOfMonth))
-	assert.True(t, dt.IsSupportedField(MonthOfYear))
-	assert.True(t, dt.IsSupportedField(YearField))
-	assert.True(t, dt.IsSupportedField(HourOfDay))
-	assert.True(t, dt.IsSupportedField(MinuteOfHour))
-	assert.True(t, dt.IsSupportedField(SecondOfMinute))
-	assert.True(t, dt.IsSupportedField(NanoOfSecond))
+	assert.True(t, dt.IsSupportedField(FieldDayOfMonth))
+	assert.True(t, dt.IsSupportedField(FieldMonthOfYear))
+	assert.True(t, dt.IsSupportedField(FieldYear))
+	assert.True(t, dt.IsSupportedField(FieldHourOfDay))
+	assert.True(t, dt.IsSupportedField(FieldMinuteOfHour))
+	assert.True(t, dt.IsSupportedField(FieldSecondOfMinute))
+	assert.True(t, dt.IsSupportedField(FieldNanoOfSecond))
 
 	// Unsupported fields
-	assert.False(t, dt.IsSupportedField(InstantSeconds))
-	assert.False(t, dt.IsSupportedField(OffsetSeconds))
+	assert.False(t, dt.IsSupportedField(FieldInstantSeconds))
+	assert.False(t, dt.IsSupportedField(FieldOffsetSeconds))
 }
 
 func TestLocalDate_GetField(t *testing.T) {
 	date := MustNewLocalDate(2024, March, 15) // Friday
 
 	t.Run("supported fields", func(t *testing.T) {
-		// Test DayOfWeekField
-		dayOfWeek := date.GetField(DayOfWeekField)
+		// Test FieldDayOfWeek
+		dayOfWeek := date.GetField(FieldDayOfWeek)
 		assert.True(t, dayOfWeek.Valid())
 		assert.False(t, dayOfWeek.Unsupported())
 		assert.Equal(t, int64(5), dayOfWeek.Int64()) // Friday = 5
 
-		// Test DayOfMonth
-		dayOfMonth := date.GetField(DayOfMonth)
+		// Test FieldDayOfMonth
+		dayOfMonth := date.GetField(FieldDayOfMonth)
 		assert.True(t, dayOfMonth.Valid())
 		assert.Equal(t, 15, dayOfMonth.Int())
 
-		// Test DayOfYear
-		dayOfYear := date.GetField(DayOfYear)
+		// Test FieldDayOfYear
+		dayOfYear := date.GetField(FieldDayOfYear)
 		assert.True(t, dayOfYear.Valid())
 		assert.Equal(t, int64(75), dayOfYear.Int64()) // 31+29+15 = 75 (2024 is leap year)
 
-		// Test MonthOfYear
-		month := date.GetField(MonthOfYear)
+		// Test FieldMonthOfYear
+		month := date.GetField(FieldMonthOfYear)
 		assert.True(t, month.Valid())
 		assert.Equal(t, int64(3), month.Int64())
 
-		// Test YearField
-		year := date.GetField(YearField)
+		// Test FieldYear
+		year := date.GetField(FieldYear)
 		assert.True(t, year.Valid())
 		assert.Equal(t, int64(2024), year.Int64())
 
-		// Test YearOfEra
-		yearOfEra := date.GetField(YearOfEra)
+		// Test FieldYearOfEra
+		yearOfEra := date.GetField(FieldYearOfEra)
 		assert.True(t, yearOfEra.Valid())
 		assert.Equal(t, int64(2024), yearOfEra.Int64())
 
-		// Test Era
-		era := date.GetField(Era)
+		// Test FieldEra
+		era := date.GetField(FieldEra)
 		assert.True(t, era.Valid())
 		assert.Equal(t, int64(1), era.Int64()) // CE
 
-		// Test EpochDay
-		epochDay := date.GetField(EpochDay)
+		// Test FieldEpochDay
+		epochDay := date.GetField(FieldEpochDay)
 		assert.True(t, epochDay.Valid())
 		assert.Greater(t, epochDay.Int64(), int64(0))
 
-		// Test ProlepticMonth
-		prolepticMonth := date.GetField(ProlepticMonth)
+		// Test FieldProlepticMonth
+		prolepticMonth := date.GetField(FieldProlepticMonth)
 		assert.True(t, prolepticMonth.Valid())
 		assert.Equal(t, int64(2024*12+3-1), prolepticMonth.Int64())
 	})
 
 	t.Run("unsupported fields", func(t *testing.T) {
 		// Time fields are not supported
-		hourOfDay := date.GetField(HourOfDay)
+		hourOfDay := date.GetField(FieldHourOfDay)
 		assert.False(t, hourOfDay.Valid())
 		assert.True(t, hourOfDay.Unsupported())
 
-		nanoOfSecond := date.GetField(NanoOfSecond)
+		nanoOfSecond := date.GetField(FieldNanoOfSecond)
 		assert.False(t, nanoOfSecond.Valid())
 		assert.True(t, nanoOfSecond.Unsupported())
 	})
 
 	t.Run("zero date", func(t *testing.T) {
 		var zeroDate LocalDate
-		field := zeroDate.GetField(DayOfMonth)
+		field := zeroDate.GetField(FieldDayOfMonth)
 		assert.False(t, field.Valid())
 		assert.True(t, field.Unsupported())
 	})
 
 	t.Run("BCE date", func(t *testing.T) {
 		bceDate := MustNewLocalDate(-100, January, 1)
-		era := bceDate.GetField(Era)
+		era := bceDate.GetField(FieldEra)
 		assert.True(t, era.Valid())
 		assert.Equal(t, int64(0), era.Int64()) // BCE
 	})
@@ -207,80 +152,80 @@ func TestLocalTime_GetField(t *testing.T) {
 	time := MustNewLocalTime(14, 30, 45, 123456789)
 
 	t.Run("supported fields", func(t *testing.T) {
-		// Test NanoOfSecond
-		nanoOfSecond := time.GetField(NanoOfSecond)
+		// Test FieldNanoOfSecond
+		nanoOfSecond := time.GetField(FieldNanoOfSecond)
 		assert.True(t, nanoOfSecond.Valid())
 		assert.False(t, nanoOfSecond.Unsupported())
 		assert.Equal(t, int64(123456789), nanoOfSecond.Int64())
 
-		// Test MicroOfSecond
-		microOfSecond := time.GetField(MicroOfSecond)
+		// Test FieldMicroOfSecond
+		microOfSecond := time.GetField(FieldMicroOfSecond)
 		assert.True(t, microOfSecond.Valid())
 		assert.Equal(t, int64(123456), microOfSecond.Int64())
 
-		// Test MilliOfSecond
-		milliOfSecond := time.GetField(MilliOfSecond)
+		// Test FieldMilliOfSecond
+		milliOfSecond := time.GetField(FieldMilliOfSecond)
 		assert.True(t, milliOfSecond.Valid())
 		assert.Equal(t, int64(123), milliOfSecond.Int64())
 
-		// Test SecondOfMinute
-		secondOfMinute := time.GetField(SecondOfMinute)
+		// Test FieldSecondOfMinute
+		secondOfMinute := time.GetField(FieldSecondOfMinute)
 		assert.True(t, secondOfMinute.Valid())
 		assert.Equal(t, int64(45), secondOfMinute.Int64())
 
-		// Test MinuteOfHour
-		minuteOfHour := time.GetField(MinuteOfHour)
+		// Test FieldMinuteOfHour
+		minuteOfHour := time.GetField(FieldMinuteOfHour)
 		assert.True(t, minuteOfHour.Valid())
 		assert.Equal(t, int64(30), minuteOfHour.Int64())
 
-		// Test HourOfDay
-		hourOfDay := time.GetField(HourOfDay)
+		// Test FieldHourOfDay
+		hourOfDay := time.GetField(FieldHourOfDay)
 		assert.True(t, hourOfDay.Valid())
 		assert.Equal(t, int64(14), hourOfDay.Int64())
 
-		// Test ClockHourOfDay
-		clockHourOfDay := time.GetField(ClockHourOfDay)
+		// Test FieldClockHourOfDay
+		clockHourOfDay := time.GetField(FieldClockHourOfDay)
 		assert.True(t, clockHourOfDay.Valid())
 		assert.Equal(t, int64(14), clockHourOfDay.Int64())
 
-		// Test HourOfAmPm
-		hourOfAmPm := time.GetField(HourOfAmPm)
+		// Test FieldHourOfAmPm
+		hourOfAmPm := time.GetField(FieldHourOfAmPm)
 		assert.True(t, hourOfAmPm.Valid())
 		assert.Equal(t, int64(2), hourOfAmPm.Int64()) // 14 % 12 = 2
 
-		// Test ClockHourOfAmPm
-		clockHourOfAmPm := time.GetField(ClockHourOfAmPm)
+		// Test FieldClockHourOfAmPm
+		clockHourOfAmPm := time.GetField(FieldClockHourOfAmPm)
 		assert.True(t, clockHourOfAmPm.Valid())
 		assert.Equal(t, int64(2), clockHourOfAmPm.Int64())
 
-		// Test AmPmOfDay
-		amPmOfDay := time.GetField(AmPmOfDay)
+		// Test FieldAmPmOfDay
+		amPmOfDay := time.GetField(FieldAmPmOfDay)
 		assert.True(t, amPmOfDay.Valid())
 		assert.Equal(t, int64(1), amPmOfDay.Int64()) // PM
 
-		// Test NanoOfDay
-		nanoOfDay := time.GetField(NanoOfDay)
+		// Test FieldNanoOfDay
+		nanoOfDay := time.GetField(FieldNanoOfDay)
 		assert.True(t, nanoOfDay.Valid())
 		expectedNanoOfDay := int64(14)*int64(3600000000000) + int64(30)*int64(60000000000) + int64(45)*int64(1000000000) + 123456789
 		assert.Equal(t, expectedNanoOfDay, nanoOfDay.Int64())
 
-		// Test MicroOfDay
-		microOfDay := time.GetField(MicroOfDay)
+		// Test FieldMicroOfDay
+		microOfDay := time.GetField(FieldMicroOfDay)
 		assert.True(t, microOfDay.Valid())
 		assert.Equal(t, expectedNanoOfDay/1000, microOfDay.Int64())
 
-		// Test MilliOfDay
-		milliOfDay := time.GetField(MilliOfDay)
+		// Test FieldMilliOfDay
+		milliOfDay := time.GetField(FieldMilliOfDay)
 		assert.True(t, milliOfDay.Valid())
 		assert.Equal(t, expectedNanoOfDay/1000000, milliOfDay.Int64())
 
-		// Test SecondOfDay
-		secondOfDay := time.GetField(SecondOfDay)
+		// Test FieldSecondOfDay
+		secondOfDay := time.GetField(FieldSecondOfDay)
 		assert.True(t, secondOfDay.Valid())
 		assert.Equal(t, int64(14*3600+30*60+45), secondOfDay.Int64())
 
-		// Test MinuteOfDay
-		minuteOfDay := time.GetField(MinuteOfDay)
+		// Test FieldMinuteOfDay
+		minuteOfDay := time.GetField(FieldMinuteOfDay)
 		assert.True(t, minuteOfDay.Valid())
 		assert.Equal(t, int64(14*60+30), minuteOfDay.Int64())
 	})
@@ -288,18 +233,18 @@ func TestLocalTime_GetField(t *testing.T) {
 	t.Run("midnight special cases", func(t *testing.T) {
 		midnight := MustNewLocalTime(0, 0, 0, 0)
 
-		// ClockHourOfDay at midnight should be 24
-		clockHourOfDay := midnight.GetField(ClockHourOfDay)
+		// FieldClockHourOfDay at midnight should be 24
+		clockHourOfDay := midnight.GetField(FieldClockHourOfDay)
 		assert.True(t, clockHourOfDay.Valid())
 		assert.Equal(t, int64(24), clockHourOfDay.Int64())
 
-		// ClockHourOfAmPm at midnight should be 12
-		clockHourOfAmPm := midnight.GetField(ClockHourOfAmPm)
+		// FieldClockHourOfAmPm at midnight should be 12
+		clockHourOfAmPm := midnight.GetField(FieldClockHourOfAmPm)
 		assert.True(t, clockHourOfAmPm.Valid())
 		assert.Equal(t, int64(12), clockHourOfAmPm.Int64())
 
-		// AmPmOfDay at midnight should be 0 (AM)
-		amPmOfDay := midnight.GetField(AmPmOfDay)
+		// FieldAmPmOfDay at midnight should be 0 (AM)
+		amPmOfDay := midnight.GetField(FieldAmPmOfDay)
 		assert.True(t, amPmOfDay.Valid())
 		assert.Equal(t, int64(0), amPmOfDay.Int64())
 	})
@@ -307,36 +252,36 @@ func TestLocalTime_GetField(t *testing.T) {
 	t.Run("noon special cases", func(t *testing.T) {
 		noon := MustNewLocalTime(12, 0, 0, 0)
 
-		// ClockHourOfDay at noon should be 12
-		clockHourOfDay := noon.GetField(ClockHourOfDay)
+		// FieldClockHourOfDay at noon should be 12
+		clockHourOfDay := noon.GetField(FieldClockHourOfDay)
 		assert.True(t, clockHourOfDay.Valid())
 		assert.Equal(t, int64(12), clockHourOfDay.Int64())
 
-		// ClockHourOfAmPm at noon should be 12
-		clockHourOfAmPm := noon.GetField(ClockHourOfAmPm)
+		// FieldClockHourOfAmPm at noon should be 12
+		clockHourOfAmPm := noon.GetField(FieldClockHourOfAmPm)
 		assert.True(t, clockHourOfAmPm.Valid())
 		assert.Equal(t, int64(12), clockHourOfAmPm.Int64())
 
-		// AmPmOfDay at noon should be 1 (PM)
-		amPmOfDay := noon.GetField(AmPmOfDay)
+		// FieldAmPmOfDay at noon should be 1 (PM)
+		amPmOfDay := noon.GetField(FieldAmPmOfDay)
 		assert.True(t, amPmOfDay.Valid())
 		assert.Equal(t, int64(1), amPmOfDay.Int64())
 	})
 
 	t.Run("unsupported fields", func(t *testing.T) {
 		// Date fields are not supported
-		dayOfMonth := time.GetField(DayOfMonth)
+		dayOfMonth := time.GetField(FieldDayOfMonth)
 		assert.False(t, dayOfMonth.Valid())
 		assert.True(t, dayOfMonth.Unsupported())
 
-		monthOfYear := time.GetField(MonthOfYear)
+		monthOfYear := time.GetField(FieldMonthOfYear)
 		assert.False(t, monthOfYear.Valid())
 		assert.True(t, monthOfYear.Unsupported())
 	})
 
 	t.Run("zero time", func(t *testing.T) {
 		var zeroTime LocalTime
-		field := zeroTime.GetField(HourOfDay)
+		field := zeroTime.GetField(FieldHourOfDay)
 		assert.False(t, field.Valid())
 		assert.True(t, field.Unsupported())
 	})
@@ -346,131 +291,131 @@ func TestLocalDateTime_GetField(t *testing.T) {
 	dt := MustNewLocalDateTimeFromComponents(2024, March, 15, 14, 30, 45, 123456789)
 
 	t.Run("date fields", func(t *testing.T) {
-		// Test DayOfWeekField
-		dayOfWeek := dt.GetField(DayOfWeekField)
+		// Test FieldDayOfWeek
+		dayOfWeek := dt.GetField(FieldDayOfWeek)
 		assert.True(t, dayOfWeek.Valid())
 		assert.Equal(t, int64(5), dayOfWeek.Int64()) // Friday
 
-		// Test DayOfMonth
-		dayOfMonth := dt.GetField(DayOfMonth)
+		// Test FieldDayOfMonth
+		dayOfMonth := dt.GetField(FieldDayOfMonth)
 		assert.True(t, dayOfMonth.Valid())
 		assert.Equal(t, int64(15), dayOfMonth.Int64())
 
-		// Test DayOfYear
-		dayOfYear := dt.GetField(DayOfYear)
+		// Test FieldDayOfYear
+		dayOfYear := dt.GetField(FieldDayOfYear)
 		assert.True(t, dayOfYear.Valid())
 		assert.Equal(t, int64(75), dayOfYear.Int64())
 
-		// Test MonthOfYear
-		month := dt.GetField(MonthOfYear)
+		// Test FieldMonthOfYear
+		month := dt.GetField(FieldMonthOfYear)
 		assert.True(t, month.Valid())
 		assert.Equal(t, int64(3), month.Int64())
 
-		// Test YearField
-		year := dt.GetField(YearField)
+		// Test FieldYear
+		year := dt.GetField(FieldYear)
 		assert.True(t, year.Valid())
 		assert.Equal(t, int64(2024), year.Int64())
 
-		// Test Era
-		era := dt.GetField(Era)
+		// Test FieldEra
+		era := dt.GetField(FieldEra)
 		assert.True(t, era.Valid())
 		assert.Equal(t, int64(1), era.Int64()) // CE
 
-		// Test EpochDay
-		epochDay := dt.GetField(EpochDay)
+		// Test FieldEpochDay
+		epochDay := dt.GetField(FieldEpochDay)
 		assert.True(t, epochDay.Valid())
 		assert.Greater(t, epochDay.Int64(), int64(0))
 
-		// Test ProlepticMonth
-		prolepticMonth := dt.GetField(ProlepticMonth)
+		// Test FieldProlepticMonth
+		prolepticMonth := dt.GetField(FieldProlepticMonth)
 		assert.True(t, prolepticMonth.Valid())
 		assert.Equal(t, int64(2024*12+3-1), prolepticMonth.Int64())
 	})
 
 	t.Run("time fields", func(t *testing.T) {
-		// Test NanoOfSecond
-		nanoOfSecond := dt.GetField(NanoOfSecond)
+		// Test FieldNanoOfSecond
+		nanoOfSecond := dt.GetField(FieldNanoOfSecond)
 		assert.True(t, nanoOfSecond.Valid())
 		assert.Equal(t, int64(123456789), nanoOfSecond.Int64())
 
-		// Test MicroOfSecond
-		microOfSecond := dt.GetField(MicroOfSecond)
+		// Test FieldMicroOfSecond
+		microOfSecond := dt.GetField(FieldMicroOfSecond)
 		assert.True(t, microOfSecond.Valid())
 		assert.Equal(t, int64(123456), microOfSecond.Int64())
 
-		// Test MilliOfSecond
-		milliOfSecond := dt.GetField(MilliOfSecond)
+		// Test FieldMilliOfSecond
+		milliOfSecond := dt.GetField(FieldMilliOfSecond)
 		assert.True(t, milliOfSecond.Valid())
 		assert.Equal(t, int64(123), milliOfSecond.Int64())
 
-		// Test SecondOfMinute
-		secondOfMinute := dt.GetField(SecondOfMinute)
+		// Test FieldSecondOfMinute
+		secondOfMinute := dt.GetField(FieldSecondOfMinute)
 		assert.True(t, secondOfMinute.Valid())
 		assert.Equal(t, int64(45), secondOfMinute.Int64())
 
-		// Test MinuteOfHour
-		minuteOfHour := dt.GetField(MinuteOfHour)
+		// Test FieldMinuteOfHour
+		minuteOfHour := dt.GetField(FieldMinuteOfHour)
 		assert.True(t, minuteOfHour.Valid())
 		assert.Equal(t, int64(30), minuteOfHour.Int64())
 
-		// Test HourOfDay
-		hourOfDay := dt.GetField(HourOfDay)
+		// Test FieldHourOfDay
+		hourOfDay := dt.GetField(FieldHourOfDay)
 		assert.True(t, hourOfDay.Valid())
 		assert.Equal(t, int64(14), hourOfDay.Int64())
 
-		// Test ClockHourOfDay
-		clockHourOfDay := dt.GetField(ClockHourOfDay)
+		// Test FieldClockHourOfDay
+		clockHourOfDay := dt.GetField(FieldClockHourOfDay)
 		assert.True(t, clockHourOfDay.Valid())
 		assert.Equal(t, int64(14), clockHourOfDay.Int64())
 
-		// Test HourOfAmPm
-		hourOfAmPm := dt.GetField(HourOfAmPm)
+		// Test FieldHourOfAmPm
+		hourOfAmPm := dt.GetField(FieldHourOfAmPm)
 		assert.True(t, hourOfAmPm.Valid())
 		assert.Equal(t, int64(2), hourOfAmPm.Int64())
 
-		// Test AmPmOfDay
-		amPmOfDay := dt.GetField(AmPmOfDay)
+		// Test FieldAmPmOfDay
+		amPmOfDay := dt.GetField(FieldAmPmOfDay)
 		assert.True(t, amPmOfDay.Valid())
 		assert.Equal(t, int64(1), amPmOfDay.Int64()) // PM
 
-		// Test NanoOfDay
-		nanoOfDay := dt.GetField(NanoOfDay)
+		// Test FieldNanoOfDay
+		nanoOfDay := dt.GetField(FieldNanoOfDay)
 		assert.True(t, nanoOfDay.Valid())
 		expectedNanoOfDay := int64(14)*int64(3600000000000) + int64(30)*int64(60000000000) + int64(45)*int64(1000000000) + 123456789
 		assert.Equal(t, expectedNanoOfDay, nanoOfDay.Int64())
 	})
 
 	t.Run("unsupported fields", func(t *testing.T) {
-		// InstantSeconds and OffsetSeconds are not supported
-		instantSeconds := dt.GetField(InstantSeconds)
+		// FieldInstantSeconds and FieldOffsetSeconds are not supported
+		instantSeconds := dt.GetField(FieldInstantSeconds)
 		assert.False(t, instantSeconds.Valid())
 		assert.True(t, instantSeconds.Unsupported())
 
-		offsetSeconds := dt.GetField(OffsetSeconds)
+		offsetSeconds := dt.GetField(FieldOffsetSeconds)
 		assert.False(t, offsetSeconds.Valid())
 		assert.True(t, offsetSeconds.Unsupported())
 	})
 
 	t.Run("zero datetime", func(t *testing.T) {
 		var zeroDT LocalDateTime
-		field := zeroDT.GetField(HourOfDay)
+		field := zeroDT.GetField(FieldHourOfDay)
 		assert.False(t, field.Valid())
 		assert.True(t, field.Unsupported())
 
-		field = zeroDT.GetField(DayOfMonth)
+		field = zeroDT.GetField(FieldDayOfMonth)
 		assert.False(t, field.Valid())
 		assert.True(t, field.Unsupported())
 	})
 
 	t.Run("delegation to date and time", func(t *testing.T) {
 		// Verify that date fields are delegated to LocalDate
-		dateField := dt.GetField(YearField)
-		dateDirectField := dt.LocalDate().GetField(YearField)
+		dateField := dt.GetField(FieldYear)
+		dateDirectField := dt.LocalDate().GetField(FieldYear)
 		assert.Equal(t, dateDirectField.Int64(), dateField.Int64())
 
 		// Verify that time fields are delegated to LocalTime
-		timeField := dt.GetField(HourOfDay)
-		timeDirectField := dt.LocalTime().GetField(HourOfDay)
+		timeField := dt.GetField(FieldHourOfDay)
+		timeDirectField := dt.LocalTime().GetField(FieldHourOfDay)
 		assert.Equal(t, timeDirectField.Int64(), timeField.Int64())
 	})
 }

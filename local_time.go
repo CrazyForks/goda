@@ -224,7 +224,7 @@ func (t LocalTime) Nanosecond() int {
 // IsSupportedField returns true if the field is supported by LocalTime.
 func (t LocalTime) IsSupportedField(field Field) bool {
 	switch field {
-	case NanoOfSecond, NanoOfDay, MicroOfSecond, MicroOfDay, MilliOfSecond, MilliOfDay, SecondOfMinute, SecondOfDay, MinuteOfHour, MinuteOfDay, HourOfAmPm, ClockHourOfAmPm, HourOfDay, ClockHourOfDay, AmPmOfDay:
+	case FieldNanoOfSecond, FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay, FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay, FieldMinuteOfHour, FieldMinuteOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldHourOfDay, FieldClockHourOfDay, FieldAmPmOfDay:
 		return true
 	default:
 		return false
@@ -239,39 +239,39 @@ func (t LocalTime) IsSupportedField(field Field) bool {
 // For fields not supported by LocalTime (such as date fields), an unsupported TemporalValue is returned.
 //
 // Supported fields include:
-//   - NanoOfSecond: returns the nanosecond within the second (0-999,999,999)
-//   - NanoOfDay: returns the nanosecond of day (0-86,399,999,999,999)
-//   - MicroOfSecond: returns the microsecond within the second (0-999,999)
-//   - MicroOfDay: returns the microsecond of day (0-86,399,999,999)
-//   - MilliOfSecond: returns the millisecond within the second (0-999)
-//   - MilliOfDay: returns the millisecond of day (0-86,399,999)
-//   - SecondOfMinute: returns the second within the minute (0-59)
-//   - SecondOfDay: returns the second of day (0-86,399)
-//   - MinuteOfHour: returns the minute within the hour (0-59)
-//   - MinuteOfDay: returns the minute of day (0-1,439)
-//   - HourOfDay: returns the hour of day (0-23)
-//   - ClockHourOfDay: returns the clock hour of day (1-24)
-//   - HourOfAmPm: returns the hour within AM/PM (0-11)
-//   - ClockHourOfAmPm: returns the clock hour within AM/PM (1-12)
-//   - AmPmOfDay: returns AM/PM indicator (0=AM, 1=PM)
+//   - FieldNanoOfSecond: returns the nanosecond within the second (0-999,999,999)
+//   - FieldNanoOfDay: returns the nanosecond of day (0-86,399,999,999,999)
+//   - FieldMicroOfSecond: returns the microsecond within the second (0-999,999)
+//   - FieldMicroOfDay: returns the microsecond of day (0-86,399,999,999)
+//   - FieldMilliOfSecond: returns the millisecond within the second (0-999)
+//   - FieldMilliOfDay: returns the millisecond of day (0-86,399,999)
+//   - FieldSecondOfMinute: returns the second within the minute (0-59)
+//   - FieldSecondOfDay: returns the second of day (0-86,399)
+//   - FieldMinuteOfHour: returns the minute within the hour (0-59)
+//   - FieldMinuteOfDay: returns the minute of day (0-1,439)
+//   - FieldHourOfDay: returns the hour of day (0-23)
+//   - FieldClockHourOfDay: returns the clock hour of day (1-24)
+//   - FieldHourOfAmPm: returns the hour within AM/PM (0-11)
+//   - FieldClockHourOfAmPm: returns the clock hour within AM/PM (1-12)
+//   - FieldAmPmOfDay: returns AM/PM indicator (0=AM, 1=PM)
 //
 // Overflow Analysis:
 // None of the supported fields can overflow int64:
-//   - NanoOfSecond: range 0-999,999,999, cannot overflow
-//   - NanoOfDay: max 86,399,999,999,999 (< 2^47), cannot overflow
-//   - MicroOfSecond: range 0-999,999, cannot overflow
-//   - MicroOfDay: max 86,399,999,999 (< 2^37), cannot overflow
-//   - MilliOfSecond: range 0-999, cannot overflow
-//   - MilliOfDay: max 86,399,999 (< 2^27), cannot overflow
-//   - SecondOfMinute: range 0-59, cannot overflow
-//   - SecondOfDay: max 86,399 (< 2^17), cannot overflow
-//   - MinuteOfHour: range 0-59, cannot overflow
-//   - MinuteOfDay: max 1,439 (< 2^11), cannot overflow
-//   - HourOfDay: range 0-23, cannot overflow
-//   - ClockHourOfDay: range 1-24, cannot overflow
-//   - HourOfAmPm: range 0-11, cannot overflow
-//   - ClockHourOfAmPm: range 1-12, cannot overflow
-//   - AmPmOfDay: values 0 or 1, cannot overflow
+//   - FieldNanoOfSecond: range 0-999,999,999, cannot overflow
+//   - FieldNanoOfDay: max 86,399,999,999,999 (< 2^47), cannot overflow
+//   - FieldMicroOfSecond: range 0-999,999, cannot overflow
+//   - FieldMicroOfDay: max 86,399,999,999 (< 2^37), cannot overflow
+//   - FieldMilliOfSecond: range 0-999, cannot overflow
+//   - FieldMilliOfDay: max 86,399,999 (< 2^27), cannot overflow
+//   - FieldSecondOfMinute: range 0-59, cannot overflow
+//   - FieldSecondOfDay: max 86,399 (< 2^17), cannot overflow
+//   - FieldMinuteOfHour: range 0-59, cannot overflow
+//   - FieldMinuteOfDay: max 1,439 (< 2^11), cannot overflow
+//   - FieldHourOfDay: range 0-23, cannot overflow
+//   - FieldClockHourOfDay: range 1-24, cannot overflow
+//   - FieldHourOfAmPm: range 0-11, cannot overflow
+//   - FieldClockHourOfAmPm: range 1-12, cannot overflow
+//   - FieldAmPmOfDay: values 0 or 1, cannot overflow
 func (t LocalTime) GetField(field Field) TemporalValue {
 	if t.IsZero() {
 		return TemporalValue{v: 0, unsupported: true}
@@ -279,40 +279,40 @@ func (t LocalTime) GetField(field Field) TemporalValue {
 	var v int64
 	ns := t.v & localTimeValueMask
 	switch field {
-	case NanoOfSecond:
+	case FieldNanoOfSecond:
 		// Range: 0-999,999,999, no overflow possible
 		v = ns % int64(time.Second)
-	case NanoOfDay:
+	case FieldNanoOfDay:
 		// Max: 86,399,999,999,999 (< 2^47), no overflow possible
 		v = ns
-	case MicroOfSecond:
+	case FieldMicroOfSecond:
 		// Range: 0-999,999, no overflow possible
 		v = ns % int64(time.Second) / int64(time.Microsecond)
-	case MicroOfDay:
+	case FieldMicroOfDay:
 		// Max: 86,399,999,999 (< 2^37), no overflow possible
 		v = ns / int64(time.Microsecond)
-	case MilliOfSecond:
+	case FieldMilliOfSecond:
 		// Range: 0-999, no overflow possible
 		v = ns % int64(time.Second) / int64(time.Millisecond)
-	case MilliOfDay:
+	case FieldMilliOfDay:
 		// Max: 86,399,999 (< 2^27), no overflow possible
 		v = ns / int64(time.Millisecond)
-	case SecondOfMinute:
+	case FieldSecondOfMinute:
 		// Range: 0-59, no overflow possible
 		v = ns / int64(time.Second) % 60
-	case SecondOfDay:
+	case FieldSecondOfDay:
 		// Max: 86,399 (< 2^17), no overflow possible
 		v = ns / int64(time.Second)
-	case MinuteOfHour:
+	case FieldMinuteOfHour:
 		// Range: 0-59, no overflow possible
 		v = ns / int64(time.Minute) % 60
-	case MinuteOfDay:
+	case FieldMinuteOfDay:
 		// Max: 1,439 (< 2^11), no overflow possible
 		v = ns / int64(time.Minute)
-	case HourOfDay:
+	case FieldHourOfDay:
 		// Range: 0-23, no overflow possible
 		v = ns / int64(time.Hour)
-	case ClockHourOfDay:
+	case FieldClockHourOfDay:
 		// Range: 1-24, no overflow possible
 		h := ns / int64(time.Hour)
 		if h == 0 {
@@ -320,10 +320,10 @@ func (t LocalTime) GetField(field Field) TemporalValue {
 		} else {
 			v = h
 		}
-	case HourOfAmPm:
+	case FieldHourOfAmPm:
 		// Range: 0-11, no overflow possible
 		v = ns / int64(time.Hour) % 12
-	case ClockHourOfAmPm:
+	case FieldClockHourOfAmPm:
 		// Range: 1-12, no overflow possible
 		h := ns / int64(time.Hour) % 12
 		if h == 0 {
@@ -331,7 +331,7 @@ func (t LocalTime) GetField(field Field) TemporalValue {
 		} else {
 			v = h
 		}
-	case AmPmOfDay:
+	case FieldAmPmOfDay:
 		// Values: 0 or 1, no overflow possible
 		if ns/int64(time.Hour) < 12 {
 			v = 0 // AM
