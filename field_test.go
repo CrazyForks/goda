@@ -419,3 +419,52 @@ func TestLocalDateTime_GetField(t *testing.T) {
 		assert.Equal(t, timeDirectField.Int64(), timeField.Int64())
 	})
 }
+
+func TestGetAllFields(t *testing.T) {
+	var refs = []struct {
+		field       Field
+		name        string
+		java        string
+		isTimeBased bool
+		isDateBased bool
+	}{
+		{FieldNanoOfSecond, "NanoOfSecond", "NANO_OF_SECOND", true, false},
+		{FieldNanoOfDay, "NanoOfDay", "NANO_OF_DAY", true, false},
+		{FieldMicroOfSecond, "MicroOfSecond", "MICRO_OF_SECOND", true, false},
+		{FieldMicroOfDay, "MicroOfDay", "MICRO_OF_DAY", true, false},
+		{FieldMilliOfSecond, "MilliOfSecond", "MILLI_OF_SECOND", true, false},
+		{FieldMilliOfDay, "MilliOfDay", "MILLI_OF_DAY", true, false},
+		{FieldSecondOfMinute, "SecondOfMinute", "SECOND_OF_MINUTE", true, false},
+		{FieldSecondOfDay, "SecondOfDay", "SECOND_OF_DAY", true, false},
+		{FieldMinuteOfHour, "MinuteOfHour", "MINUTE_OF_HOUR", true, false},
+		{FieldMinuteOfDay, "MinuteOfDay", "MINUTE_OF_DAY", true, false},
+		{FieldHourOfAmPm, "HourOfAmPm", "HOUR_OF_AMPM", true, false},
+		{FieldClockHourOfAmPm, "ClockHourOfAmPm", "CLOCK_HOUR_OF_AMPM", true, false},
+		{FieldHourOfDay, "HourOfDay", "HOUR_OF_DAY", true, false},
+		{FieldClockHourOfDay, "ClockHourOfDay", "CLOCK_HOUR_OF_DAY", true, false},
+		{FieldAmPmOfDay, "AmPmOfDay", "AMPM_OF_DAY", true, false},
+		{FieldDayOfWeek, "DayOfWeek", "DAY_OF_WEEK", false, true},
+		{FieldAlignedDayOfWeekInMonth, "AlignedDayOfWeekInMonth", "ALIGNED_DAY_OF_WEEK_IN_MONTH", false, true},
+		{FieldAlignedDayOfWeekInYear, "AlignedDayOfWeekInYear", "ALIGNED_DAY_OF_WEEK_IN_YEAR", false, true},
+		{FieldDayOfMonth, "DayOfMonth", "DAY_OF_MONTH", false, true},
+		{FieldDayOfYear, "DayOfYear", "DAY_OF_YEAR", false, true},
+		{FieldEpochDay, "EpochDay", "EPOCH_DAY", false, true},
+		{FieldAlignedWeekOfMonth, "AlignedWeekOfMonth", "ALIGNED_WEEK_OF_MONTH", false, true},
+		{FieldAlignedWeekOfYear, "AlignedWeekOfYear", "ALIGNED_WEEK_OF_YEAR", false, true},
+		{FieldMonthOfYear, "MonthOfYear", "MONTH_OF_YEAR", false, true},
+		{FieldProlepticMonth, "ProlepticMonth", "PROLEPTIC_MONTH", false, true},
+		{FieldYearOfEra, "YearOfEra", "YEAR_OF_ERA", false, true},
+		{FieldYear, "Year", "YEAR", false, true},
+		{FieldEra, "Era", "ERA", false, true},
+		{FieldInstantSeconds, "InstantSeconds", "INSTANT_SECONDS", false, false},
+		{FieldOffsetSeconds, "OffsetSeconds", "OFFSET_SECONDS", false, false},
+	}
+	for i, field := range GetAllFields() {
+		assert.Equal(t, field, Field(i+1))
+		assert.Equal(t, refs[i].field, field)
+		assert.Equal(t, refs[i].name, field.String())
+		assert.Equal(t, "ChronoField."+refs[i].java, field.JavaName())
+		assert.Equal(t, refs[i].isTimeBased, field.IsTimeBased())
+		assert.Equal(t, refs[i].isDateBased, field.IsDateBased())
+	}
+}
