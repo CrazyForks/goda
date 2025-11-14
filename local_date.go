@@ -394,6 +394,10 @@ var _ sql.Scanner = (*LocalDate)(nil)
 // Returns an error if the date is invalid (e.g., month out of range 1-12,
 // day out of range for the month, or February 29 in a non-leap year).
 func NewLocalDate(year Year, month Month, dayOfMonth int) (d LocalDate, e error) {
+	if int64(year)<<16>>16 != int64(year) {
+		e = newError("year %d out of range", year)
+		return
+	}
 	if month < January || month > December {
 		e = newError("month %d out of range", month)
 		return
