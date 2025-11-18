@@ -47,7 +47,7 @@ func (d *LocalDate) Scan(src any) error {
 
 // Value implements the driver.Valuer interface.
 // It returns nil for zero values, otherwise returns the date as a string in yyyy-MM-dd format.
-func (d *LocalDate) Value() (driver.Value, error) {
+func (d LocalDate) Value() (driver.Value, error) {
 	if d.IsZero() {
 		return nil, nil
 	}

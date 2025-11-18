@@ -39,7 +39,7 @@ const (
 )
 
 // Value implements driver.Valuer for database serialization.
-func (t *LocalTime) Value() (driver.Value, error) {
+func (t LocalTime) Value() (driver.Value, error) {
 	if t.IsZero() {
 		return nil, nil
 	}
@@ -52,6 +52,8 @@ func (t *LocalTime) Scan(src any) error {
 	case nil:
 		*t = LocalTime{}
 		return nil
+	case []byte:
+		return t.UnmarshalText(v)
 	case string:
 		return t.UnmarshalText([]byte(v))
 	case time.Time:
