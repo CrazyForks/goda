@@ -775,3 +775,48 @@ func TestLocalTimeNowIn(t *testing.T) {
 		})
 	}
 }
+
+func TestLocalTime_ValuePostgres(t *testing.T) {
+	var pg = GetPG(t)
+	t.Run("normal", func(t *testing.T) {
+		var expected = MustParseLocalTime("12:00:00")
+		var actual LocalTime
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT $1::time without time zone, $1::time without time zone = '12:00:00'", expected).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.Equal(t, expected, actual)
+		assert.True(t, expectedTrue)
+	})
+	t.Run("null_value", func(t *testing.T) {
+		var actual LocalTime
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT NULL::time without time zone, $1::time without time zone is null", actual).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.True(t, actual.IsZero())
+		assert.True(t, expectedTrue)
+	})
+}
+
+func TestLocalTime_ValueMySQL(t *testing.T) {
+	var mysql = GetMySQL(t)
+	t.Run("normal", func(t *testing.T) {
+		var expected = MustParseLocalTime("08:00:00")
+		var actual LocalTime
+		var expectedTrue bool
+		// I don't want to understand why MySQL has this bug
+		var e = mysql.QueryRow("SELECT cast(cast(? as char) as time), cast(cast(? as char) as time) = '08:00:00'", expected, expected).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		t.Log(expected.Value())
+		assert.Equal(t, expected, actual)
+		assert.True(t, expectedTrue)
+	})
+	t.Run("null_value", func(t *testing.T) {
+		var actual LocalTime
+		var expectedTrue bool
+		// I don't want to understand why MySQL has this bug
+		var e = mysql.QueryRow("SELECT cast(cast(? as char) as time), cast(cast(? as char) as time) is null", actual, actual).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.True(t, actual.IsZero())
+		assert.True(t, expectedTrue)
+	})
+}

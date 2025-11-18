@@ -479,3 +479,45 @@ func TestFieldGetter(t *testing.T) {
 		}
 	}
 }
+
+func TestLocalDateTime_ValuePostgres(t *testing.T) {
+	var pg = GetPG(t)
+	t.Run("normal", func(t *testing.T) {
+		var expected = MustParseLocalDateTime("2000-12-29 12:00:00")
+		var actual LocalDateTime
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT $1::timestamp without time zone, $1::timestamp without time zone = '2000-12-29 12:00:00'", expected).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.Equal(t, expected, actual)
+		assert.True(t, expectedTrue)
+	})
+	t.Run("null_value", func(t *testing.T) {
+		var actual LocalDateTime
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT NULL::timestamp without time zone, $1::timestamp without time zone is null", actual).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.True(t, actual.IsZero())
+		assert.True(t, expectedTrue)
+	})
+}
+
+func TestLocalDateTime_ValueMySQL(t *testing.T) {
+	var pg = GetMySQL(t)
+	t.Run("normal", func(t *testing.T) {
+		var expected = MustParseLocalDateTime("2000-12-29 12:00:00")
+		var actual LocalDateTime
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT CAST(? AS DATETIME), CAST(? AS DATETIME)  = '2000-12-29 12:00:00'", expected, expected).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.Equal(t, expected, actual)
+		assert.True(t, expectedTrue)
+	})
+	t.Run("null_value", func(t *testing.T) {
+		var actual LocalDateTime
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT CAST(NULL AS DATETIME), CAST(? AS DATETIME) is null", actual).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.True(t, actual.IsZero())
+		assert.True(t, expectedTrue)
+	})
+}

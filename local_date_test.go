@@ -666,3 +666,45 @@ func TestLocalDateNowIn(t *testing.T) {
 		})
 	}
 }
+
+func TestLocalDate_ValuePostgres(t *testing.T) {
+	var pg = GetPG(t)
+	t.Run("normal", func(t *testing.T) {
+		var expected = MustParseLocalDate("2000-12-29")
+		var actual LocalDate
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT $1::date, $1::date = '2000-12-29'", expected).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.Equal(t, expected, actual)
+		assert.True(t, expectedTrue)
+	})
+	t.Run("null_value", func(t *testing.T) {
+		var actual LocalDate
+		var expectedTrue bool
+		var e = pg.QueryRow("SELECT NULL::date, $1::date is null", actual).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.True(t, actual.IsZero())
+		assert.True(t, expectedTrue)
+	})
+}
+
+func TestLocalDate_ValueMySQL(t *testing.T) {
+	var mysql = GetMySQL(t)
+	t.Run("normal", func(t *testing.T) {
+		var expected = MustParseLocalDate("2000-12-29")
+		var actual LocalDate
+		var expectedTrue bool
+		var e = mysql.QueryRow("SELECT CAST(? AS DATE), CAST(? AS DATE) = '2000-12-29'", expected, expected).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.Equal(t, expected, actual)
+		assert.True(t, expectedTrue)
+	})
+	t.Run("null_value", func(t *testing.T) {
+		var actual LocalDate
+		var expectedTrue bool
+		var e = mysql.QueryRow("SELECT CAST(NULL AS DATE), CAST(? AS DATE) is null", actual).Scan(&actual, &expectedTrue)
+		assert.NoError(t, e)
+		assert.True(t, actual.IsZero())
+		assert.True(t, expectedTrue)
+	})
+}
