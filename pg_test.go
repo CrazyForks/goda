@@ -21,7 +21,6 @@ func init() {
 	var e error
 	pg, e = sql.Open("pgx", "")
 	if e != nil {
-		pg = nil
-		return
+		panic(e)
 	}
 }

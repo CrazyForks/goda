@@ -18,5 +18,13 @@ func GetMySQL(t *testing.T) *sql.DB {
 }
 
 func init() {
-	mysqlC, _ = sql.Open("mysql", "root:123456@/")
+	var e error
+	mysqlC, e = sql.Open("mysql", "root:123456@/")
+	if e != nil {
+		panic(e)
+	}
+	_, e = mysqlC.Exec("select 1")
+	if e != nil {
+		mysqlC = nil
+	}
 }
