@@ -495,6 +495,88 @@ func (t LocalTime) AtDate(date LocalDate) LocalDateTime {
 	}
 }
 
+// PlusHours returns a copy of this LocalTime with the specified number of hours added.
+// The calculation wraps around midnight. For example, 23:00 + 2 hours = 01:00.
+// Negative values subtract hours. Returns zero value if called on zero value.
+func (t LocalTime) PlusHours(hours int) LocalTime {
+	if t.IsZero() {
+		return t
+	}
+	return t.plusNanos(int64(hours) * int64(time.Hour))
+}
+
+// MinusHours returns a copy of this LocalTime with the specified number of hours subtracted.
+// Equivalent to PlusHours(-hours).
+func (t LocalTime) MinusHours(hours int) LocalTime {
+	return t.PlusHours(-hours)
+}
+
+// PlusMinutes returns a copy of this LocalTime with the specified number of minutes added.
+// The calculation wraps around midnight. For example, 23:50 + 20 minutes = 00:10.
+// Negative values subtract minutes. Returns zero value if called on zero value.
+func (t LocalTime) PlusMinutes(minutes int) LocalTime {
+	if t.IsZero() {
+		return t
+	}
+	return t.plusNanos(int64(minutes) * int64(time.Minute))
+}
+
+// MinusMinutes returns a copy of this LocalTime with the specified number of minutes subtracted.
+// Equivalent to PlusMinutes(-minutes).
+func (t LocalTime) MinusMinutes(minutes int) LocalTime {
+	return t.PlusMinutes(-minutes)
+}
+
+// PlusSeconds returns a copy of this LocalTime with the specified number of seconds added.
+// The calculation wraps around midnight. For example, 23:59:50 + 20 seconds = 00:00:10.
+// Negative values subtract seconds. Returns zero value if called on zero value.
+func (t LocalTime) PlusSeconds(seconds int) LocalTime {
+	if t.IsZero() {
+		return t
+	}
+	return t.plusNanos(int64(seconds) * int64(time.Second))
+}
+
+// MinusSeconds returns a copy of this LocalTime with the specified number of seconds subtracted.
+// Equivalent to PlusSeconds(-seconds).
+func (t LocalTime) MinusSeconds(seconds int) LocalTime {
+	return t.PlusSeconds(-seconds)
+}
+
+// PlusNanos returns a copy of this LocalTime with the specified number of nanoseconds added.
+// The calculation wraps around midnight.
+// Negative values subtract nanoseconds. Returns zero value if called on zero value.
+func (t LocalTime) PlusNanos(nanos int64) LocalTime {
+	if t.IsZero() {
+		return t
+	}
+	return t.plusNanos(nanos)
+}
+
+// MinusNanos returns a copy of this LocalTime with the specified number of nanoseconds subtracted.
+// Equivalent to PlusNanos(-nanos).
+func (t LocalTime) MinusNanos(nanos int64) LocalTime {
+	return t.PlusNanos(-nanos)
+}
+
+// plusNanos is the internal implementation for adding nanoseconds.
+// It handles wrapping around midnight (modulo operation with nanoseconds per day).
+func (t LocalTime) plusNanos(nanosToAdd int64) LocalTime {
+	const nanosPerDay = 24 * int64(time.Hour)
+	currentNanos := t.v & localTimeValueMask
+
+	// Add the nanoseconds
+	newNanos := currentNanos + nanosToAdd
+
+	// Wrap around midnight (handle both positive and negative overflow)
+	newNanos = newNanos % nanosPerDay
+	if newNanos < 0 {
+		newNanos += nanosPerDay
+	}
+
+	return LocalTime{v: newNanos | localTimeValidBit}
+}
+
 var _ encoding.TextAppender = (*LocalTime)(nil)
 var _ fmt.Stringer = (*LocalTime)(nil)
 var _ encoding.TextMarshaler = (*LocalTime)(nil)
