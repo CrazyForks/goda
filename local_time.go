@@ -57,7 +57,7 @@ func (t *LocalTime) Scan(src any) error {
 	case string:
 		return t.UnmarshalText([]byte(v))
 	case time.Time:
-		*t = NewLocalTimeByGoTime(v)
+		*t = LocalTimeOfGoTime(v)
 		return nil
 	default:
 		return sqlScannerDefaultBranch(src)
@@ -384,10 +384,10 @@ func MustNewLocalTime(hour, minute, second, nanosecond int) LocalTime {
 	return lt
 }
 
-// NewLocalTimeByGoTime creates a LocalTime from a time.Time.
+// LocalTimeOfGoTime creates a LocalTime from a time.Time.
 // The date and time zone components are ignored.
 // Returns zero value if t.IsZero().
-func NewLocalTimeByGoTime(t time.Time) LocalTime {
+func LocalTimeOfGoTime(t time.Time) LocalTime {
 	if t.IsZero() {
 		return LocalTime{}
 	}
@@ -398,22 +398,22 @@ func NewLocalTimeByGoTime(t time.Time) LocalTime {
 }
 
 // LocalTimeNow returns the current time in the system's local time zone.
-// This is equivalent to NewLocalTimeByGoTime(time.Now()).
+// This is equivalent to LocalTimeOfGoTime(time.Now()).
 // For UTC time, use LocalTimeNowUTC. For a specific timezone, use LocalTimeNowIn.
 func LocalTimeNow() LocalTime {
-	return NewLocalTimeByGoTime(time.Now())
+	return LocalTimeOfGoTime(time.Now())
 }
 
 // LocalTimeNowIn returns the current time in the specified time zone.
-// This is equivalent to NewLocalTimeByGoTime(time.Now().In(loc)).
+// This is equivalent to LocalTimeOfGoTime(time.Now().In(loc)).
 func LocalTimeNowIn(loc *time.Location) LocalTime {
-	return NewLocalTimeByGoTime(time.Now().In(loc))
+	return LocalTimeOfGoTime(time.Now().In(loc))
 }
 
 // LocalTimeNowUTC returns the current time in UTC.
-// This is equivalent to NewLocalTimeByGoTime(time.Now().UTC()).
+// This is equivalent to LocalTimeOfGoTime(time.Now().UTC()).
 func LocalTimeNowUTC() LocalTime {
-	return NewLocalTimeByGoTime(time.Now().UTC())
+	return LocalTimeOfGoTime(time.Now().UTC())
 }
 
 // ParseLocalTime parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
@@ -485,6 +485,14 @@ func (t LocalTime) IsBefore(other LocalTime) bool {
 // IsAfter returns true if this time is after the specified time.
 func (t LocalTime) IsAfter(other LocalTime) bool {
 	return t.Compare(other) > 0
+}
+
+// AtDate combines this time with a date to create a LocalDateTime.
+func (t LocalTime) AtDate(date LocalDate) LocalDateTime {
+	return LocalDateTime{
+		date: date,
+		time: t,
+	}
 }
 
 var _ encoding.TextAppender = (*LocalTime)(nil)

@@ -54,7 +54,7 @@ func TestLocalTime_IsSupportedField(t *testing.T) {
 }
 
 func TestLocalDateTime_IsSupportedField(t *testing.T) {
-	dt := MustNewLocalDateTimeFromComponents(2024, March, 15, 14, 30, 45, 123456789)
+	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
 
 	// Should support both date and time fields
 	assert.True(t, dt.IsSupportedField(FieldDayOfMonth))
@@ -288,7 +288,7 @@ func TestLocalTime_GetField(t *testing.T) {
 }
 
 func TestLocalDateTime_GetField(t *testing.T) {
-	dt := MustNewLocalDateTimeFromComponents(2024, March, 15, 14, 30, 45, 123456789)
+	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
 
 	t.Run("date fields", func(t *testing.T) {
 		// Test FieldDayOfWeek

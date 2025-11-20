@@ -214,7 +214,7 @@ func TestLocalTime_GoTime(t *testing.T) {
 
 func TestNewLocalTimeByGoTime(t *testing.T) {
 	goTime := time.Date(2024, time.March, 15, 14, 30, 45, 123456789, time.UTC)
-	lt := NewLocalTimeByGoTime(goTime)
+	lt := LocalTimeOfGoTime(goTime)
 
 	assert.Equal(t, 14, lt.Hour())
 	assert.Equal(t, 30, lt.Minute())
@@ -224,7 +224,7 @@ func TestNewLocalTimeByGoTime(t *testing.T) {
 	// Test with different time zone (should ignore timezone)
 	loc, _ := time.LoadLocation("America/New_York")
 	goTime = time.Date(2024, time.March, 15, 14, 30, 45, 123456789, loc)
-	lt = NewLocalTimeByGoTime(goTime)
+	lt = LocalTimeOfGoTime(goTime)
 
 	assert.Equal(t, 14, lt.Hour())
 	assert.Equal(t, 30, lt.Minute())
@@ -232,7 +232,7 @@ func TestNewLocalTimeByGoTime(t *testing.T) {
 	assert.Equal(t, 123456789, lt.Nanosecond())
 
 	// Test with zero time
-	lt = NewLocalTimeByGoTime(time.Time{})
+	lt = LocalTimeOfGoTime(time.Time{})
 	assert.True(t, lt.IsZero())
 }
 

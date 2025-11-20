@@ -15,7 +15,7 @@ func TestLocalDate_Epoch(t *testing.T) {
 		if !assert.Equal(t, i, st.UnixEpochDays(), tt) {
 			return false
 		}
-		if !assert.Equal(t, st, NewLocalDateByUnixEpochDays(i), tt) {
+		if !assert.Equal(t, st, LocalDateOfUnixEpochDays(i), tt) {
 			return false
 		}
 		if !assert.Equal(t, st.DayOfWeek().GoWeekday(), tt.Weekday(), tt) {
@@ -324,14 +324,14 @@ func TestLocalDate_GoTime(t *testing.T) {
 
 func TestNewLocalDateByGoTime(t *testing.T) {
 	goTime := time.Date(2024, time.March, 15, 14, 30, 45, 0, time.UTC)
-	d := NewLocalDateByGoTime(goTime)
+	d := LocalDateOfGoTime(goTime)
 
 	assert.Equal(t, Year(2024), d.Year())
 	assert.Equal(t, March, d.Month())
 	assert.Equal(t, 15, d.DayOfMonth())
 
 	// Test with zero time
-	d = NewLocalDateByGoTime(time.Time{})
+	d = LocalDateOfGoTime(time.Time{})
 	assert.True(t, d.IsZero())
 }
 
@@ -563,7 +563,7 @@ func TestLocalDateNow(t *testing.T) {
 
 	// Test that it matches time.Now()
 	now := time.Now()
-	expected := NewLocalDateByGoTime(now)
+	expected := LocalDateOfGoTime(now)
 
 	// Allow for the possibility that the date changed between calls
 	// (very unlikely but possible at midnight)
@@ -577,7 +577,7 @@ func TestLocalDateNowUTC(t *testing.T) {
 
 	// Test that it matches time.Now().UTC()
 	now := time.Now().UTC()
-	expected := NewLocalDateByGoTime(now)
+	expected := LocalDateOfGoTime(now)
 
 	diff := todayUTC.Compare(expected)
 	assert.True(t, diff >= -1 && diff <= 1, "LocalDateNowUTC should be within 1 day of current UTC time")
@@ -659,7 +659,7 @@ func TestLocalDateNowIn(t *testing.T) {
 			assert.False(t, todayIn.IsZero(), "LocalDateNowIn should not be zero")
 
 			now := time.Now().In(tt.loc)
-			expected := NewLocalDateByGoTime(now)
+			expected := LocalDateOfGoTime(now)
 
 			diff := todayIn.Compare(expected)
 			assert.True(t, diff >= -1 && diff <= 1, "LocalDateNowIn should be within 1 day of current time in specified zone")

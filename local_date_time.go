@@ -27,17 +27,9 @@ type LocalDateTime struct {
 	time LocalTime
 }
 
-// NewLocalDateTime creates a new LocalDateTime from a LocalDate and LocalTime.
-func NewLocalDateTime(date LocalDate, time LocalTime) LocalDateTime {
-	return LocalDateTime{
-		date: date,
-		time: time,
-	}
-}
-
-// NewLocalDateTimeFromComponents creates a new LocalDateTime from individual components.
+// NewLocalDateTime creates a new LocalDateTime from individual components.
 // Returns an error if any component is invalid.
-func NewLocalDateTimeFromComponents(year Year, month Month, day, hour, minute, second, nanosecond int) (LocalDateTime, error) {
+func NewLocalDateTime(year Year, month Month, day, hour, minute, second, nanosecond int) (LocalDateTime, error) {
 	date, err := NewLocalDate(year, month, day)
 	if err != nil {
 		return LocalDateTime{}, err
@@ -46,13 +38,16 @@ func NewLocalDateTimeFromComponents(year Year, month Month, day, hour, minute, s
 	if err != nil {
 		return LocalDateTime{}, err
 	}
-	return NewLocalDateTime(date, time), nil
+	return LocalDateTime{
+		date: date,
+		time: time,
+	}, nil
 }
 
-// MustNewLocalDateTimeFromComponents creates a new LocalDateTime from individual components.
+// MustNewLocalDateTime creates a new LocalDateTime from individual components.
 // Panics if any component is invalid.
-func MustNewLocalDateTimeFromComponents(year Year, month Month, day, hour, minute, second, nanosecond int) LocalDateTime {
-	dt, err := NewLocalDateTimeFromComponents(year, month, day, hour, minute, second, nanosecond)
+func MustNewLocalDateTime(year Year, month Month, day, hour, minute, second, nanosecond int) LocalDateTime {
+	dt, err := NewLocalDateTime(year, month, day, hour, minute, second, nanosecond)
 	if err != nil {
 		panic(err)
 	}
@@ -61,29 +56,26 @@ func MustNewLocalDateTimeFromComponents(year Year, month Month, day, hour, minut
 
 // LocalDateTimeNow returns the current date-time in the system's local time zone.
 func LocalDateTimeNow() LocalDateTime {
-	return NewLocalDateTimeByGoTime(time.Now())
+	return LocalDateTimeOfGoTime(time.Now())
 }
 
 // LocalDateTimeNowIn returns the current date-time in the specified time zone.
 func LocalDateTimeNowIn(loc *time.Location) LocalDateTime {
-	return NewLocalDateTimeByGoTime(time.Now().In(loc))
+	return LocalDateTimeOfGoTime(time.Now().In(loc))
 }
 
 // LocalDateTimeNowUTC returns the current date-time in UTC.
 func LocalDateTimeNowUTC() LocalDateTime {
-	return NewLocalDateTimeByGoTime(time.Now().UTC())
+	return LocalDateTimeOfGoTime(time.Now().UTC())
 }
 
-// NewLocalDateTimeByGoTime creates a LocalDateTime from a time.Time.
+// LocalDateTimeOfGoTime creates a LocalDateTime from a time.Time.
 // Returns zero value if t.IsZero().
-func NewLocalDateTimeByGoTime(t time.Time) LocalDateTime {
+func LocalDateTimeOfGoTime(t time.Time) LocalDateTime {
 	if t.IsZero() {
 		return LocalDateTime{}
 	}
-	return NewLocalDateTime(
-		NewLocalDateByGoTime(t),
-		NewLocalTimeByGoTime(t),
-	)
+	return LocalDateOfGoTime(t).AtTime(LocalTimeOfGoTime(t))
 }
 
 // ParseLocalDateTime parses a date-time string in RFC3339-compatible format.
@@ -274,7 +266,7 @@ func (dt LocalDateTime) IsAfter(other LocalDateTime) bool {
 
 // PlusDays returns a copy with the specified number of days added.
 func (dt LocalDateTime) PlusDays(days int) LocalDateTime {
-	return NewLocalDateTime(dt.date.PlusDays(days), dt.time)
+	return dt.date.PlusDays(days).AtTime(dt.time)
 }
 
 // MinusDays returns a copy with the specified number of days subtracted.
@@ -284,7 +276,7 @@ func (dt LocalDateTime) MinusDays(days int) LocalDateTime {
 
 // PlusMonths returns a copy with the specified number of months added.
 func (dt LocalDateTime) PlusMonths(months int) LocalDateTime {
-	return NewLocalDateTime(dt.date.PlusMonths(months), dt.time)
+	return dt.date.PlusMonths(months).AtTime(dt.time)
 }
 
 // MinusMonths returns a copy with the specified number of months subtracted.
@@ -294,7 +286,7 @@ func (dt LocalDateTime) MinusMonths(months int) LocalDateTime {
 
 // PlusYears returns a copy with the specified number of years added.
 func (dt LocalDateTime) PlusYears(years int) LocalDateTime {
-	return NewLocalDateTime(dt.date.PlusYears(years), dt.time)
+	return dt.date.PlusYears(years).AtTime(dt.time)
 }
 
 // MinusYears returns a copy with the specified number of years subtracted.
@@ -356,7 +348,7 @@ func (dt *LocalDateTime) UnmarshalText(text []byte) error {
 		return err
 	}
 
-	*dt = NewLocalDateTime(date, timePart)
+	*dt = date.AtTime(timePart)
 	return nil
 }
 
@@ -385,7 +377,7 @@ func (dt *LocalDateTime) Scan(src any) error {
 	case []byte:
 		return dt.UnmarshalText(v)
 	case time.Time:
-		*dt = NewLocalDateTimeByGoTime(v)
+		*dt = LocalDateTimeOfGoTime(v)
 		return nil
 	default:
 		return sqlScannerDefaultBranch(v)

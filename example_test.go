@@ -123,11 +123,11 @@ func ExampleMustNewLocalDate() {
 	// 2024-03-15
 }
 
-// ExampleNewLocalDateByGoTime demonstrates converting from time.Time to LocalDate.
-func ExampleNewLocalDateByGoTime() {
+// ExampleLocalDateOfGoTime demonstrates converting from time.Time to LocalDate.
+func ExampleLocalDateOfGoTime() {
 	// Convert from time.LocalTime
 	goTime := time.Date(2024, time.March, 15, 14, 30, 0, 0, time.UTC)
-	date := goda.NewLocalDateByGoTime(goTime)
+	date := goda.LocalDateOfGoTime(goTime)
 	fmt.Println(date)
 
 	// Output:
@@ -284,11 +284,11 @@ func ExampleMustNewLocalTime() {
 	// Midnight: 00:00:00
 }
 
-// ExampleNewLocalTimeByGoTime demonstrates converting from time.Time to LocalTime.
-func ExampleNewLocalTimeByGoTime() {
+// ExampleLocalTimeOfGoTime demonstrates converting from time.Time to LocalTime.
+func ExampleLocalTimeOfGoTime() {
 	// Convert from time.LocalTime
 	goTime := time.Date(2024, time.March, 15, 14, 30, 45, 123456789, time.UTC)
-	t := goda.NewLocalTimeByGoTime(goTime)
+	t := goda.LocalTimeOfGoTime(goTime)
 	fmt.Println(t)
 
 	// Output:
@@ -442,7 +442,7 @@ func ExampleLocalTime_UnmarshalJSON() {
 // ExampleLocalDateTime demonstrates basic LocalDateTime usage.
 func ExampleLocalDateTime() {
 	// Create from components
-	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 123456789)
+	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
 	fmt.Println(dt)
 
 	// Access date and time parts
@@ -481,11 +481,22 @@ func ExampleMustParseLocalDateTime() {
 	// 2024-03-15T14:30:45
 }
 
-// ExampleNewLocalDateTime demonstrates creating a datetime from date and time.
-func ExampleNewLocalDateTime() {
+// ExampleLocalDate_AtTime demonstrates creating a datetime from date and time.
+func ExampleLocalDate_AtTime() {
 	date := goda.MustNewLocalDate(2024, goda.March, 15)
 	time := goda.MustNewLocalTime(14, 30, 45, 123456789)
-	dt := goda.NewLocalDateTime(date, time)
+	dt := date.AtTime(time)
+	fmt.Println(dt)
+
+	// Output:
+	// 2024-03-15T14:30:45.123456789
+}
+
+// ExampleLocalTime_AtDate demonstrates creating a datetime from time and date.
+func ExampleLocalTime_AtDate() {
+	time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	dt := time.AtDate(date)
 	fmt.Println(dt)
 
 	// Output:
@@ -558,7 +569,7 @@ func ExampleLocalDateTime_UnmarshalJSON() {
 
 // ExampleLocalDateTime_IsSupportedField demonstrates checking field support.
 func ExampleLocalDateTime_IsSupportedField() {
-	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 0)
+	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 0)
 
 	fmt.Printf("Supports FieldHourOfDay: %v\n", dt.IsSupportedField(goda.FieldHourOfDay))
 	fmt.Printf("Supports FieldDayOfMonth: %v\n", dt.IsSupportedField(goda.FieldDayOfMonth))
@@ -734,7 +745,7 @@ func ExampleLocalTime_GetField_ofDayFields() {
 
 // ExampleLocalDateTime_GetField demonstrates querying fields from a date-time.
 func ExampleLocalDateTime_GetField() {
-	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 123456789)
+	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
 
 	// Query date fields
 	year := dt.GetField(goda.FieldYear)
@@ -768,7 +779,7 @@ func ExampleLocalDateTime_GetField() {
 
 // ExampleLocalDateTime_GetField_delegation demonstrates field delegation.
 func ExampleLocalDateTime_GetField_delegation() {
-	dt := goda.MustNewLocalDateTimeFromComponents(2024, goda.March, 15, 14, 30, 45, 0)
+	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 0)
 
 	// LocalDateTime delegates date fields to LocalDate
 	dayOfYear := dt.GetField(goda.FieldDayOfYear)

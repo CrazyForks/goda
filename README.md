@@ -55,11 +55,14 @@ func main() {
     // Create dates and times
     date := goda.MustNewLocalDate(2024, goda.March, 15)
     time := goda.MustNewLocalTime(14, 30, 45, 123456789)
-    datetime := goda.NewLocalDateTime(date, time)
+    datetime := date.AtTime(time)  // or time.AtDate(date)
     
     fmt.Println(date)     // 2024-03-15
     fmt.Println(time)     // 14:30:45.123456789
     fmt.Println(datetime) // 2024-03-15T14:30:45.123456789
+    
+    // Create from components directly
+    datetime2 := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
     
     // Parse from strings
     date, _ = goda.ParseLocalDate("2024-03-15")

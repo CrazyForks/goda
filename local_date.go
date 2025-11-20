@@ -38,7 +38,7 @@ func (d *LocalDate) Scan(src any) error {
 	case []byte:
 		return d.UnmarshalText(v)
 	case time.Time:
-		*d = NewLocalDateByGoTime(v)
+		*d = LocalDateOfGoTime(v)
 		return nil
 	default:
 		return sqlScannerDefaultBranch(v)
@@ -257,7 +257,7 @@ func (d LocalDate) PlusDays(days int) LocalDate {
 	if d.IsZero() {
 		return d
 	}
-	return NewLocalDateByUnixEpochDays(d.UnixEpochDays() + int64(days))
+	return LocalDateOfUnixEpochDays(d.UnixEpochDays() + int64(days))
 }
 
 // MinusDays returns a copy of this date with the specified number of days subtracted.
@@ -426,10 +426,10 @@ func MustNewLocalDate(year Year, month Month, dayOfMonth int) LocalDate {
 	return nld
 }
 
-// NewLocalDateByGoTime creates a LocalDate from a time.Time.
+// LocalDateOfGoTime creates a LocalDate from a time.Time.
 // The time zone and time-of-day components are ignored.
 // Returns zero value if t.IsZero().
-func NewLocalDateByGoTime(t time.Time) LocalDate {
+func LocalDateOfGoTime(t time.Time) LocalDate {
 	if t.IsZero() {
 		return LocalDate{}
 	}
@@ -437,22 +437,22 @@ func NewLocalDateByGoTime(t time.Time) LocalDate {
 }
 
 // LocalDateNow returns the current date in the system's local time zone.
-// This is equivalent to NewLocalDateByGoTime(time.Now()).
+// This is equivalent to LocalDateOfGoTime(time.Now()).
 // For UTC time, use LocalDateNowUTC. For a specific timezone, use LocalDateNowIn.
 func LocalDateNow() LocalDate {
-	return NewLocalDateByGoTime(time.Now())
+	return LocalDateOfGoTime(time.Now())
 }
 
 // LocalDateNowIn returns the current date in the specified time zone.
-// This is equivalent to NewLocalDateByGoTime(time.Now().In(loc)).
+// This is equivalent to LocalDateOfGoTime(time.Now().In(loc)).
 func LocalDateNowIn(loc *time.Location) LocalDate {
-	return NewLocalDateByGoTime(time.Now().In(loc))
+	return LocalDateOfGoTime(time.Now().In(loc))
 }
 
 // LocalDateNowUTC returns the current date in UTC.
-// This is equivalent to NewLocalDateByGoTime(time.Now().UTC()).
+// This is equivalent to LocalDateOfGoTime(time.Now().UTC()).
 func LocalDateNowUTC() LocalDate {
-	return NewLocalDateByGoTime(time.Now().UTC())
+	return LocalDateOfGoTime(time.Now().UTC())
 }
 
 // ParseLocalDate parses a date string in yyyy-MM-dd format.
@@ -487,9 +487,17 @@ func MustParseLocalDate(s string) LocalDate {
 	return d
 }
 
-// NewLocalDateByUnixEpochDays creates a LocalDate from the number of days since Unix epoch (1970-01-01).
+// AtTime combines this date with a time to create a LocalDateTime.
+func (d LocalDate) AtTime(time LocalTime) LocalDateTime {
+	return LocalDateTime{
+		date: d,
+		time: time,
+	}
+}
+
+// LocalDateOfUnixEpochDays creates a LocalDate from the number of days since Unix epoch (1970-01-01).
 // Positive values represent dates after the epoch, negative before.
-func NewLocalDateByUnixEpochDays(days int64) LocalDate {
+func LocalDateOfUnixEpochDays(days int64) LocalDate {
 	const DaysPerCycle = 365*400 + 97
 	const Days0000To1970 = (DaysPerCycle * 5) - (30*365 + 7)
 	zeroDay := days + Days0000To1970
