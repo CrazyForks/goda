@@ -16,6 +16,7 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 - 📅 **LocalDate**: Date without time (e.g., `2024-03-15`)
 - ⏰ **LocalTime**: Time without date (e.g., `14:30:45.123456789`)
 - 📆 **LocalDateTime**: Date-time (e.g., `2024-03-15T14:30:45.123456789`)
+- 🌐 **ZoneOffset**: Time-zone offset from Greenwich/UTC (e.g. `+08:00`).
 - 🔢 **Field**: Enumeration of date-time fields (like Java's `ChronoField`)
 - 🔍 **TemporalAccessor**: Universal interface for querying temporal objects
 - 📊 **TemporalValue**: Type-safe wrapper for field values with validation state
@@ -206,28 +207,29 @@ db.QueryRow("SELECT id, created_at, date FROM records WHERE id = ?", 1).Scan(
 
 ### Core Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `LocalDate` | Date without time | `2024-03-15` |
-| `LocalTime` | Time without date | `14:30:45.123456789` |
-| `LocalDateTime` | Date-time | `2024-03-15T14:30:45` |
-| `Month` | Month of year (1-12) | `March` |
-| `Year` | Year | `2024` |
-| `DayOfWeek` | Day of week (1=Monday, 7=Sunday) | `Friday` |
-| `Field` | Date-time field enumeration | `HourOfDay`, `DayOfMonth` |
+| Type               | Description                             | Example                           |
+|--------------------|-----------------------------------------|-----------------------------------|
+| `LocalDate`        | Date without time                       | `2024-03-15`                      |
+| `LocalTime`        | Time without date                       | `14:30:45.123456789`              |
+| `LocalDateTime`    | Date-time                               | `2024-03-15T14:30:45`             |
+| `Month`            | Month of year (1-12)                    | `March`                           |
+| `Year`             | Year                                    | `2024`                            |
+| `DayOfWeek`        | Day of week (1=Monday, 7=Sunday)        | `Friday`                          |
+| `ZoneOffset`       | Time-zone offset from Greenwich/UTC     | `+08:00`                          |
+| `Field`            | Date-time field enumeration             | `HourOfDay`, `DayOfMonth`         |
 | `TemporalAccessor` | Interface for querying temporal objects | Implemented by all temporal types |
-| `TemporalValue` | Type-safe field value with validation | Returned by `GetField()` |
+| `TemporalValue`    | Type-safe field value with validation   | Returned by `GetField()`          |
 
 ### Time Formatting
 
 Time values use ISO 8601 format with **Java.time compatible** fractional second alignment:
 
-| Precision | Digits | Example |
-|-----------|--------|---------|
-| Whole seconds | 0 | `14:30:45` |
-| Milliseconds | 3 | `14:30:45.100`, `14:30:45.123` |
-| Microseconds | 6 | `14:30:45.123400`, `14:30:45.123456` |
-| Nanoseconds | 9 | `14:30:45.000000001`, `14:30:45.123456789` |
+| Precision     | Digits | Example                                    |
+|---------------|--------|--------------------------------------------|
+| Whole seconds | 0      | `14:30:45`                                 |
+| Milliseconds  | 3      | `14:30:45.100`, `14:30:45.123`             |
+| Microseconds  | 6      | `14:30:45.123400`, `14:30:45.123456`       |
+| Nanoseconds   | 9      | `14:30:45.000000001`, `14:30:45.123456789` |
 
 Fractional seconds are automatically aligned to 3-digit boundaries (milliseconds, microseconds, nanoseconds), matching Java's `LocalTime` behavior. Parsing accepts any length of fractional seconds.
 
