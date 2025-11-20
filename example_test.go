@@ -800,3 +800,92 @@ func ExampleLocalDateTime_GetField_delegation() {
 	// Nanoseconds of day: 52245000000000
 	// FieldOffsetSeconds is not supported for LocalDateTime
 }
+
+// ExampleZoneOffset demonstrates basic ZoneOffset usage.
+func ExampleZoneOffset() {
+	// Create zone offsets
+	utc := goda.ZoneOffsetUTC()
+	fmt.Println("UTC:", utc)
+
+	// From hours
+	est := goda.MustZoneOffsetOfHours(-5)
+	fmt.Println("EST:", est)
+
+	// From hours and minutes
+	ist := goda.MustZoneOffsetOfHoursMinutes(5, 30)
+	fmt.Println("IST:", ist)
+
+	// From total seconds
+	jst := goda.MustZoneOffsetOfSeconds(9 * 3600)
+	fmt.Println("JST:", jst)
+
+	// Output:
+	// UTC: Z
+	// EST: -05:00
+	// IST: +05:30
+	// JST: +09:00
+}
+
+// ExampleParseZoneOffset demonstrates parsing zone offsets.
+func ExampleParseZoneOffset() {
+	// Parse various formats
+	z1 := goda.MustParseZoneOffset("Z")
+	fmt.Println("Z:", z1.TotalSeconds())
+
+	z2 := goda.MustParseZoneOffset("+02:00")
+	fmt.Println("+02:00:", z2.TotalSeconds())
+
+	z3 := goda.MustParseZoneOffset("-05:30")
+	fmt.Println("-05:30:", z3.TotalSeconds())
+
+	z4 := goda.MustParseZoneOffset("+0930")
+	fmt.Println("+0930:", z4.TotalSeconds())
+
+	// Output:
+	// Z: 0
+	// +02:00: 7200
+	// -05:30: -19800
+	// +0930: 34200
+}
+
+// ExampleZoneOffset_TotalSeconds demonstrates accessing offset components.
+func ExampleZoneOffset_TotalSeconds() {
+	offset := goda.MustParseZoneOffset("+05:30")
+
+	fmt.Println("Total seconds:", offset.TotalSeconds())
+	fmt.Println("Hours:", offset.Hours())
+	fmt.Println("Minutes:", offset.Minutes())
+	fmt.Println("Seconds:", offset.Seconds())
+
+	// Output:
+	// Total seconds: 19800
+	// Hours: 5
+	// Minutes: 30
+	// Seconds: 0
+}
+
+// ExampleZoneOffset_Compare demonstrates comparing zone offsets.
+func ExampleZoneOffset_Compare() {
+	utc := goda.ZoneOffsetUTC()
+	est := goda.MustZoneOffsetOfHours(-5)
+	cet := goda.MustZoneOffsetOfHours(1)
+
+	fmt.Printf("EST < UTC: %v\n", est.Compare(utc) < 0)
+	fmt.Printf("CET > UTC: %v\n", cet.Compare(utc) > 0)
+	fmt.Printf("EST < CET: %v\n", est.Compare(cet) < 0)
+
+	// Output:
+	// EST < UTC: true
+	// CET > UTC: true
+	// EST < CET: true
+}
+
+// ExampleZoneOffset_MarshalJSON demonstrates JSON serialization.
+func ExampleZoneOffset_MarshalJSON() {
+	offset := goda.MustParseZoneOffset("+05:30")
+	jsonBytes, _ := json.Marshal(offset)
+	fmt.Println(string(jsonBytes))
+
+	// Output:
+	// "+05:30"
+}
