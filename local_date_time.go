@@ -125,7 +125,7 @@ func (dt LocalDateTime) Month() Month {
 	return dt.date.Month()
 }
 
-// FieldDayOfMonth returns the day-of-month component.
+// DayOfMonth returns the day-of-month component.
 func (dt LocalDateTime) DayOfMonth() int {
 	return dt.date.DayOfMonth()
 }
@@ -135,7 +135,7 @@ func (dt LocalDateTime) DayOfWeek() DayOfWeek {
 	return dt.date.DayOfWeek()
 }
 
-// FieldDayOfYear returns the day-of-year.
+// DayOfYear returns the day-of-year.
 func (dt LocalDateTime) DayOfYear() int {
 	return dt.date.DayOfYear()
 }

@@ -228,7 +228,7 @@ func (d LocalDate) Month() Month {
 	return Month(d.v >> 8 & 0xff)
 }
 
-// FieldDayOfMonth returns the day-of-month component of this date (1-31).
+// DayOfMonth returns the day-of-month component of this date (1-31).
 func (d LocalDate) DayOfMonth() int {
 	return int(d.v & 0xff)
 }
@@ -242,7 +242,7 @@ func (d LocalDate) DayOfWeek() DayOfWeek {
 	return DayOfWeek(floorMod(d.UnixEpochDays()+3, 7) + 1)
 }
 
-// FieldDayOfYear returns the day-of-year for this date (1-366).
+// DayOfYear returns the day-of-year for this date (1-366).
 // Returns 0 for zero value.
 func (d LocalDate) DayOfYear() int {
 	if d.IsZero() {
