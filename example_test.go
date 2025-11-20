@@ -889,3 +889,202 @@ func ExampleZoneOffset_MarshalJSON() {
 	// Output:
 	// "+05:30"
 }
+
+// ExampleOffsetDateTime demonstrates basic OffsetDateTime usage.
+func ExampleOffsetDateTime() {
+	// Create from components
+	offset := goda.MustZoneOffsetOfHours(8) // +08:00 (China Standard Time)
+	odt := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, offset)
+	fmt.Println(odt)
+
+	// Create from LocalDateTime
+	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 0)
+	odt2 := dt.AtOffset(offset)
+	fmt.Println(odt2)
+
+	// Parse from string
+	odt3 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	fmt.Println(odt3)
+
+	// UTC
+	utcOdt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45Z")
+	fmt.Println(utcOdt)
+
+	// Output:
+	// 2024-03-15T14:30:45+08:00
+	// 2024-03-15T14:30:45+08:00
+	// 2024-03-15T14:30:45+08:00
+	// 2024-03-15T14:30:45Z
+}
+
+// ExampleParseOffsetDateTime demonstrates parsing offset date-times.
+func ExampleParseOffsetDateTime() {
+	// With positive offset
+	odt1, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	fmt.Println(odt1)
+
+	// With negative offset
+	odt2, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45-05:00")
+	fmt.Println(odt2)
+
+	// UTC (Z)
+	odt3, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45Z")
+	fmt.Println(odt3)
+
+	// With minutes offset
+	odt4, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45+05:30")
+	fmt.Println(odt4)
+
+	// Output:
+	// 2024-03-15T14:30:45+08:00
+	// 2024-03-15T14:30:45-05:00
+	// 2024-03-15T14:30:45Z
+	// 2024-03-15T14:30:45+05:30
+}
+
+// ExampleOffsetDateTimeNow demonstrates getting the current time with offset.
+func ExampleOffsetDateTimeNow() {
+	// Get current time with system's local offset
+	now := goda.OffsetDateTimeNow()
+	fmt.Printf("Has current time: %v\n", !now.IsZero())
+
+	// Get current UTC time
+	utcNow := goda.OffsetDateTimeNowUTC()
+	fmt.Printf("UTC offset: %d seconds\n", utcNow.Offset().TotalSeconds())
+
+	// Output:
+	// Has current time: true
+	// UTC offset: 0 seconds
+}
+
+// ExampleOffsetDateTime_WithOffsetSameLocal demonstrates changing offset while keeping local time.
+func ExampleOffsetDateTime_WithOffsetSameLocal() {
+	est := goda.MustZoneOffsetOfHours(-5) // EST
+	pst := goda.MustZoneOffsetOfHours(-8) // PST
+
+	// Create a time in EST
+	odtEST := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, est)
+	fmt.Println("Original (EST):", odtEST)
+
+	// Change to PST offset, but keep the local time (14:30:45)
+	odtPST := odtEST.WithOffsetSameLocal(pst)
+	fmt.Println("Same local (PST):", odtPST)
+
+	// Note: These represent different instants in time!
+	fmt.Printf("Different instants: %v\n",
+		odtEST.ToEpochSecond() != odtPST.ToEpochSecond())
+
+	// Output:
+	// Original (EST): 2024-03-15T14:30:45-05:00
+	// Same local (PST): 2024-03-15T14:30:45-08:00
+	// Different instants: true
+}
+
+// ExampleOffsetDateTime_WithOffsetSameInstant demonstrates changing offset while preserving instant.
+func ExampleOffsetDateTime_WithOffsetSameInstant() {
+	est := goda.MustZoneOffsetOfHours(-5) // EST
+	pst := goda.MustZoneOffsetOfHours(-8) // PST
+
+	// Create a time in EST
+	odtEST := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, est)
+	fmt.Println("Original (EST):", odtEST)
+
+	// Change to PST offset, but preserve the instant (same moment in time)
+	odtPST := odtEST.WithOffsetSameInstant(pst)
+	fmt.Println("Same instant (PST):", odtPST)
+
+	// The local time is adjusted: 14:30 EST = 11:30 PST
+	fmt.Printf("Same instant: %v\n",
+		odtEST.ToEpochSecond() == odtPST.ToEpochSecond())
+
+	// Output:
+	// Original (EST): 2024-03-15T14:30:45-05:00
+	// Same instant (PST): 2024-03-15T11:30:45-08:00
+	// Same instant: true
+}
+
+// ExampleOffsetDateTime_Compare demonstrates comparing offset date-times.
+func ExampleOffsetDateTime_Compare() {
+	// These represent the same instant in time
+	odt1 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	odt2 := goda.MustParseOffsetDateTime("2024-03-15T06:30:45Z")
+
+	if odt1.Compare(odt2) == 0 {
+		fmt.Println("Same instant")
+	}
+
+	// Different instants
+	odt3 := goda.MustParseOffsetDateTime("2024-03-15T15:30:45+08:00")
+	if odt3.IsAfter(odt1) {
+		fmt.Println("odt3 is later")
+	}
+
+	// Output:
+	// Same instant
+	// odt3 is later
+}
+
+// ExampleOffsetDateTime_PlusHours demonstrates time arithmetic with hours.
+func ExampleOffsetDateTime_PlusHours() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+
+	// Add hours
+	later := odt.PlusHours(5)
+	fmt.Println("5 hours later:", later)
+
+	// Subtract hours
+	earlier := odt.MinusHours(2)
+	fmt.Println("2 hours earlier:", earlier)
+
+	// Output:
+	// 5 hours later: 2024-03-15T19:30:45+08:00
+	// 2 hours earlier: 2024-03-15T12:30:45+08:00
+}
+
+// ExampleOffsetDateTime_ToEpochSecond demonstrates Unix timestamp conversion.
+func ExampleOffsetDateTime_ToEpochSecond() {
+	// Different offsets, same instant
+	odt1 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	odt2 := goda.MustParseOffsetDateTime("2024-03-15T06:30:45Z")
+
+	epoch1 := odt1.ToEpochSecond()
+	epoch2 := odt2.ToEpochSecond()
+
+	fmt.Printf("Has epoch seconds: %v\n", epoch1 > 0)
+	fmt.Printf("Same instant: %v\n", epoch1 == epoch2)
+
+	// Output:
+	// Has epoch seconds: true
+	// Same instant: true
+}
+
+// ExampleOffsetDateTime_MarshalJSON demonstrates JSON serialization.
+func ExampleOffsetDateTime_MarshalJSON() {
+	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	jsonBytes, _ := json.Marshal(odt)
+	fmt.Println(string(jsonBytes))
+
+	// UTC
+	utcOdt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45Z")
+	utcBytes, _ := json.Marshal(utcOdt)
+	fmt.Println(string(utcBytes))
+
+	// Output:
+	// "2024-03-15T14:30:45+08:00"
+	// "2024-03-15T14:30:45Z"
+}
+
+// ExampleOffsetDateTime_UnmarshalJSON demonstrates JSON deserialization.
+func ExampleOffsetDateTime_UnmarshalJSON() {
+	jsonData := []byte(`"2024-03-15T14:30:45+08:00"`)
+
+	var odt goda.OffsetDateTime
+	json.Unmarshal(jsonData, &odt)
+
+	fmt.Printf("Year: %d\n", odt.Year())
+	fmt.Printf("Offset: %d hours\n", odt.Offset().TotalSeconds()/3600)
+
+	// Output:
+	// Year: 2024
+	// Offset: 8 hours
+}

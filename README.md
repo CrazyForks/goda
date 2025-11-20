@@ -15,8 +15,9 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 
 - 📅 **LocalDate**: Date without time (e.g., `2024-03-15`)
 - ⏰ **LocalTime**: Time without date (e.g., `14:30:45.123456789`)
-- 📆 **LocalDateTime**: Date-time (e.g., `2024-03-15T14:30:45.123456789`)
-- 🌐 **ZoneOffset**: Time-zone offset from Greenwich/UTC (e.g. `+08:00`).
+- 📆 **LocalDateTime**: Date-time without timezone (e.g., `2024-03-15T14:30:45.123456789`)
+- 🌐 **ZoneOffset**: Time-zone offset from Greenwich/UTC (e.g., `+08:00`)
+- 🌍 **OffsetDateTime**: Date-time with offset (e.g., `2024-03-15T14:30:45.123456789+01:00`)
 - 🔢 **Field**: Enumeration of date-time fields (like Java's `ChronoField`)
 - 🔍 **TemporalAccessor**: Universal interface for querying temporal objects
 - 📊 **TemporalValue**: Type-safe wrapper for field values with validation state
@@ -65,6 +66,11 @@ func main() {
     // Create from components directly
     datetime2 := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
     
+    // With time zone offset
+    offset := goda.MustZoneOffsetOfHours(1)  // +01:00
+    offsetDateTime := datetime.AtOffset(offset)
+    fmt.Println(offsetDateTime) // 2024-03-15T14:30:45.123456789+01:00
+    
     // Parse from strings
     date, _ = goda.ParseLocalDate("2024-03-15")
     time = goda.MustParseLocalTime("14:30:45.123456789")
@@ -74,6 +80,7 @@ func main() {
     today := goda.LocalDateNow()
     now := goda.LocalTimeNow()
     currentDateTime := goda.LocalDateTimeNow()
+    currentOffsetDateTime := goda.OffsetDateTimeNow()
     
     // Date arithmetic
     tomorrow := today.PlusDays(1)
@@ -84,6 +91,43 @@ func main() {
     if tomorrow.IsAfter(today) {
         fmt.Println("Tomorrow is after today!")
     }
+}
+```
+
+### Working with Time Zones
+
+```go
+// Create with offset
+offset := goda.MustZoneOffsetOfHours(8)  // +08:00 (China Standard Time)
+odt := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, offset)
+
+// Parse with offset
+odt, _ = goda.ParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+odt = goda.MustParseOffsetDateTime("2024-03-15T14:30:45Z")  // UTC
+
+// Convert from Go's time.Time (preserves offset)
+goTime := time.Now()
+odt = goda.OffsetDateTimeOfGoTime(goTime)
+
+// Change offset while keeping local time
+est := goda.MustZoneOffsetOfHours(-5)  // EST
+pst := goda.MustZoneOffsetOfHours(-8)  // PST
+odtEST := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, est)
+odtPST := odtEST.WithOffsetSameLocal(pst)  // Local time unchanged: 14:30:45-08:00
+
+// Change offset while keeping the instant
+odtPST2 := odtEST.WithOffsetSameInstant(pst)  // Instant preserved: 11:30:45-08:00
+
+// Time arithmetic with offset
+tomorrow := odt.PlusDays(1)
+inTwoHours := odt.PlusHours(2)
+
+// Convert to Unix timestamp
+epochSecond := odt.ToEpochSecond()
+
+// Compare based on instant
+if odt1.IsBefore(odt2) {
+    fmt.Println("odt1 is earlier")
 }
 ```
 
@@ -171,54 +215,65 @@ printYear(goda.LocalDateTimeNow())
 
 ```go
 type Event struct {
-    Name      string              `json:"name"`
-    Date      goda.LocalDate      `json:"date"`
-    Time      goda.LocalTime      `json:"time"`
-    CreatedAt goda.LocalDateTime  `json:"created_at"`
+    Name        string                `json:"name"`
+    Date        goda.LocalDate        `json:"date"`
+    Time        goda.LocalTime        `json:"time"`
+    CreatedAt   goda.LocalDateTime    `json:"created_at"`
+    ScheduledAt goda.OffsetDateTime   `json:"scheduled_at"`  // With timezone
 }
 
 event := Event{
-    Name:      "Meeting",
-    Date:      goda.MustNewLocalDate(2024, goda.March, 15),
-    Time:      goda.MustNewLocalTime(14, 30, 0, 0),
-    CreatedAt: goda.MustParseLocalDateTime("2024-03-15T14:30:00"),
+    Name:        "Meeting",
+    Date:        goda.MustNewLocalDate(2024, goda.March, 15),
+    Time:        goda.MustNewLocalTime(14, 30, 0, 0),
+    CreatedAt:   goda.MustParseLocalDateTime("2024-03-15T14:30:00"),
+    ScheduledAt: goda.MustParseOffsetDateTime("2024-03-15T14:30:00+08:00"),
 }
 
 jsonData, _ := json.Marshal(event)
-// {"name":"Meeting","date":"2024-03-15","time":"14:30:00","created_at":"2024-03-15T14:30:00"}
+// {"name":"Meeting","date":"2024-03-15","time":"14:30:00",
+//  "created_at":"2024-03-15T14:30:00","scheduled_at":"2024-03-15T14:30:00+08:00"}
 ```
 
 ### Database Integration
 
 ```go
 type Record struct {
-    ID        int64
-    CreatedAt goda.LocalDateTime
-    Date      goda.LocalDate
+    ID          int64
+    CreatedAt   goda.LocalDateTime
+    Date        goda.LocalDate
+    UpdatedAt   goda.OffsetDateTime  // With timezone for audit trails
 }
 
 // Works with database/sql - implements sql.Scanner and driver.Valuer
-db.QueryRow("SELECT id, created_at, date FROM records WHERE id = ?", 1).Scan(
-    &record.ID, &record.CreatedAt, &record.Date,
+db.QueryRow("SELECT id, created_at, date, updated_at FROM records WHERE id = ?", 1).Scan(
+    &record.ID, &record.CreatedAt, &record.Date, &record.UpdatedAt,
 )
+
+// Insert with offset datetime
+offset := goda.MustZoneOffsetOfHours(8)
+now := goda.OffsetDateTimeNow()
+db.Exec("INSERT INTO records (created_at, updated_at) VALUES (?, ?)",
+    goda.LocalDateTimeNow(), now)
 ```
 
 ## API Overview
 
 ### Core Types
 
-| Type               | Description                             | Example                           |
-|--------------------|-----------------------------------------|-----------------------------------|
-| `LocalDate`        | Date without time                       | `2024-03-15`                      |
-| `LocalTime`        | Time without date                       | `14:30:45.123456789`              |
-| `LocalDateTime`    | Date-time                               | `2024-03-15T14:30:45`             |
-| `Month`            | Month of year (1-12)                    | `March`                           |
-| `Year`             | Year                                    | `2024`                            |
-| `DayOfWeek`        | Day of week (1=Monday, 7=Sunday)        | `Friday`                          |
-| `ZoneOffset`       | Time-zone offset from Greenwich/UTC     | `+08:00`                          |
-| `Field`            | Date-time field enumeration             | `HourOfDay`, `DayOfMonth`         |
-| `TemporalAccessor` | Interface for querying temporal objects | Implemented by all temporal types |
-| `TemporalValue`    | Type-safe field value with validation   | Returned by `GetField()`          |
+| Type               | Description                             | Example                                |
+|--------------------|-----------------------------------------|----------------------------------------|
+| `LocalDate`        | Date without time                       | `2024-03-15`                           |
+| `LocalTime`        | Time without date                       | `14:30:45.123456789`                   |
+| `LocalDateTime`    | Date-time without timezone              | `2024-03-15T14:30:45`                  |
+| `ZoneOffset`       | Time-zone offset from Greenwich/UTC     | `+08:00`, `-05:00`, `Z`                |
+| `OffsetDateTime`   | Date-time with offset from UTC          | `2024-03-15T14:30:45+08:00`            |
+| `Month`            | Month of year (1-12)                    | `March`                                |
+| `Year`             | Year                                    | `2024`                                 |
+| `DayOfWeek`        | Day of week (1=Monday, 7=Sunday)        | `Friday`                               |
+| `Field`            | Date-time field enumeration             | `HourOfDay`, `DayOfMonth`              |
+| `TemporalAccessor` | Interface for querying temporal objects | Implemented by all temporal types      |
+| `TemporalValue`    | Type-safe field value with validation   | Returned by `GetField()`               |
 
 ### Time Formatting
 
@@ -243,7 +298,7 @@ Fractional seconds are automatically aligned to 3-digit boundaries (milliseconds
 
 ### Implemented Interfaces
 
-All temporal types (`LocalDate`, `LocalTime`, `LocalDateTime`) implement:
+All temporal types (`LocalDate`, `LocalTime`, `LocalDateTime`, `OffsetDateTime`) implement:
 - `TemporalAccessor`: Universal query interface with `GetField(field Field) TemporalValue`
 - `fmt.Stringer`
 - `encoding.TextMarshaler` / `encoding.TextUnmarshaler`
@@ -263,15 +318,26 @@ This package follows the **ThreeTen/JSR-310** model (Java's `java.time` package)
 - **Safe field queries**: `TemporalValue` return type validates field support and prevents silent errors
 - **Zero-value safe**: Zero values are properly handled throughout
 
-### When to Use LocalDate, LocalTime, LocalDateTime
+### When to Use Each Type
 
-Use the local types when you only need the date/time without timezone information:
+**LocalDate, LocalTime, LocalDateTime** - Use when timezone is not relevant:
 - **Birthdays**: "March 15" means March 15 everywhere
 - **Business hours**: "9:00 AM - 5:00 PM" in local context
 - **Schedules**: "Meeting at 2:30 PM" without timezone concerns
 - **Calendar dates**: Historical dates, recurring events
 
-For timezone-aware operations, use `ZonedDateTime` (coming soon).
+**OffsetDateTime** - Use when you need a fixed offset from UTC:
+- **API timestamps**: REST APIs often use RFC3339 with offsets
+- **Audit logs**: Record exact moment with original timezone offset
+- **Event scheduling**: When timezone offset matters but DST transitions don't
+- **International coordination**: "The meeting is at 14:00 UTC+1"
+
+**ZoneOffset** - Use to represent timezone offsets:
+- **Fixed offsets**: +08:00, -05:00, Z (UTC)
+- **No DST handling**: Use when you don't need daylight saving time rules
+- **Simple offset arithmetic**: Convert between different offsets
+
+For full timezone support with DST transitions, use `ZonedDateTime` (coming soon).
 
 ## Documentation
 

@@ -110,6 +110,16 @@ func (dt LocalDateTime) LocalDate() LocalDate {
 	return dt.date
 }
 
+func (dt LocalDateTime) AtOffset(offset ZoneOffset) OffsetDateTime {
+	if dt.IsZero() {
+		return OffsetDateTime{}
+	}
+	return OffsetDateTime{
+		datetime: dt,
+		offset:   offset,
+	}
+}
+
 // LocalTime returns the time part of this date-time.
 func (dt LocalDateTime) LocalTime() LocalTime {
 	return dt.time

@@ -1,10 +1,12 @@
 // Package goda provides date and time types following the ThreeTen/JSR-310 model (java.time package).
 //
-// This package implements four main types:
+// This package implements the following main types:
 //
 //   - LocalDate: A date without time (e.g., 2024-03-15)
 //   - LocalTime: A time without date (e.g., 14:30:45.123456789)
-//   - LocalDateTime: A date-time (e.g., 2024-03-15T14:30:45.123456789)
+//   - LocalDateTime: A date-time without timezone (e.g., 2024-03-15T14:30:45.123456789)
+//   - ZoneOffset: A time-zone offset from UTC (e.g., +08:00, -05:00, Z)
+//   - OffsetDateTime: A date-time with offset from UTC (e.g., 2024-03-15T14:30:45+08:00)
 //   - Year, Month, DayOfWeek: Supporting types for date/time operations
 //
 // All types implement standard interfaces for serialization:
@@ -22,17 +24,23 @@
 //	// Specific date and time
 //	date := goda.MustNewLocalDate(2024, goda.March, 15)
 //	time := goda.MustNewLocalTime(14, 30, 45, 0)
-//	datetime := goda.NewLocalDateTime(date, time)
+//	datetime := date.AtTime(time)  // Combine date and time
+//
+//	// With timezone offset
+//	offset := goda.MustZoneOffsetOfHours(8)  // +08:00
+//	offsetDateTime := datetime.AtOffset(offset)
 //
 //	// Current date and time
 //	today := goda.LocalDateNow()
 //	now := goda.LocalTimeNow()
 //	currentDateTime := goda.LocalDateTimeNow()
+//	currentOffsetDateTime := goda.OffsetDateTimeNow()
 //
 //	// Parse from string
 //	date = goda.MustParseLocalDate("2024-03-15")
 //	time = goda.MustParseLocalTime("14:30:45.123456789")
 //	datetime = goda.MustParseLocalDateTime("2024-03-15T14:30:45.123456789")
+//	offsetDateTime = goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
 //
 // LocalDate arithmetic:
 //
@@ -87,4 +95,11 @@
 //
 //   - LocalDateTime: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] (e.g., "2024-03-15T14:30:45.123456789")
 //     Combined with 'T' separator (lowercase 't' accepted when parsing).
+//
+//   - ZoneOffset: ±HH:mm[:ss] or Z for UTC (e.g., "+08:00", "-05:30", "Z")
+//     Hours must be in range [-18, 18], minutes and seconds in [0, 59].
+//     Compact formats (±HH, ±HHMM, ±HHMMSS) are also supported.
+//
+//   - OffsetDateTime: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]±HH:mm[:ss] (e.g., "2024-03-15T14:30:45+08:00")
+//     Combines LocalDateTime and ZoneOffset. 'Z' is accepted as UTC offset.
 package goda
