@@ -1079,7 +1079,7 @@ func ExampleOffsetDateTime_UnmarshalJSON() {
 	jsonData := []byte(`"2024-03-15T14:30:45+08:00"`)
 
 	var odt goda.OffsetDateTime
-	json.Unmarshal(jsonData, &odt)
+	_ = json.Unmarshal(jsonData, &odt)
 
 	fmt.Printf("Year: %d\n", odt.Year())
 	fmt.Printf("Offset: %d hours\n", odt.Offset().TotalSeconds()/3600)
