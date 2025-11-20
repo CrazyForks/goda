@@ -397,6 +397,74 @@ func LocalTimeOfGoTime(t time.Time) LocalTime {
 	}
 }
 
+// LocalTimeOfNanoOfDay creates a LocalTime from the nanosecond-of-day value.
+// Returns an error if nanoOfDay is out of the valid range (0 to 86,399,999,999,999).
+// The valid range represents 00:00:00.000000000 to 23:59:59.999999999.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt, err := LocalTimeOfNanoOfDay(12 * 60 * 60 * 1000000000)
+func LocalTimeOfNanoOfDay(nanoOfDay int64) (LocalTime, error) {
+	const nanosPerDay = 24 * int64(time.Hour)
+	if nanoOfDay < 0 || nanoOfDay >= nanosPerDay {
+		return LocalTime{}, newError("nanoOfDay %d out of range [0, %d)", nanoOfDay, nanosPerDay)
+	}
+	return LocalTime{
+		v: nanoOfDay | localTimeValidBit,
+	}, nil
+}
+
+// MustLocalTimeOfNanoOfDay creates a LocalTime from the nanosecond-of-day value.
+// Panics if nanoOfDay is out of range. Use LocalTimeOfNanoOfDay for error handling.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt := MustLocalTimeOfNanoOfDay(12 * 60 * 60 * 1000000000)
+func MustLocalTimeOfNanoOfDay(nanoOfDay int64) LocalTime {
+	lt, err := LocalTimeOfNanoOfDay(nanoOfDay)
+	if err != nil {
+		panic(err)
+	}
+	return lt
+}
+
+// LocalTimeOfSecondOfDay creates a LocalTime from the second-of-day value.
+// Returns an error if secondOfDay is out of the valid range (0 to 86,399).
+// The valid range represents 00:00:00 to 23:59:59.
+// The nanosecond component will be set to zero.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt, err := LocalTimeOfSecondOfDay(12 * 60 * 60)
+func LocalTimeOfSecondOfDay(secondOfDay int) (LocalTime, error) {
+	const secondsPerDay = 24 * 60 * 60
+	if secondOfDay < 0 || secondOfDay >= secondsPerDay {
+		return LocalTime{}, newError("secondOfDay %d out of range [0, %d)", secondOfDay, secondsPerDay)
+	}
+	nanos := int64(secondOfDay) * int64(time.Second)
+	return LocalTime{
+		v: nanos | localTimeValidBit,
+	}, nil
+}
+
+// MustLocalTimeOfSecondOfDay creates a LocalTime from the second-of-day value.
+// Panics if secondOfDay is out of range. Use LocalTimeOfSecondOfDay for error handling.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt := MustLocalTimeOfSecondOfDay(12 * 60 * 60)
+func MustLocalTimeOfSecondOfDay(secondOfDay int) LocalTime {
+	lt, err := LocalTimeOfSecondOfDay(secondOfDay)
+	if err != nil {
+		panic(err)
+	}
+	return lt
+}
+
 // LocalTimeNow returns the current time in the system's local time zone.
 // This is equivalent to LocalTimeOfGoTime(time.Now()).
 // For UTC time, use LocalTimeNowUTC. For a specific timezone, use LocalTimeNowIn.

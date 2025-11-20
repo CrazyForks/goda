@@ -1257,3 +1257,211 @@ func TestLocalTime_PlusMinusCombinations(t *testing.T) {
 		assert.Equal(t, expected, result)
 	})
 }
+
+func TestLocalTimeOfNanoOfDay(t *testing.T) {
+	t.Run("valid nano of day", func(t *testing.T) {
+		// Midnight (0 nanoseconds)
+		lt, err := LocalTimeOfNanoOfDay(0)
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(0, 0, 0, 0), lt)
+
+		// 1 hour = 3,600,000,000,000 nanoseconds
+		lt, err = LocalTimeOfNanoOfDay(int64(time.Hour))
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(1, 0, 0, 0), lt)
+
+		// 12:30:45.123456789
+		nanos := int64(12)*int64(time.Hour) +
+			int64(30)*int64(time.Minute) +
+			int64(45)*int64(time.Second) +
+			123456789
+		lt, err = LocalTimeOfNanoOfDay(nanos)
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(12, 30, 45, 123456789), lt)
+
+		// Last nanosecond of the day (23:59:59.999999999)
+		maxNanos := int64(24)*int64(time.Hour) - 1
+		lt, err = LocalTimeOfNanoOfDay(maxNanos)
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(23, 59, 59, 999999999), lt)
+	})
+
+	t.Run("invalid nano of day", func(t *testing.T) {
+		// Negative value
+		_, err := LocalTimeOfNanoOfDay(-1)
+		assert.Error(t, err)
+
+		// Value >= 24 hours in nanoseconds
+		_, err = LocalTimeOfNanoOfDay(24 * int64(time.Hour))
+		assert.Error(t, err)
+
+		// Large positive value
+		_, err = LocalTimeOfNanoOfDay(100 * int64(time.Hour))
+		assert.Error(t, err)
+	})
+
+	t.Run("round trip with GetField", func(t *testing.T) {
+		// Create time from components
+		original := MustNewLocalTime(15, 45, 30, 987654321)
+
+		// Get nano of day
+		nanoOfDay := original.GetField(FieldNanoOfDay).Int64()
+
+		// Create new time from nano of day
+		reconstructed, err := LocalTimeOfNanoOfDay(nanoOfDay)
+		require.NoError(t, err)
+
+		// Should be equal
+		assert.Equal(t, original, reconstructed)
+	})
+}
+
+func TestMustLocalTimeOfNanoOfDay(t *testing.T) {
+	t.Run("valid value", func(t *testing.T) {
+		assert.NotPanics(t, func() {
+			lt := MustLocalTimeOfNanoOfDay(int64(12 * time.Hour))
+			assert.Equal(t, MustNewLocalTime(12, 0, 0, 0), lt)
+		})
+	})
+
+	t.Run("invalid value panics", func(t *testing.T) {
+		assert.Panics(t, func() {
+			MustLocalTimeOfNanoOfDay(-1)
+		})
+
+		assert.Panics(t, func() {
+			MustLocalTimeOfNanoOfDay(24 * int64(time.Hour))
+		})
+	})
+}
+
+func TestLocalTimeOfSecondOfDay(t *testing.T) {
+	t.Run("valid second of day", func(t *testing.T) {
+		// Midnight (0 seconds)
+		lt, err := LocalTimeOfSecondOfDay(0)
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(0, 0, 0, 0), lt)
+
+		// 1 hour = 3,600 seconds
+		lt, err = LocalTimeOfSecondOfDay(3600)
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(1, 0, 0, 0), lt)
+
+		// 12:30:45 = 45,045 seconds
+		seconds := 12*3600 + 30*60 + 45
+		lt, err = LocalTimeOfSecondOfDay(seconds)
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(12, 30, 45, 0), lt)
+
+		// Last second of the day (23:59:59 = 86,399 seconds)
+		lt, err = LocalTimeOfSecondOfDay(86399)
+		require.NoError(t, err)
+		assert.Equal(t, MustNewLocalTime(23, 59, 59, 0), lt)
+	})
+
+	t.Run("invalid second of day", func(t *testing.T) {
+		// Negative value
+		_, err := LocalTimeOfSecondOfDay(-1)
+		assert.Error(t, err)
+
+		// Value >= 24 hours in seconds (86,400)
+		_, err = LocalTimeOfSecondOfDay(86400)
+		assert.Error(t, err)
+
+		// Large positive value
+		_, err = LocalTimeOfSecondOfDay(100000)
+		assert.Error(t, err)
+	})
+
+	t.Run("round trip with GetField", func(t *testing.T) {
+		// Create time from components (no nanoseconds)
+		original := MustNewLocalTime(15, 45, 30, 0)
+
+		// Get second of day
+		secondOfDay := int(original.GetField(FieldSecondOfDay).Int64())
+
+		// Create new time from second of day
+		reconstructed, err := LocalTimeOfSecondOfDay(secondOfDay)
+		require.NoError(t, err)
+
+		// Should be equal
+		assert.Equal(t, original, reconstructed)
+	})
+
+	t.Run("nanoseconds are zero", func(t *testing.T) {
+		// Create time from second of day
+		lt, err := LocalTimeOfSecondOfDay(12345)
+		require.NoError(t, err)
+
+		// Nanoseconds should be 0
+		assert.Equal(t, 0, lt.Nanosecond())
+	})
+}
+
+func TestMustLocalTimeOfSecondOfDay(t *testing.T) {
+	t.Run("valid value", func(t *testing.T) {
+		assert.NotPanics(t, func() {
+			lt := MustLocalTimeOfSecondOfDay(43200) // 12:00:00
+			assert.Equal(t, MustNewLocalTime(12, 0, 0, 0), lt)
+		})
+	})
+
+	t.Run("invalid value panics", func(t *testing.T) {
+		assert.Panics(t, func() {
+			MustLocalTimeOfSecondOfDay(-1)
+		})
+
+		assert.Panics(t, func() {
+			MustLocalTimeOfSecondOfDay(86400)
+		})
+	})
+}
+
+func TestLocalTimeOfDay_Consistency(t *testing.T) {
+	t.Run("second of day and nano of day consistency", func(t *testing.T) {
+		// For same second value, both constructors should create same time (ignoring nanos)
+		secondOfDay := 45045 // 12:30:45
+
+		lt1, err := LocalTimeOfSecondOfDay(secondOfDay)
+		require.NoError(t, err)
+
+		lt2, err := LocalTimeOfNanoOfDay(int64(secondOfDay) * int64(time.Second))
+		require.NoError(t, err)
+
+		assert.Equal(t, lt1, lt2)
+	})
+
+	t.Run("all valid times", func(t *testing.T) {
+		// Test several times throughout the day
+		testCases := []struct {
+			hour   int
+			minute int
+			second int
+			nano   int
+		}{
+			{0, 0, 0, 0},            // midnight
+			{6, 30, 15, 500000000},  // morning
+			{12, 0, 0, 0},           // noon
+			{18, 45, 30, 123456789}, // evening
+			{23, 59, 59, 999999999}, // last nanosecond
+		}
+
+		for _, tc := range testCases {
+			original := MustNewLocalTime(tc.hour, tc.minute, tc.second, tc.nano)
+
+			// Test nano of day round trip
+			nanoOfDay := original.GetField(FieldNanoOfDay).Int64()
+			fromNano := MustLocalTimeOfNanoOfDay(nanoOfDay)
+			assert.Equal(t, original, fromNano, "nano of day round trip failed for %02d:%02d:%02d.%09d",
+				tc.hour, tc.minute, tc.second, tc.nano)
+
+			// Test second of day round trip (only if no nanoseconds)
+			if tc.nano == 0 {
+				secondOfDay := int(original.GetField(FieldSecondOfDay).Int64())
+				fromSecond := MustLocalTimeOfSecondOfDay(secondOfDay)
+				assert.Equal(t, original, fromSecond, "second of day round trip failed for %02d:%02d:%02d",
+					tc.hour, tc.minute, tc.second)
+			}
+		}
+	})
+}
