@@ -260,8 +260,7 @@ func TestZoneId_AppendText(t *testing.T) {
 
 func TestZoneId_Scan(t *testing.T) {
 	t.Run("from nil", func(t *testing.T) {
-		var z ZoneId
-		z = MustZoneIdOf("UTC") // Set to non-zero first
+		var z = MustZoneIdOf("UTC") // Set to non-zero first
 		err := z.Scan(nil)
 		require.NoError(t, err)
 		assert.True(t, z.IsZero())
