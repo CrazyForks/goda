@@ -47,11 +47,7 @@ func NewLocalDateTime(year Year, month Month, day, hour, minute, second, nanosec
 // MustNewLocalDateTime creates a new LocalDateTime from individual components.
 // Panics if any component is invalid.
 func MustNewLocalDateTime(year Year, month Month, day, hour, minute, second, nanosecond int) LocalDateTime {
-	dt, err := NewLocalDateTime(year, month, day, hour, minute, second, nanosecond)
-	if err != nil {
-		panic(err)
-	}
-	return dt
+	return mustValue(NewLocalDateTime(year, month, day, hour, minute, second, nanosecond))
 }
 
 // LocalDateTimeNow returns the current date-time in the system's local time zone.
@@ -98,11 +94,7 @@ func ParseLocalDateTime(s string) (LocalDateTime, error) {
 // MustParseLocalDateTime parses a date-time string in yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] format.
 // Panics if the string is invalid.
 func MustParseLocalDateTime(s string) LocalDateTime {
-	dt, err := ParseLocalDateTime(s)
-	if err != nil {
-		panic(err)
-	}
-	return dt
+	return mustValue(ParseLocalDateTime(s))
 }
 
 // LocalDate returns the date part of this date-time.

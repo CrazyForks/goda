@@ -82,3 +82,10 @@ func compareZero[T interface{ IsZero() bool }](a, b T) int {
 	}
 	return 0
 }
+
+func mustValue[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}

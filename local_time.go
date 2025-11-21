@@ -377,11 +377,7 @@ func NewLocalTime(hour, minute, second, nanosecond int) (LocalTime, error) {
 // MustNewLocalTime creates a new LocalTime from the specified hour, minute, second, and nanosecond.
 // Panics if any component is out of range. Use NewLocalTime for error handling.
 func MustNewLocalTime(hour, minute, second, nanosecond int) LocalTime {
-	lt, err := NewLocalTime(hour, minute, second, nanosecond)
-	if err != nil {
-		panic(err)
-	}
-	return lt
+	return mustValue(NewLocalTime(hour, minute, second, nanosecond))
 }
 
 // LocalTimeOfGoTime creates a LocalTime from a time.Time.
@@ -423,11 +419,7 @@ func LocalTimeOfNanoOfDay(nanoOfDay int64) (LocalTime, error) {
 //	// Create time for 12:00:00
 //	lt := MustLocalTimeOfNanoOfDay(12 * 60 * 60 * 1000000000)
 func MustLocalTimeOfNanoOfDay(nanoOfDay int64) LocalTime {
-	lt, err := LocalTimeOfNanoOfDay(nanoOfDay)
-	if err != nil {
-		panic(err)
-	}
-	return lt
+	return mustValue(LocalTimeOfNanoOfDay(nanoOfDay))
 }
 
 // LocalTimeOfSecondOfDay creates a LocalTime from the second-of-day value.
@@ -458,11 +450,7 @@ func LocalTimeOfSecondOfDay(secondOfDay int) (LocalTime, error) {
 //	// Create time for 12:00:00
 //	lt := MustLocalTimeOfSecondOfDay(12 * 60 * 60)
 func MustLocalTimeOfSecondOfDay(secondOfDay int) LocalTime {
-	lt, err := LocalTimeOfSecondOfDay(secondOfDay)
-	if err != nil {
-		panic(err)
-	}
-	return lt
+	return mustValue(LocalTimeOfSecondOfDay(secondOfDay))
 }
 
 // LocalTimeNow returns the current time in the system's local time zone.
@@ -516,11 +504,7 @@ func ParseLocalTime(s string) (LocalTime, error) {
 //
 //	time := MustParseLocalTime("14:30:45.123456789")
 func MustParseLocalTime(s string) LocalTime {
-	t, err := ParseLocalTime(s)
-	if err != nil {
-		panic(err)
-	}
-	return t
+	return mustValue(ParseLocalTime(s))
 }
 
 // IsZero returns true if this is the zero value of LocalTime.

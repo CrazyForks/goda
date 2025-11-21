@@ -426,11 +426,7 @@ func NewLocalDate(year Year, month Month, dayOfMonth int) (d LocalDate, e error)
 // MustNewLocalDate creates a new LocalDate from the specified year, month, and day-of-month.
 // Panics if the date is invalid. Use NewLocalDate for error handling.
 func MustNewLocalDate(year Year, month Month, dayOfMonth int) LocalDate {
-	nld, e := NewLocalDate(year, month, dayOfMonth)
-	if e != nil {
-		panic(e)
-	}
-	return nld
+	return mustValue(NewLocalDate(year, month, dayOfMonth))
 }
 
 // LocalDateOfGoTime creates a LocalDate from a time.Time.
@@ -487,11 +483,7 @@ func ParseLocalDate(s string) (LocalDate, error) {
 //
 //	date := MustParseLocalDate("2024-03-15")
 func MustParseLocalDate(s string) LocalDate {
-	d, err := ParseLocalDate(s)
-	if err != nil {
-		panic(err)
-	}
-	return d
+	return mustValue(ParseLocalDate(s))
 }
 
 // AtTime combines this date with a time to create a LocalDateTime.

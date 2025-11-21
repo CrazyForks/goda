@@ -74,11 +74,7 @@ func ZoneOffsetOfSeconds(seconds int) (ZoneOffset, error) {
 // MustZoneOffsetOfSeconds creates a ZoneOffset from the total offset in seconds.
 // Panics if the offset is outside the valid range.
 func MustZoneOffsetOfSeconds(seconds int) ZoneOffset {
-	z, err := ZoneOffsetOfSeconds(seconds)
-	if err != nil {
-		panic(err)
-	}
-	return z
+	return mustValue(ZoneOffsetOfSeconds(seconds))
 }
 
 // ZoneOffsetOf creates a ZoneOffset from hours, minutes, and seconds.
@@ -126,11 +122,7 @@ func ZoneOffsetOf(hours, minutes, seconds int) (ZoneOffset, error) {
 // MustZoneOffsetOf creates a ZoneOffset from hours, minutes, and seconds.
 // Panics if the offset is invalid.
 func MustZoneOffsetOf(hours, minutes, seconds int) ZoneOffset {
-	z, err := ZoneOffsetOf(hours, minutes, seconds)
-	if err != nil {
-		panic(err)
-	}
-	return z
+	return mustValue(ZoneOffsetOf(hours, minutes, seconds))
 }
 
 // ZoneOffsetOfHours creates a ZoneOffset from hours only.
@@ -142,11 +134,7 @@ func ZoneOffsetOfHours(hours int) (ZoneOffset, error) {
 // MustZoneOffsetOfHours creates a ZoneOffset from hours only.
 // Panics if the offset is invalid.
 func MustZoneOffsetOfHours(hours int) ZoneOffset {
-	z, err := ZoneOffsetOfHours(hours)
-	if err != nil {
-		panic(err)
-	}
-	return z
+	return mustValue(ZoneOffsetOfHours(hours))
 }
 
 // ZoneOffsetOfHoursMinutes creates a ZoneOffset from hours and minutes.
@@ -158,11 +146,7 @@ func ZoneOffsetOfHoursMinutes(hours, minutes int) (ZoneOffset, error) {
 // MustZoneOffsetOfHoursMinutes creates a ZoneOffset from hours and minutes.
 // Panics if the offset is invalid.
 func MustZoneOffsetOfHoursMinutes(hours, minutes int) ZoneOffset {
-	z, err := ZoneOffsetOfHoursMinutes(hours, minutes)
-	if err != nil {
-		panic(err)
-	}
-	return z
+	return mustValue(ZoneOffsetOfHoursMinutes(hours, minutes))
 }
 
 // ParseZoneOffset parses a zone offset string.
@@ -185,11 +169,7 @@ func ParseZoneOffset(s string) (ZoneOffset, error) {
 // MustParseZoneOffset parses a zone offset string.
 // Panics if the string is invalid.
 func MustParseZoneOffset(s string) ZoneOffset {
-	z, err := ParseZoneOffset(s)
-	if err != nil {
-		panic(err)
-	}
-	return z
+	return mustValue(ParseZoneOffset(s))
 }
 
 // TotalSeconds returns the total zone offset in seconds.

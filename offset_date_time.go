@@ -44,11 +44,7 @@ func NewOffsetDateTime(year Year, month Month, day int, hour int, minute int, se
 // MustNewOffsetDateTime creates a new OffsetDateTime from individual components.
 // Panics if any component is invalid.
 func MustNewOffsetDateTime(year Year, month Month, day int, hour int, minute int, second int, nanosecond int, offset ZoneOffset) OffsetDateTime {
-	odt, err := NewOffsetDateTime(year, month, day, hour, minute, second, nanosecond, offset)
-	if err != nil {
-		panic(err)
-	}
-	return odt
+	return mustValue(NewOffsetDateTime(year, month, day, hour, minute, second, nanosecond, offset))
 }
 
 // OffsetDateTimeNow returns the current date-time with offset in the system's local time zone.
