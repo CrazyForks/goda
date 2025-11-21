@@ -108,11 +108,6 @@ func (z ZoneId) IsZero() bool {
 	return z.loc == nil
 }
 
-// goLocation is an internal accessor for the location.
-func (z ZoneId) goLocation() *time.Location {
-	return z.loc
-}
-
 // String returns the zone ID as a string, or empty string for zero value.
 func (z ZoneId) String() string {
 	if z.IsZero() {

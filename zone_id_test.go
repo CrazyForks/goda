@@ -175,16 +175,14 @@ func TestZoneId_UnmarshalJSON(t *testing.T) {
 	})
 
 	t.Run("null", func(t *testing.T) {
-		var z ZoneId
-		z = MustZoneIdOf("UTC") // Set to non-zero first
+		var z = MustZoneIdOf("UTC") // Set to non-zero first
 		err := json.Unmarshal([]byte(`null`), &z)
 		require.NoError(t, err)
 		assert.True(t, z.IsZero())
 	})
 
 	t.Run("empty string", func(t *testing.T) {
-		var z ZoneId
-		z = MustZoneIdOf("UTC") // Set to non-zero first
+		var z = MustZoneIdOf("UTC") // Set to non-zero first
 		err := json.Unmarshal([]byte(`""`), &z)
 		require.NoError(t, err)
 		assert.True(t, z.IsZero())
@@ -222,8 +220,7 @@ func TestZoneId_UnmarshalText(t *testing.T) {
 	})
 
 	t.Run("empty", func(t *testing.T) {
-		var z ZoneId
-		z = MustZoneIdOf("UTC") // Set to non-zero first
+		var z = MustZoneIdOf("UTC") // Set to non-zero first
 		err := z.UnmarshalText([]byte(""))
 		require.NoError(t, err)
 		assert.True(t, z.IsZero())
