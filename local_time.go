@@ -653,3 +653,8 @@ var _ json.Marshaler = (*LocalTime)(nil)
 var _ json.Unmarshaler = (*LocalTime)(nil)
 var _ driver.Valuer = (*LocalTime)(nil)
 var _ sql.Scanner = (*LocalTime)(nil)
+
+// Compile-time check that LocalTime is comparable
+func _assertLocalTimeIsComparable[T comparable](t T) {}
+
+var _ = _assertLocalTimeIsComparable[LocalTime]

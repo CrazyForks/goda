@@ -413,3 +413,8 @@ var (
 	_ driver.Valuer            = (*LocalDateTime)(nil)
 	_ sql.Scanner              = (*LocalDateTime)(nil)
 )
+
+// Compile-time check that LocalDateTime is comparable
+func _assertLocalDateTimeIsComparable[T comparable](t T) {}
+
+var _ = _assertLocalDateTimeIsComparable[LocalDateTime]

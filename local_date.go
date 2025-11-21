@@ -394,6 +394,11 @@ var _ json.Unmarshaler = (*LocalDate)(nil)
 var _ driver.Valuer = (*LocalDate)(nil)
 var _ sql.Scanner = (*LocalDate)(nil)
 
+// Compile-time check that LocalDate is comparable
+func _assertLocalDateIsComparable[T comparable](t T) {}
+
+var _ = _assertLocalDateIsComparable[LocalDate]
+
 // NewLocalDate creates a new LocalDate from the specified year, month, and day-of-month.
 // Returns an error if the date is invalid (e.g., month out of range 1-12,
 // day out of range for the month, or February 29 in a non-leap year).

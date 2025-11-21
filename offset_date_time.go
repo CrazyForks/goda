@@ -529,3 +529,8 @@ var (
 	_ driver.Valuer            = (*OffsetDateTime)(nil)
 	_ sql.Scanner              = (*OffsetDateTime)(nil)
 )
+
+// Compile-time check that OffsetDateTime is comparable
+func _assertOffsetDateTimeIsComparable[T comparable](t T) {}
+
+var _ = _assertOffsetDateTimeIsComparable[OffsetDateTime]

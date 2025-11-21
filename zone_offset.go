@@ -419,3 +419,8 @@ var (
 	_ json.Unmarshaler         = (*ZoneOffset)(nil)
 	_ TemporalAccessor         = (*ZoneOffset)(nil)
 )
+
+// Compile-time check that ZoneOffset is comparable
+func _assertZoneOffsetIsComparable[T comparable](t T) {}
+
+var _ = _assertZoneOffsetIsComparable[ZoneOffset]
