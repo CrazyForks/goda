@@ -385,14 +385,16 @@ func (d LocalDate) IsZero() bool {
 	return d.v == 0
 }
 
-var _ encoding.TextAppender = (*LocalDate)(nil)
-var _ fmt.Stringer = (*LocalDate)(nil)
-var _ encoding.TextMarshaler = (*LocalDate)(nil)
-var _ encoding.TextUnmarshaler = (*LocalDate)(nil)
-var _ json.Marshaler = (*LocalDate)(nil)
-var _ json.Unmarshaler = (*LocalDate)(nil)
-var _ driver.Valuer = (*LocalDate)(nil)
-var _ sql.Scanner = (*LocalDate)(nil)
+var (
+	_ encoding.TextAppender    = (*LocalDate)(nil)
+	_ fmt.Stringer             = (*LocalDate)(nil)
+	_ encoding.TextMarshaler   = (*LocalDate)(nil)
+	_ encoding.TextUnmarshaler = (*LocalDate)(nil)
+	_ json.Marshaler           = (*LocalDate)(nil)
+	_ json.Unmarshaler         = (*LocalDate)(nil)
+	_ driver.Valuer            = (*LocalDate)(nil)
+	_ sql.Scanner              = (*LocalDate)(nil)
+)
 
 // Compile-time check that LocalDate is comparable
 func _assertLocalDateIsComparable[T comparable](t T) {}

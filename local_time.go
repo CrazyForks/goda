@@ -645,14 +645,16 @@ func (t LocalTime) plusNanos(nanosToAdd int64) LocalTime {
 	return LocalTime{v: newNanos | localTimeValidBit}
 }
 
-var _ encoding.TextAppender = (*LocalTime)(nil)
-var _ fmt.Stringer = (*LocalTime)(nil)
-var _ encoding.TextMarshaler = (*LocalTime)(nil)
-var _ encoding.TextUnmarshaler = (*LocalTime)(nil)
-var _ json.Marshaler = (*LocalTime)(nil)
-var _ json.Unmarshaler = (*LocalTime)(nil)
-var _ driver.Valuer = (*LocalTime)(nil)
-var _ sql.Scanner = (*LocalTime)(nil)
+var (
+	_ encoding.TextAppender    = (*LocalTime)(nil)
+	_ fmt.Stringer             = (*LocalTime)(nil)
+	_ encoding.TextMarshaler   = (*LocalTime)(nil)
+	_ encoding.TextUnmarshaler = (*LocalTime)(nil)
+	_ json.Marshaler           = (*LocalTime)(nil)
+	_ json.Unmarshaler         = (*LocalTime)(nil)
+	_ driver.Valuer            = (*LocalTime)(nil)
+	_ sql.Scanner              = (*LocalTime)(nil)
+)
 
 // Compile-time check that LocalTime is comparable
 func _assertLocalTimeIsComparable[T comparable](t T) {}
