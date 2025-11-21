@@ -1088,3 +1088,198 @@ func ExampleOffsetDateTime_UnmarshalJSON() {
 	// Year: 2024
 	// Offset: 8 hours
 }
+
+// ExampleZoneId demonstrates basic ZoneId usage.
+func ExampleZoneId() {
+	// Create zone IDs for different time zones
+	newYork, _ := goda.ZoneIdOf("America/New_York")
+	fmt.Println("New York:", newYork)
+
+	tokyo := goda.MustZoneIdOf("Asia/Tokyo")
+	fmt.Println("Tokyo:", tokyo)
+
+	// UTC is a common zone
+	utc := goda.ZoneIdUTC()
+	fmt.Println("UTC:", utc)
+
+	// Get system's default zone
+	defaultZone := goda.ZoneIdDefault()
+	fmt.Printf("Has default zone: %v\n", !defaultZone.IsZero())
+
+	// Output:
+	// New York: America/New_York
+	// Tokyo: Asia/Tokyo
+	// UTC: UTC
+	// Has default zone: true
+}
+
+// ExampleZoneIdOf demonstrates creating a ZoneId from a string.
+func ExampleZoneIdOf() {
+	// Valid zone ID
+	zone, err := goda.ZoneIdOf("Europe/London")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Zone:", zone)
+
+	// Invalid zone ID returns error
+	_, err = goda.ZoneIdOf("Invalid/Zone")
+	if err != nil {
+		fmt.Println("Got expected error for invalid zone")
+	}
+
+	// Output:
+	// Zone: Europe/London
+	// Got expected error for invalid zone
+}
+
+// ExampleMustZoneIdOf demonstrates creating a ZoneId that panics on error.
+func ExampleMustZoneIdOf() {
+	// Valid zone ID
+	zone := goda.MustZoneIdOf("Asia/Shanghai")
+	fmt.Println(zone)
+
+	// Output:
+	// Asia/Shanghai
+}
+
+// ExampleZoneIdUTC demonstrates getting the UTC zone.
+func ExampleZoneIdUTC() {
+	utc := goda.ZoneIdUTC()
+	fmt.Println("Zone:", utc)
+	fmt.Println("Is UTC:", utc.String() == "UTC")
+
+	// Output:
+	// Zone: UTC
+	// Is UTC: true
+}
+
+// ExampleZoneIdOfGoLocation demonstrates creating a ZoneId from time.Location.
+func ExampleZoneIdOfGoLocation() {
+	// From Go's time.UTC
+	utcZone := goda.ZoneIdOfGoLocation(time.UTC)
+	fmt.Println("UTC:", utcZone)
+
+	// From Go's time.Local
+	localZone := goda.ZoneIdOfGoLocation(time.Local)
+	fmt.Printf("Has local zone: %v\n", !localZone.IsZero())
+
+	// From loaded location
+	paris, _ := time.LoadLocation("Europe/Paris")
+	parisZone := goda.ZoneIdOfGoLocation(paris)
+	fmt.Println("Paris:", parisZone)
+
+	// Output:
+	// UTC: UTC
+	// Has local zone: true
+	// Paris: Europe/Paris
+}
+
+// ExampleZoneIdDefault demonstrates getting the system's default zone.
+func ExampleZoneIdDefault() {
+	defaultZone := goda.ZoneIdDefault()
+	fmt.Printf("Has default zone: %v\n", !defaultZone.IsZero())
+	fmt.Printf("Zone name not empty: %v\n", defaultZone.String() != "")
+
+	// Output:
+	// Has default zone: true
+	// Zone name not empty: true
+}
+
+// ExampleZoneId_IsZero demonstrates checking for zero value.
+func ExampleZoneId_IsZero() {
+	// Zero value
+	var zero goda.ZoneId
+	fmt.Println("Zero is zero:", zero.IsZero())
+
+	// Non-zero value
+	zone := goda.ZoneIdUTC()
+	fmt.Println("UTC is zero:", zone.IsZero())
+
+	// Output:
+	// Zero is zero: true
+	// UTC is zero: false
+}
+
+// ExampleZoneId_String demonstrates getting the string representation.
+func ExampleZoneId_String() {
+	// Various zones
+	zones := []string{
+		"America/New_York",
+		"Europe/London",
+		"Asia/Tokyo",
+		"Australia/Sydney",
+	}
+
+	for _, name := range zones {
+		zone := goda.MustZoneIdOf(name)
+		fmt.Println(zone.String())
+	}
+
+	// Output:
+	// America/New_York
+	// Europe/London
+	// Asia/Tokyo
+	// Australia/Sydney
+}
+
+// ExampleZoneId_MarshalJSON demonstrates JSON serialization.
+func ExampleZoneId_MarshalJSON() {
+	zone := goda.MustZoneIdOf("Asia/Singapore")
+	jsonBytes, _ := json.Marshal(zone)
+	fmt.Println(string(jsonBytes))
+
+	// Zero value
+	var zero goda.ZoneId
+	zeroBytes, _ := json.Marshal(zero)
+	fmt.Println(string(zeroBytes))
+
+	// Output:
+	// "Asia/Singapore"
+	// ""
+}
+
+// ExampleZoneId_UnmarshalJSON demonstrates JSON deserialization.
+func ExampleZoneId_UnmarshalJSON() {
+	// From JSON string
+	var zone goda.ZoneId
+	err := json.Unmarshal([]byte(`"Europe/Berlin"`), &zone)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Zone:", zone)
+
+	// From JSON null
+	var nullZone goda.ZoneId
+	_ = json.Unmarshal([]byte(`null`), &nullZone)
+	fmt.Println("Null is zero:", nullZone.IsZero())
+
+	// Output:
+	// Zone: Europe/Berlin
+	// Null is zero: true
+}
+
+// ExampleZoneId_roundTrip demonstrates serialization round-trip.
+func ExampleZoneId_roundTrip() {
+	// Original zone
+	original := goda.MustZoneIdOf("Pacific/Auckland")
+
+	// Serialize to JSON
+	jsonData, _ := json.Marshal(original)
+
+	// Deserialize from JSON
+	var restored goda.ZoneId
+	_ = json.Unmarshal(jsonData, &restored)
+
+	// Compare
+	fmt.Println("Original:", original)
+	fmt.Println("Restored:", restored)
+	fmt.Println("Same:", original.String() == restored.String())
+
+	// Output:
+	// Original: Pacific/Auckland
+	// Restored: Pacific/Auckland
+	// Same: true
+}
