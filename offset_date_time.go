@@ -189,31 +189,10 @@ func (odt OffsetDateTime) ToEpochSecond() int64 {
 }
 
 // Compare compares this offset date-time with another.
-// The comparison is based on the instant represented by the offset date-time.
+// The comparison is based on the instant then on the local date-time.
 // Returns -1 if this is before other, 0 if equal, 1 if after.
 func (odt OffsetDateTime) Compare(other OffsetDateTime) int {
-	if cmp := compareZero(odt, other); cmp != 0 {
-		return cmp
-	}
-	// Compare by instant (epoch seconds)
-	s1 := odt.ToEpochSecond()
-	s2 := other.ToEpochSecond()
-	if s1 < s2 {
-		return -1
-	}
-	if s1 > s2 {
-		return 1
-	}
-	// Same instant, compare nanoseconds
-	n1 := odt.Nanosecond()
-	n2 := other.Nanosecond()
-	if n1 < n2 {
-		return -1
-	}
-	if n1 > n2 {
-		return 1
-	}
-	return 0
+	return doCompare(odt, other, comparing(OffsetDateTime.ToEpochSecond), comparing(OffsetDateTime.Nanosecond), comparing1(OffsetDateTime.LocalDateTime))
 }
 
 // IsBefore returns true if this offset date-time is before the specified offset date-time.

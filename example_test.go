@@ -1020,7 +1020,6 @@ func ExampleOffsetDateTime_Compare() {
 	}
 
 	// Output:
-	// Same instant
 	// odt3 is later
 }
 

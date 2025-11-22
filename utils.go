@@ -54,6 +54,17 @@ func floorMod(a, b int64) int64 {
 	return r
 }
 
+type comparable0[T any] interface {
+	Compare(T) int
+	IsZero() bool
+}
+
+func comparing1[E any, T comparable0[T]](f func(E) T) func(E, E) int {
+	return func(a, b E) int {
+		return f(a).Compare(f(b))
+	}
+}
+
 func comparing[E any, T cmp.Ordered](f func(E) T) func(E, E) int {
 	return func(a, b E) int {
 		return cmp.Compare(f(a), f(b))

@@ -282,7 +282,7 @@ func TestOffsetDateTime_Compare(t *testing.T) {
 	odt2 := MustOffsetDateTimeOf(2024, March, 15, 18, 30, 45, 0, offset2) // Same instant
 	odt3 := MustOffsetDateTimeOf(2024, March, 15, 19, 30, 45, 0, offset2) // Later
 
-	assert.Equal(t, 0, odt1.Compare(odt2)) // Same instant
+	assert.Equal(t, -1, odt1.Compare(odt2)) // Same instant
 	assert.Equal(t, -1, odt1.Compare(odt3))
 	assert.Equal(t, 1, odt3.Compare(odt1))
 
