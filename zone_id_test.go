@@ -57,34 +57,6 @@ func TestMustZoneIdOf(t *testing.T) {
 	})
 }
 
-func TestNewZoneId(t *testing.T) {
-	t.Run("valid zone ID", func(t *testing.T) {
-		z, err := NewZoneId("Asia/Tokyo")
-		require.NoError(t, err)
-		assert.Equal(t, "Asia/Tokyo", z.String())
-	})
-
-	t.Run("invalid zone ID", func(t *testing.T) {
-		_, err := NewZoneId("Bad/Zone")
-		assert.Error(t, err)
-	})
-}
-
-func TestMustNewZoneId(t *testing.T) {
-	t.Run("valid zone ID", func(t *testing.T) {
-		assert.NotPanics(t, func() {
-			z := MustNewZoneId("Europe/Paris")
-			assert.Equal(t, "Europe/Paris", z.String())
-		})
-	})
-
-	t.Run("invalid zone ID panics", func(t *testing.T) {
-		assert.Panics(t, func() {
-			MustNewZoneId("Fake/Zone")
-		})
-	})
-}
-
 func TestZoneIdUTC(t *testing.T) {
 	z := ZoneIdUTC()
 	assert.False(t, z.IsZero())

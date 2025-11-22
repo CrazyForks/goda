@@ -65,19 +65,6 @@ func MustZoneIdOf(id string) ZoneId {
 	return mustValue(ZoneIdOf(id))
 }
 
-// NewZoneId creates a ZoneId from a time zone identifier string.
-// This is an alias for ZoneIdOf for consistency with other constructors.
-func NewZoneId(id string) (ZoneId, error) {
-	return ZoneIdOf(id)
-}
-
-// MustNewZoneId creates a ZoneId from a time zone identifier string.
-// This is an alias for MustZoneIdOf for consistency with other constructors.
-// Panics if the zone ID is invalid.
-func MustNewZoneId(id string) ZoneId {
-	return mustValue(ZoneIdOf(id))
-}
-
 // ZoneIdUTC returns a ZoneId representing UTC (Coordinated Universal Time).
 func ZoneIdUTC() ZoneId {
 	return ZoneId{time.UTC}
