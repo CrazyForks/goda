@@ -11,11 +11,11 @@ import (
 // Example demonstrates basic usage of the goda package.
 func Example() {
 	// Create a specific date
-	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
 	fmt.Println("LocalDate:", date)
 
 	// Create a specific time
-	timeOfDay := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	timeOfDay := goda.MustLocalTimeOf(14, 30, 45, 123456789)
 	fmt.Println("LocalTime:", timeOfDay)
 
 	// Get current date and time
@@ -70,10 +70,10 @@ func ExampleLocalDateNowIn() {
 	// Valid: true
 }
 
-// ExampleParseLocalDate demonstrates parsing a date from a string.
-func ExampleParseLocalDate() {
+// ExampleLocalDateParse demonstrates parsing a date from a string.
+func ExampleLocalDateParse() {
 	// Parse a date string
-	date, err := goda.ParseLocalDate("2024-03-15")
+	date, err := goda.LocalDateParse("2024-03-15")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -84,10 +84,10 @@ func ExampleParseLocalDate() {
 	// 2024-03-15
 }
 
-// ExampleMustParseLocalDate demonstrates parsing a date that panics on error.
-func ExampleMustParseLocalDate() {
+// ExampleMustLocalDateParse demonstrates parsing a date that panics on error.
+func ExampleMustLocalDateParse() {
 	// Parse a date string (panics if invalid)
-	date := goda.MustParseLocalDate("2024-03-15")
+	date := goda.MustLocalDateParse("2024-03-15")
 	fmt.Println(date)
 
 	// Output:
@@ -95,9 +95,9 @@ func ExampleMustParseLocalDate() {
 }
 
 // ExampleNewLocalDate demonstrates how to create a date.
-func ExampleNewLocalDate() {
+func ExampleLocalDateOf() {
 	// Create a valid date
-	date, err := goda.NewLocalDate(2024, goda.January, 15)
+	date, err := goda.LocalDateOf(2024, goda.January, 15)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -105,7 +105,7 @@ func ExampleNewLocalDate() {
 	fmt.Println(date)
 
 	// Try to create an invalid date
-	_, err = goda.NewLocalDate(2024, goda.February, 30)
+	_, err = goda.LocalDateOf(2024, goda.February, 30)
 	fmt.Println("Error:", err)
 
 	// Output:
@@ -114,9 +114,9 @@ func ExampleNewLocalDate() {
 }
 
 // ExampleMustNewLocalDate demonstrates how to create a date that panics on error.
-func ExampleMustNewLocalDate() {
+func ExampleMustLocalDateOf() {
 	// Create a date (panics if invalid)
-	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
 	fmt.Println(date)
 
 	// Output:
@@ -136,7 +136,7 @@ func ExampleLocalDateOfGoTime() {
 
 // ExampleLocalDate_PlusDays demonstrates adding days to a date.
 func ExampleLocalDate_PlusDays() {
-	date := goda.MustNewLocalDate(2024, goda.January, 15)
+	date := goda.MustLocalDateOf(2024, goda.January, 15)
 	fmt.Println("Original:", date)
 	fmt.Println("Plus 10 days:", date.PlusDays(10))
 	fmt.Println("Minus 10 days:", date.PlusDays(-10))
@@ -149,7 +149,7 @@ func ExampleLocalDate_PlusDays() {
 
 // ExampleLocalDate_PlusMonths demonstrates adding months to a date.
 func ExampleLocalDate_PlusMonths() {
-	date := goda.MustNewLocalDate(2024, goda.January, 31)
+	date := goda.MustLocalDateOf(2024, goda.January, 31)
 	fmt.Println("Original:", date)
 	fmt.Println("Plus 1 month:", date.PlusMonths(1))
 	fmt.Println("Plus 2 months:", date.PlusMonths(2))
@@ -162,9 +162,9 @@ func ExampleLocalDate_PlusMonths() {
 
 // ExampleLocalDate_Compare demonstrates comparing dates.
 func ExampleLocalDate_Compare() {
-	date1 := goda.MustNewLocalDate(2024, goda.March, 15)
-	date2 := goda.MustNewLocalDate(2024, goda.March, 20)
-	date3 := goda.MustNewLocalDate(2024, goda.March, 15)
+	date1 := goda.MustLocalDateOf(2024, goda.March, 15)
+	date2 := goda.MustLocalDateOf(2024, goda.March, 20)
+	date3 := goda.MustLocalDateOf(2024, goda.March, 15)
 
 	fmt.Println("date1 < date2:", date1.IsBefore(date2))
 	fmt.Println("date1 > date2:", date1.IsAfter(date2))
@@ -178,7 +178,7 @@ func ExampleLocalDate_Compare() {
 
 // ExampleLocalDate_DayOfWeek demonstrates getting the day of week.
 func ExampleLocalDate_DayOfWeek() {
-	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
 	fmt.Println("Day of week:", date.DayOfWeek())
 	fmt.Println("Is Friday?", date.DayOfWeek() == goda.Friday)
 
@@ -226,10 +226,10 @@ func ExampleLocalTimeNowIn() {
 	// Valid: true
 }
 
-// ExampleParseLocalTime demonstrates parsing a time from a string.
-func ExampleParseLocalTime() {
+// ExampleLocalTimeParse demonstrates parsing a time from a string.
+func ExampleLocalTimeParse() {
 	// Parse a time string
-	t, err := goda.ParseLocalTime("14:30:45.123456789")
+	t, err := goda.LocalTimeParse("14:30:45.123456789")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -240,20 +240,20 @@ func ExampleParseLocalTime() {
 	// 14:30:45.123456789
 }
 
-// ExampleMustParseLocalTime demonstrates parsing a time that panics on error.
-func ExampleMustParseLocalTime() {
+// ExampleMustLocalTimeParse demonstrates parsing a time that panics on error.
+func ExampleMustLocalTimeParse() {
 	// Parse a time string (panics if invalid)
-	t := goda.MustParseLocalTime("14:30:45")
+	t := goda.MustLocalTimeParse("14:30:45")
 	fmt.Println(t)
 
 	// Output:
 	// 14:30:45
 }
 
-// ExampleNewLocalTime demonstrates how to create a time.
-func ExampleNewLocalTime() {
+// ExampleLocalTimeOf demonstrates how to create a time.
+func ExampleLocalTimeOf() {
 	// Create a valid time
-	t, err := goda.NewLocalTime(14, 30, 45, 123456789)
+	t, err := goda.LocalTimeOf(14, 30, 45, 123456789)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -261,7 +261,7 @@ func ExampleNewLocalTime() {
 	fmt.Println(t)
 
 	// Try to create an invalid time
-	_, err = goda.NewLocalTime(25, 0, 0, 0)
+	_, err = goda.LocalTimeOf(25, 0, 0, 0)
 	fmt.Println("Error:", err)
 
 	// Output:
@@ -269,14 +269,14 @@ func ExampleNewLocalTime() {
 	// Error: goda: hour 25 out of range
 }
 
-// ExampleMustNewLocalTime demonstrates how to create a time that panics on error.
-func ExampleMustNewLocalTime() {
+// ExampleMustLocalTimeOf demonstrates how to create a time that panics on error.
+func ExampleMustLocalTimeOf() {
 	// Create a time (panics if invalid)
-	t := goda.MustNewLocalTime(14, 30, 45, 0)
+	t := goda.MustLocalTimeOf(14, 30, 45, 0)
 	fmt.Println(t)
 
 	// Midnight
-	midnight := goda.MustNewLocalTime(0, 0, 0, 0)
+	midnight := goda.MustLocalTimeOf(0, 0, 0, 0)
 	fmt.Println("Midnight:", midnight)
 
 	// Output:
@@ -297,7 +297,7 @@ func ExampleLocalTimeOfGoTime() {
 
 // ExampleLocalTime_hour demonstrates accessing time components.
 func ExampleLocalTime_hour() {
-	t := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	t := goda.MustLocalTimeOf(14, 30, 45, 123456789)
 	fmt.Println("Hour:", t.Hour())
 	fmt.Println("Minute:", t.Minute())
 	fmt.Println("Second:", t.Second())
@@ -314,9 +314,9 @@ func ExampleLocalTime_hour() {
 
 // ExampleLocalTime_Compare demonstrates comparing times.
 func ExampleLocalTime_Compare() {
-	t1 := goda.MustNewLocalTime(14, 30, 0, 0)
-	t2 := goda.MustNewLocalTime(15, 0, 0, 0)
-	t3 := goda.MustNewLocalTime(14, 30, 0, 0)
+	t1 := goda.MustLocalTimeOf(14, 30, 0, 0)
+	t2 := goda.MustLocalTimeOf(15, 0, 0, 0)
+	t3 := goda.MustLocalTimeOf(14, 30, 0, 0)
 
 	fmt.Println("t1 < t2:", t1.IsBefore(t2))
 	fmt.Println("t1 > t2:", t1.IsAfter(t2))
@@ -331,23 +331,23 @@ func ExampleLocalTime_Compare() {
 // ExampleLocalTime_String demonstrates the string format with fractional seconds.
 func ExampleLocalTime_String() {
 	// LocalTime without fractional seconds
-	t1 := goda.MustNewLocalTime(14, 30, 45, 0)
+	t1 := goda.MustLocalTimeOf(14, 30, 45, 0)
 	fmt.Println(t1)
 
 	// LocalTime with milliseconds
-	t2 := goda.MustNewLocalTime(14, 30, 45, 123000000)
+	t2 := goda.MustLocalTimeOf(14, 30, 45, 123000000)
 	fmt.Println(t2)
 
 	// LocalTime with microseconds
-	t3 := goda.MustNewLocalTime(14, 30, 45, 123456000)
+	t3 := goda.MustLocalTimeOf(14, 30, 45, 123456000)
 	fmt.Println(t3)
 
 	// LocalTime with nanoseconds
-	t4 := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	t4 := goda.MustLocalTimeOf(14, 30, 45, 123456789)
 	fmt.Println(t4)
 
 	// LocalTime with trailing zeros aligned to 3-digit boundaries
-	t5 := goda.MustNewLocalTime(14, 30, 45, 100000000)
+	t5 := goda.MustLocalTimeOf(14, 30, 45, 100000000)
 	fmt.Println(t5)
 
 	// Output:
@@ -391,7 +391,7 @@ func ExampleYear_IsLeapYear() {
 
 // ExampleLocalDate_MarshalJSON demonstrates JSON serialization.
 func ExampleLocalDate_MarshalJSON() {
-	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
 	jsonBytes, _ := json.Marshal(date)
 	fmt.Println(string(jsonBytes))
 
@@ -416,7 +416,7 @@ func ExampleLocalDate_UnmarshalJSON() {
 
 // ExampleLocalTime_MarshalJSON demonstrates JSON serialization.
 func ExampleLocalTime_MarshalJSON() {
-	t := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	t := goda.MustLocalTimeOf(14, 30, 45, 123456789)
 	jsonBytes, _ := json.Marshal(t)
 	fmt.Println(string(jsonBytes))
 
@@ -442,7 +442,7 @@ func ExampleLocalTime_UnmarshalJSON() {
 // ExampleLocalDateTime demonstrates basic LocalDateTime usage.
 func ExampleLocalDateTime() {
 	// Create from components
-	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
+	dt := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 123456789)
 	fmt.Println(dt)
 
 	// Access date and time parts
@@ -459,9 +459,9 @@ func ExampleLocalDateTime() {
 	// Year: 2024, Hour: 14
 }
 
-// ExampleParseLocalDateTime demonstrates parsing a datetime from a string.
-func ExampleParseLocalDateTime() {
-	dt, err := goda.ParseLocalDateTime("2024-03-15T14:30:45.123456789")
+// ExampleLocalDateTimeParse demonstrates parsing a datetime from a string.
+func ExampleLocalDateTimeParse() {
+	dt, err := goda.LocalDateTimeParse("2024-03-15T14:30:45.123456789")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -472,9 +472,9 @@ func ExampleParseLocalDateTime() {
 	// 2024-03-15T14:30:45.123456789
 }
 
-// ExampleMustParseLocalDateTime demonstrates parsing that panics on error.
-func ExampleMustParseLocalDateTime() {
-	dt := goda.MustParseLocalDateTime("2024-03-15T14:30:45")
+// ExampleMustLocalDateTimeParse demonstrates parsing that panics on error.
+func ExampleMustLocalDateTimeParse() {
+	dt := goda.MustLocalDateTimeParse("2024-03-15T14:30:45")
 	fmt.Println(dt)
 
 	// Output:
@@ -483,8 +483,8 @@ func ExampleMustParseLocalDateTime() {
 
 // ExampleLocalDate_AtTime demonstrates creating a datetime from date and time.
 func ExampleLocalDate_AtTime() {
-	date := goda.MustNewLocalDate(2024, goda.March, 15)
-	time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
+	time := goda.MustLocalTimeOf(14, 30, 45, 123456789)
 	dt := date.AtTime(time)
 	fmt.Println(dt)
 
@@ -494,8 +494,8 @@ func ExampleLocalDate_AtTime() {
 
 // ExampleLocalTime_AtDate demonstrates creating a datetime from time and date.
 func ExampleLocalTime_AtDate() {
-	time := goda.MustNewLocalTime(14, 30, 45, 123456789)
-	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	time := goda.MustLocalTimeOf(14, 30, 45, 123456789)
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
 	dt := time.AtDate(date)
 	fmt.Println(dt)
 
@@ -518,9 +518,9 @@ func ExampleLocalDateTimeNow() {
 
 // ExampleLocalDateTime_Compare demonstrates comparing datetimes.
 func ExampleLocalDateTime_Compare() {
-	dt1 := goda.MustParseLocalDateTime("2024-03-15T14:30:45")
-	dt2 := goda.MustParseLocalDateTime("2024-03-15T14:30:45")
-	dt3 := goda.MustParseLocalDateTime("2024-03-15T15:30:45")
+	dt1 := goda.MustLocalDateTimeParse("2024-03-15T14:30:45")
+	dt2 := goda.MustLocalDateTimeParse("2024-03-15T14:30:45")
+	dt3 := goda.MustLocalDateTimeParse("2024-03-15T15:30:45")
 
 	fmt.Printf("dt1 == dt2: %v\n", dt1.Compare(dt2) == 0)
 	fmt.Printf("dt1 < dt3: %v\n", dt1.IsBefore(dt3))
@@ -534,7 +534,7 @@ func ExampleLocalDateTime_Compare() {
 
 // ExampleLocalDateTime_PlusDays demonstrates adding days.
 func ExampleLocalDateTime_PlusDays() {
-	dt := goda.MustParseLocalDateTime("2024-03-15T14:30:45")
+	dt := goda.MustLocalDateTimeParse("2024-03-15T14:30:45")
 	future := dt.PlusDays(10)
 	fmt.Println(future)
 
@@ -544,7 +544,7 @@ func ExampleLocalDateTime_PlusDays() {
 
 // ExampleLocalDateTime_MarshalJSON demonstrates JSON serialization.
 func ExampleLocalDateTime_MarshalJSON() {
-	dt := goda.MustParseLocalDateTime("2024-03-15T14:30:45.123456789")
+	dt := goda.MustLocalDateTimeParse("2024-03-15T14:30:45.123456789")
 	jsonBytes, _ := json.Marshal(dt)
 	fmt.Println(string(jsonBytes))
 
@@ -569,7 +569,7 @@ func ExampleLocalDateTime_UnmarshalJSON() {
 
 // ExampleLocalDateTime_IsSupportedField demonstrates checking field support.
 func ExampleLocalDateTime_IsSupportedField() {
-	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 0)
+	dt := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0)
 
 	fmt.Printf("Supports FieldHourOfDay: %v\n", dt.IsSupportedField(goda.FieldHourOfDay))
 	fmt.Printf("Supports FieldDayOfMonth: %v\n", dt.IsSupportedField(goda.FieldDayOfMonth))
@@ -583,7 +583,7 @@ func ExampleLocalDateTime_IsSupportedField() {
 
 // ExampleLocalDate_GetField demonstrates querying date fields with TemporalValue.
 func ExampleLocalDate_GetField() {
-	date := goda.MustNewLocalDate(2024, goda.March, 15) // Friday
+	date := goda.MustLocalDateOf(2024, goda.March, 15) // Friday
 
 	// Query various date fields
 	dayOfWeek := date.GetField(goda.FieldDayOfWeek)
@@ -616,7 +616,7 @@ func ExampleLocalDate_GetField() {
 
 // ExampleLocalDate_GetField_advancedFields demonstrates advanced date field queries.
 func ExampleLocalDate_GetField_advancedFields() {
-	date := goda.MustNewLocalDate(2024, goda.March, 15)
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
 
 	// Day of year (1-366)
 	dayOfYear := date.GetField(goda.FieldDayOfYear)
@@ -645,7 +645,7 @@ func ExampleLocalDate_GetField_advancedFields() {
 
 // ExampleLocalTime_GetField demonstrates querying time fields with TemporalValue.
 func ExampleLocalTime_GetField() {
-	t := goda.MustNewLocalTime(14, 30, 45, 123456789)
+	t := goda.MustLocalTimeOf(14, 30, 45, 123456789)
 
 	// Query various time fields
 	hour := t.GetField(goda.FieldHourOfDay)
@@ -685,7 +685,7 @@ func ExampleLocalTime_GetField() {
 // ExampleLocalTime_GetField_clockHours demonstrates 12-hour clock field queries.
 func ExampleLocalTime_GetField_clockHours() {
 	// Afternoon time (2:30 PM)
-	afternoon := goda.MustNewLocalTime(14, 30, 0, 0)
+	afternoon := goda.MustLocalTimeOf(14, 30, 0, 0)
 
 	// 24-hour format
 	hourOfDay := afternoon.GetField(goda.FieldHourOfDay)
@@ -705,7 +705,7 @@ func ExampleLocalTime_GetField_clockHours() {
 	fmt.Printf("Clock hour (1-12): %d:30 %s\n", clockHour.Int(), amPmStr)
 
 	// Midnight special case
-	midnight := goda.MustNewLocalTime(0, 0, 0, 0)
+	midnight := goda.MustLocalTimeOf(0, 0, 0, 0)
 	midnightClock := midnight.GetField(goda.FieldClockHourOfDay)
 	fmt.Printf("Midnight clock hour: %d:00\n", midnightClock.Int())
 
@@ -718,7 +718,7 @@ func ExampleLocalTime_GetField_clockHours() {
 
 // ExampleLocalTime_GetField_ofDayFields demonstrates querying cumulative daily values.
 func ExampleLocalTime_GetField_ofDayFields() {
-	t := goda.MustNewLocalTime(14, 30, 45, 500000000) // 2:30:45.5 PM
+	t := goda.MustLocalTimeOf(14, 30, 45, 500000000) // 2:30:45.5 PM
 
 	// Total seconds elapsed since midnight
 	secondOfDay := t.GetField(goda.FieldSecondOfDay)
@@ -745,7 +745,7 @@ func ExampleLocalTime_GetField_ofDayFields() {
 
 // ExampleLocalDateTime_GetField demonstrates querying fields from a date-time.
 func ExampleLocalDateTime_GetField() {
-	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
+	dt := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 123456789)
 
 	// Query date fields
 	year := dt.GetField(goda.FieldYear)
@@ -779,7 +779,7 @@ func ExampleLocalDateTime_GetField() {
 
 // ExampleLocalDateTime_GetField_delegation demonstrates field delegation.
 func ExampleLocalDateTime_GetField_delegation() {
-	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 0)
+	dt := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0)
 
 	// LocalDateTime delegates date fields to LocalDate
 	dayOfYear := dt.GetField(goda.FieldDayOfYear)
@@ -826,19 +826,19 @@ func ExampleZoneOffset() {
 	// JST: +09:00
 }
 
-// ExampleParseZoneOffset demonstrates parsing zone offsets.
-func ExampleParseZoneOffset() {
+// ExampleZoneOffsetParse demonstrates parsing zone offsets.
+func ExampleZoneOffsetParse() {
 	// Parse various formats
-	z1 := goda.MustParseZoneOffset("Z")
+	z1 := goda.MustZoneOffsetParse("Z")
 	fmt.Println("Z:", z1.TotalSeconds())
 
-	z2 := goda.MustParseZoneOffset("+02:00")
+	z2 := goda.MustZoneOffsetParse("+02:00")
 	fmt.Println("+02:00:", z2.TotalSeconds())
 
-	z3 := goda.MustParseZoneOffset("-05:30")
+	z3 := goda.MustZoneOffsetParse("-05:30")
 	fmt.Println("-05:30:", z3.TotalSeconds())
 
-	z4 := goda.MustParseZoneOffset("+0930")
+	z4 := goda.MustZoneOffsetParse("+0930")
 	fmt.Println("+0930:", z4.TotalSeconds())
 
 	// Output:
@@ -850,7 +850,7 @@ func ExampleParseZoneOffset() {
 
 // ExampleZoneOffset_TotalSeconds demonstrates accessing offset components.
 func ExampleZoneOffset_TotalSeconds() {
-	offset := goda.MustParseZoneOffset("+05:30")
+	offset := goda.MustZoneOffsetParse("+05:30")
 
 	fmt.Println("Total seconds:", offset.TotalSeconds())
 	fmt.Println("Hours:", offset.Hours())
@@ -882,7 +882,7 @@ func ExampleZoneOffset_Compare() {
 
 // ExampleZoneOffset_MarshalJSON demonstrates JSON serialization.
 func ExampleZoneOffset_MarshalJSON() {
-	offset := goda.MustParseZoneOffset("+05:30")
+	offset := goda.MustZoneOffsetParse("+05:30")
 	jsonBytes, _ := json.Marshal(offset)
 	fmt.Println(string(jsonBytes))
 
@@ -894,20 +894,20 @@ func ExampleZoneOffset_MarshalJSON() {
 func ExampleOffsetDateTime() {
 	// Create from components
 	offset := goda.MustZoneOffsetOfHours(8) // +08:00 (China Standard Time)
-	odt := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, offset)
+	odt := goda.MustOffsetDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0, offset)
 	fmt.Println(odt)
 
 	// Create from LocalDateTime
-	dt := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 0)
+	dt := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0)
 	odt2 := dt.AtOffset(offset)
 	fmt.Println(odt2)
 
 	// Parse from string
-	odt3 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	odt3 := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
 	fmt.Println(odt3)
 
 	// UTC
-	utcOdt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45Z")
+	utcOdt := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45Z")
 	fmt.Println(utcOdt)
 
 	// Output:
@@ -917,22 +917,22 @@ func ExampleOffsetDateTime() {
 	// 2024-03-15T14:30:45Z
 }
 
-// ExampleParseOffsetDateTime demonstrates parsing offset date-times.
-func ExampleParseOffsetDateTime() {
+// ExampleOffsetDateTimeParse demonstrates parsing offset date-times.
+func ExampleOffsetDateTimeParse() {
 	// With positive offset
-	odt1, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	odt1, _ := goda.OffsetDateTimeParse("2024-03-15T14:30:45+08:00")
 	fmt.Println(odt1)
 
 	// With negative offset
-	odt2, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45-05:00")
+	odt2, _ := goda.OffsetDateTimeParse("2024-03-15T14:30:45-05:00")
 	fmt.Println(odt2)
 
 	// UTC (Z)
-	odt3, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45Z")
+	odt3, _ := goda.OffsetDateTimeParse("2024-03-15T14:30:45Z")
 	fmt.Println(odt3)
 
 	// With minutes offset
-	odt4, _ := goda.ParseOffsetDateTime("2024-03-15T14:30:45+05:30")
+	odt4, _ := goda.OffsetDateTimeParse("2024-03-15T14:30:45+05:30")
 	fmt.Println(odt4)
 
 	// Output:
@@ -963,7 +963,7 @@ func ExampleOffsetDateTime_WithOffsetSameLocal() {
 	pst := goda.MustZoneOffsetOfHours(-8) // PST
 
 	// Create a time in EST
-	odtEST := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, est)
+	odtEST := goda.MustOffsetDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0, est)
 	fmt.Println("Original (EST):", odtEST)
 
 	// Change to PST offset, but keep the local time (14:30:45)
@@ -986,7 +986,7 @@ func ExampleOffsetDateTime_WithOffsetSameInstant() {
 	pst := goda.MustZoneOffsetOfHours(-8) // PST
 
 	// Create a time in EST
-	odtEST := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, est)
+	odtEST := goda.MustOffsetDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0, est)
 	fmt.Println("Original (EST):", odtEST)
 
 	// Change to PST offset, but preserve the instant (same moment in time)
@@ -1006,15 +1006,15 @@ func ExampleOffsetDateTime_WithOffsetSameInstant() {
 // ExampleOffsetDateTime_Compare demonstrates comparing offset date-times.
 func ExampleOffsetDateTime_Compare() {
 	// These represent the same instant in time
-	odt1 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
-	odt2 := goda.MustParseOffsetDateTime("2024-03-15T06:30:45Z")
+	odt1 := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
+	odt2 := goda.MustOffsetDateTimeParse("2024-03-15T06:30:45Z")
 
 	if odt1.Compare(odt2) == 0 {
 		fmt.Println("Same instant")
 	}
 
 	// Different instants
-	odt3 := goda.MustParseOffsetDateTime("2024-03-15T15:30:45+08:00")
+	odt3 := goda.MustOffsetDateTimeParse("2024-03-15T15:30:45+08:00")
 	if odt3.IsAfter(odt1) {
 		fmt.Println("odt3 is later")
 	}
@@ -1026,7 +1026,7 @@ func ExampleOffsetDateTime_Compare() {
 
 // ExampleOffsetDateTime_PlusHours demonstrates time arithmetic with hours.
 func ExampleOffsetDateTime_PlusHours() {
-	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	odt := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
 
 	// Add hours
 	later := odt.PlusHours(5)
@@ -1044,8 +1044,8 @@ func ExampleOffsetDateTime_PlusHours() {
 // ExampleOffsetDateTime_ToEpochSecond demonstrates Unix timestamp conversion.
 func ExampleOffsetDateTime_ToEpochSecond() {
 	// Different offsets, same instant
-	odt1 := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
-	odt2 := goda.MustParseOffsetDateTime("2024-03-15T06:30:45Z")
+	odt1 := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
+	odt2 := goda.MustOffsetDateTimeParse("2024-03-15T06:30:45Z")
 
 	epoch1 := odt1.ToEpochSecond()
 	epoch2 := odt2.ToEpochSecond()
@@ -1060,12 +1060,12 @@ func ExampleOffsetDateTime_ToEpochSecond() {
 
 // ExampleOffsetDateTime_MarshalJSON demonstrates JSON serialization.
 func ExampleOffsetDateTime_MarshalJSON() {
-	odt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+	odt := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
 	jsonBytes, _ := json.Marshal(odt)
 	fmt.Println(string(jsonBytes))
 
 	// UTC
-	utcOdt := goda.MustParseOffsetDateTime("2024-03-15T14:30:45Z")
+	utcOdt := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45Z")
 	utcBytes, _ := json.Marshal(utcOdt)
 	fmt.Println(string(utcBytes))
 

@@ -11,7 +11,7 @@ import (
 
 func TestLocalDate_Epoch(t *testing.T) {
 	var check = func(i int64, tt time.Time) bool {
-		var st = MustNewLocalDate(Year(tt.Year()), Month(tt.Month()), tt.Day())
+		var st = MustLocalDateOf(Year(tt.Year()), Month(tt.Month()), tt.Day())
 		if !assert.Equal(t, i, st.UnixEpochDays(), tt) {
 			return false
 		}
@@ -42,36 +42,36 @@ func TestLocalDate_Epoch(t *testing.T) {
 
 func TestNewLocalDate(t *testing.T) {
 	t.Run("valid dates", func(t *testing.T) {
-		d, err := NewLocalDate(2024, January, 1)
+		d, err := LocalDateOf(2024, January, 1)
 		require.NoError(t, err)
 		assert.Equal(t, Year(2024), d.Year())
 		assert.Equal(t, January, d.Month())
 		assert.Equal(t, 1, d.DayOfMonth())
 
-		d, err = NewLocalDate(2024, February, 29) // leap year
+		d, err = LocalDateOf(2024, February, 29) // leap year
 		require.NoError(t, err)
 		assert.Equal(t, 29, d.DayOfMonth())
 	})
 
 	t.Run("invalid day of month", func(t *testing.T) {
-		_, err := NewLocalDate(2024, January, 32)
+		_, err := LocalDateOf(2024, January, 32)
 		assert.Error(t, err)
 
-		_, err = NewLocalDate(2023, February, 29) // not a leap year
+		_, err = LocalDateOf(2023, February, 29) // not a leap year
 		assert.Error(t, err)
 
-		_, err = NewLocalDate(2024, February, 30)
+		_, err = LocalDateOf(2024, February, 30)
 		assert.Error(t, err)
 
-		_, err = NewLocalDate(2024, April, 31)
+		_, err = LocalDateOf(2024, April, 31)
 		assert.Error(t, err)
 	})
 
 	t.Run("invalid month", func(t *testing.T) {
-		_, err := NewLocalDate(2024, Month(0), 1)
+		_, err := LocalDateOf(2024, Month(0), 1)
 		assert.Error(t, err)
 
-		_, err = NewLocalDate(2024, Month(13), 1)
+		_, err = LocalDateOf(2024, Month(13), 1)
 		assert.Error(t, err)
 	})
 }
@@ -79,14 +79,14 @@ func TestNewLocalDate(t *testing.T) {
 func TestMustNewLocalDate(t *testing.T) {
 	t.Run("valid date", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			d := MustNewLocalDate(2024, March, 15)
+			d := MustLocalDateOf(2024, March, 15)
 			assert.Equal(t, Year(2024), d.Year())
 		})
 	})
 
 	t.Run("invalid date panics", func(t *testing.T) {
 		assert.Panics(t, func() {
-			MustNewLocalDate(2024, January, 32)
+			MustLocalDateOf(2024, January, 32)
 		})
 	})
 }
@@ -95,7 +95,7 @@ func TestLocalDate_IsZero(t *testing.T) {
 	var zero LocalDate
 	assert.True(t, zero.IsZero())
 
-	d := MustNewLocalDate(2024, January, 1)
+	d := MustLocalDateOf(2024, January, 1)
 	assert.False(t, d.IsZero())
 }
 
@@ -113,7 +113,7 @@ func TestLocalDate_IsLeapYear(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		d := MustNewLocalDate(tt.year, January, 1)
+		d := MustLocalDateOf(tt.year, January, 1)
 		assert.Equal(t, tt.isLeap, d.IsLeapYear(), "year %d", tt.year)
 	}
 }
@@ -123,15 +123,15 @@ func TestLocalDate_DayOfYear(t *testing.T) {
 		date      LocalDate
 		dayOfYear int
 	}{
-		{MustNewLocalDate(2024, January, 1), 1},
-		{MustNewLocalDate(2024, January, 31), 31},
-		{MustNewLocalDate(2024, February, 1), 32},
-		{MustNewLocalDate(2024, February, 29), 60}, // leap year
-		{MustNewLocalDate(2023, February, 28), 59}, // non-leap year
-		{MustNewLocalDate(2024, March, 1), 61},     // leap year
-		{MustNewLocalDate(2023, March, 1), 60},     // non-leap year
-		{MustNewLocalDate(2024, December, 31), 366},
-		{MustNewLocalDate(2023, December, 31), 365},
+		{MustLocalDateOf(2024, January, 1), 1},
+		{MustLocalDateOf(2024, January, 31), 31},
+		{MustLocalDateOf(2024, February, 1), 32},
+		{MustLocalDateOf(2024, February, 29), 60}, // leap year
+		{MustLocalDateOf(2023, February, 28), 59}, // non-leap year
+		{MustLocalDateOf(2024, March, 1), 61},     // leap year
+		{MustLocalDateOf(2023, March, 1), 60},     // non-leap year
+		{MustLocalDateOf(2024, December, 31), 366},
+		{MustLocalDateOf(2023, December, 31), 365},
 	}
 
 	for _, tt := range tests {
@@ -147,12 +147,12 @@ func TestLocalDate_DayOfWeek(t *testing.T) {
 		date      LocalDate
 		dayOfWeek DayOfWeek
 	}{
-		{MustNewLocalDate(2024, 11, 5), Tuesday},  // Known date
-		{MustNewLocalDate(2024, 1, 1), Monday},    // New Year 2024
-		{MustNewLocalDate(2023, 1, 1), Sunday},    // New Year 2023
-		{MustNewLocalDate(2000, 1, 1), Saturday},  // Y2K
-		{MustNewLocalDate(1970, 1, 1), Thursday},  // Unix epoch
-		{MustNewLocalDate(2024, 2, 29), Thursday}, // Leap day 2024
+		{MustLocalDateOf(2024, 11, 5), Tuesday},  // Known date
+		{MustLocalDateOf(2024, 1, 1), Monday},    // New Year 2024
+		{MustLocalDateOf(2023, 1, 1), Sunday},    // New Year 2023
+		{MustLocalDateOf(2000, 1, 1), Saturday},  // Y2K
+		{MustLocalDateOf(1970, 1, 1), Thursday},  // Unix epoch
+		{MustLocalDateOf(2024, 2, 29), Thursday}, // Leap day 2024
 	}
 
 	for _, tt := range tests {
@@ -164,19 +164,19 @@ func TestLocalDate_DayOfWeek(t *testing.T) {
 }
 
 func TestLocalDate_PlusDays(t *testing.T) {
-	d := MustNewLocalDate(2024, January, 15)
+	d := MustLocalDateOf(2024, January, 15)
 
 	tests := []struct {
 		days     int
 		expected LocalDate
 	}{
-		{0, MustNewLocalDate(2024, January, 15)},
-		{1, MustNewLocalDate(2024, January, 16)},
-		{16, MustNewLocalDate(2024, January, 31)},
-		{17, MustNewLocalDate(2024, February, 1)},
-		{365, MustNewLocalDate(2025, January, 14)}, // 2024 is leap year
-		{-1, MustNewLocalDate(2024, January, 14)},
-		{-15, MustNewLocalDate(2023, December, 31)},
+		{0, MustLocalDateOf(2024, January, 15)},
+		{1, MustLocalDateOf(2024, January, 16)},
+		{16, MustLocalDateOf(2024, January, 31)},
+		{17, MustLocalDateOf(2024, February, 1)},
+		{365, MustLocalDateOf(2025, January, 14)}, // 2024 is leap year
+		{-1, MustLocalDateOf(2024, January, 14)},
+		{-15, MustLocalDateOf(2023, December, 31)},
 	}
 
 	for _, tt := range tests {
@@ -189,13 +189,13 @@ func TestLocalDate_PlusDays(t *testing.T) {
 }
 
 func TestLocalDate_MinusDays(t *testing.T) {
-	d := MustNewLocalDate(2024, February, 15)
+	d := MustLocalDateOf(2024, February, 15)
 
 	result := d.MinusDays(10)
-	assert.Equal(t, MustNewLocalDate(2024, February, 5), result)
+	assert.Equal(t, MustLocalDateOf(2024, February, 5), result)
 
 	result = d.MinusDays(15)
-	assert.Equal(t, MustNewLocalDate(2024, January, 31), result)
+	assert.Equal(t, MustLocalDateOf(2024, January, 31), result)
 }
 
 func TestLocalDate_PlusMonths(t *testing.T) {
@@ -204,19 +204,19 @@ func TestLocalDate_PlusMonths(t *testing.T) {
 		months   int
 		expected LocalDate
 	}{
-		{MustNewLocalDate(2024, January, 15), 1, MustNewLocalDate(2024, February, 15)},
-		{MustNewLocalDate(2024, January, 15), 12, MustNewLocalDate(2025, January, 15)},
-		{MustNewLocalDate(2024, January, 15), 13, MustNewLocalDate(2025, February, 15)},
-		{MustNewLocalDate(2024, January, 15), -1, MustNewLocalDate(2023, December, 15)},
-		{MustNewLocalDate(2024, January, 15), -13, MustNewLocalDate(2022, December, 15)},
+		{MustLocalDateOf(2024, January, 15), 1, MustLocalDateOf(2024, February, 15)},
+		{MustLocalDateOf(2024, January, 15), 12, MustLocalDateOf(2025, January, 15)},
+		{MustLocalDateOf(2024, January, 15), 13, MustLocalDateOf(2025, February, 15)},
+		{MustLocalDateOf(2024, January, 15), -1, MustLocalDateOf(2023, December, 15)},
+		{MustLocalDateOf(2024, January, 15), -13, MustLocalDateOf(2022, December, 15)},
 		// Test day clamping
-		{MustNewLocalDate(2024, January, 31), 1, MustNewLocalDate(2024, February, 29)}, // leap year
-		{MustNewLocalDate(2023, January, 31), 1, MustNewLocalDate(2023, February, 28)}, // non-leap year
-		{MustNewLocalDate(2024, March, 31), 1, MustNewLocalDate(2024, April, 30)},
-		{MustNewLocalDate(2024, May, 31), 1, MustNewLocalDate(2024, June, 30)},
+		{MustLocalDateOf(2024, January, 31), 1, MustLocalDateOf(2024, February, 29)}, // leap year
+		{MustLocalDateOf(2023, January, 31), 1, MustLocalDateOf(2023, February, 28)}, // non-leap year
+		{MustLocalDateOf(2024, March, 31), 1, MustLocalDateOf(2024, April, 30)},
+		{MustLocalDateOf(2024, May, 31), 1, MustLocalDateOf(2024, June, 30)},
 		// Large month additions
-		{MustNewLocalDate(2024, January, 1), 24, MustNewLocalDate(2026, January, 1)},
-		{MustNewLocalDate(2024, January, 1), -24, MustNewLocalDate(2022, January, 1)},
+		{MustLocalDateOf(2024, January, 1), 24, MustLocalDateOf(2026, January, 1)},
+		{MustLocalDateOf(2024, January, 1), -24, MustLocalDateOf(2022, January, 1)},
 	}
 
 	for _, tt := range tests {
@@ -229,13 +229,13 @@ func TestLocalDate_PlusMonths(t *testing.T) {
 }
 
 func TestLocalDate_MinusMonths(t *testing.T) {
-	d := MustNewLocalDate(2024, March, 15)
+	d := MustLocalDateOf(2024, March, 15)
 
 	result := d.MinusMonths(2)
-	assert.Equal(t, MustNewLocalDate(2024, January, 15), result)
+	assert.Equal(t, MustLocalDateOf(2024, January, 15), result)
 
 	result = d.MinusMonths(14)
-	assert.Equal(t, MustNewLocalDate(2023, January, 15), result)
+	assert.Equal(t, MustLocalDateOf(2023, January, 15), result)
 }
 
 func TestLocalDate_PlusYears(t *testing.T) {
@@ -244,13 +244,13 @@ func TestLocalDate_PlusYears(t *testing.T) {
 		years    int
 		expected LocalDate
 	}{
-		{MustNewLocalDate(2024, March, 15), 1, MustNewLocalDate(2025, March, 15)},
-		{MustNewLocalDate(2024, March, 15), -1, MustNewLocalDate(2023, March, 15)},
-		{MustNewLocalDate(2024, March, 15), 10, MustNewLocalDate(2034, March, 15)},
+		{MustLocalDateOf(2024, March, 15), 1, MustLocalDateOf(2025, March, 15)},
+		{MustLocalDateOf(2024, March, 15), -1, MustLocalDateOf(2023, March, 15)},
+		{MustLocalDateOf(2024, March, 15), 10, MustLocalDateOf(2034, March, 15)},
 		// Leap year edge case
-		{MustNewLocalDate(2024, February, 29), 1, MustNewLocalDate(2025, February, 28)},
-		{MustNewLocalDate(2024, February, 29), 4, MustNewLocalDate(2028, February, 29)},
-		{MustNewLocalDate(2024, February, 29), -4, MustNewLocalDate(2020, February, 29)},
+		{MustLocalDateOf(2024, February, 29), 1, MustLocalDateOf(2025, February, 28)},
+		{MustLocalDateOf(2024, February, 29), 4, MustLocalDateOf(2028, February, 29)},
+		{MustLocalDateOf(2024, February, 29), -4, MustLocalDateOf(2020, February, 29)},
 	}
 
 	for _, tt := range tests {
@@ -263,21 +263,21 @@ func TestLocalDate_PlusYears(t *testing.T) {
 }
 
 func TestLocalDate_MinusYears(t *testing.T) {
-	d := MustNewLocalDate(2024, March, 15)
+	d := MustLocalDateOf(2024, March, 15)
 
 	result := d.MinusYears(1)
-	assert.Equal(t, MustNewLocalDate(2023, March, 15), result)
+	assert.Equal(t, MustLocalDateOf(2023, March, 15), result)
 
 	result = d.MinusYears(10)
-	assert.Equal(t, MustNewLocalDate(2014, March, 15), result)
+	assert.Equal(t, MustLocalDateOf(2014, March, 15), result)
 }
 
 func TestLocalDate_Compare(t *testing.T) {
-	d1 := MustNewLocalDate(2024, March, 15)
-	d2 := MustNewLocalDate(2024, March, 15)
-	d3 := MustNewLocalDate(2024, March, 16)
-	d4 := MustNewLocalDate(2024, February, 15)
-	d5 := MustNewLocalDate(2023, March, 15)
+	d1 := MustLocalDateOf(2024, March, 15)
+	d2 := MustLocalDateOf(2024, March, 15)
+	d3 := MustLocalDateOf(2024, March, 16)
+	d4 := MustLocalDateOf(2024, February, 15)
+	d5 := MustLocalDateOf(2023, March, 15)
 
 	assert.Equal(t, 0, d1.Compare(d2))
 	assert.Equal(t, -1, d1.Compare(d3))
@@ -287,9 +287,9 @@ func TestLocalDate_Compare(t *testing.T) {
 }
 
 func TestLocalDate_IsBefore(t *testing.T) {
-	d1 := MustNewLocalDate(2024, March, 15)
-	d2 := MustNewLocalDate(2024, March, 16)
-	d3 := MustNewLocalDate(2024, March, 15)
+	d1 := MustLocalDateOf(2024, March, 15)
+	d2 := MustLocalDateOf(2024, March, 16)
+	d3 := MustLocalDateOf(2024, March, 15)
 
 	assert.True(t, d1.IsBefore(d2))
 	assert.False(t, d2.IsBefore(d1))
@@ -297,9 +297,9 @@ func TestLocalDate_IsBefore(t *testing.T) {
 }
 
 func TestLocalDate_IsAfter(t *testing.T) {
-	d1 := MustNewLocalDate(2024, March, 15)
-	d2 := MustNewLocalDate(2024, March, 16)
-	d3 := MustNewLocalDate(2024, March, 15)
+	d1 := MustLocalDateOf(2024, March, 15)
+	d2 := MustLocalDateOf(2024, March, 16)
+	d3 := MustLocalDateOf(2024, March, 15)
 
 	assert.False(t, d1.IsAfter(d2))
 	assert.True(t, d2.IsAfter(d1))
@@ -307,7 +307,7 @@ func TestLocalDate_IsAfter(t *testing.T) {
 }
 
 func TestLocalDate_GoTime(t *testing.T) {
-	d := MustNewLocalDate(2024, March, 15)
+	d := MustLocalDateOf(2024, March, 15)
 	goTime := d.GoTime()
 
 	assert.Equal(t, 2024, goTime.Year())
@@ -340,10 +340,10 @@ func TestLocalDate_String(t *testing.T) {
 		date     LocalDate
 		expected string
 	}{
-		{MustNewLocalDate(2024, March, 15), "2024-03-15"},
-		{MustNewLocalDate(2024, January, 1), "2024-01-01"},
-		{MustNewLocalDate(2024, December, 31), "2024-12-31"},
-		{MustNewLocalDate(1999, June, 5), "1999-06-05"},
+		{MustLocalDateOf(2024, March, 15), "2024-03-15"},
+		{MustLocalDateOf(2024, January, 1), "2024-01-01"},
+		{MustLocalDateOf(2024, December, 31), "2024-12-31"},
+		{MustLocalDateOf(1999, June, 5), "1999-06-05"},
 		{LocalDate{}, ""},
 	}
 
@@ -353,7 +353,7 @@ func TestLocalDate_String(t *testing.T) {
 }
 
 func TestLocalDate_MarshalText(t *testing.T) {
-	d := MustNewLocalDate(2024, March, 15)
+	d := MustLocalDateOf(2024, March, 15)
 	text, err := d.MarshalText()
 	require.NoError(t, err)
 	assert.Equal(t, "2024-03-15", string(text))
@@ -369,11 +369,11 @@ func TestLocalDate_UnmarshalText(t *testing.T) {
 		var d LocalDate
 		err := d.UnmarshalText([]byte("2024-03-15"))
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(2024, March, 15), d)
+		assert.Equal(t, MustLocalDateOf(2024, March, 15), d)
 
 		err = d.UnmarshalText([]byte("1999-12-31"))
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(1999, December, 31), d)
+		assert.Equal(t, MustLocalDateOf(1999, December, 31), d)
 	})
 
 	t.Run("empty string", func(t *testing.T) {
@@ -406,7 +406,7 @@ func TestLocalDate_UnmarshalText(t *testing.T) {
 }
 
 func TestLocalDate_MarshalJSON(t *testing.T) {
-	d := MustNewLocalDate(2024, March, 15)
+	d := MustLocalDateOf(2024, March, 15)
 	data, err := json.Marshal(d)
 	require.NoError(t, err)
 	assert.Equal(t, `"2024-03-15"`, string(data))
@@ -422,7 +422,7 @@ func TestLocalDate_UnmarshalJSON(t *testing.T) {
 		var d LocalDate
 		err := json.Unmarshal([]byte(`"2024-03-15"`), &d)
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(2024, March, 15), d)
+		assert.Equal(t, MustLocalDateOf(2024, March, 15), d)
 	})
 
 	t.Run("empty string", func(t *testing.T) {
@@ -458,14 +458,14 @@ func TestLocalDate_Scan(t *testing.T) {
 		var d LocalDate
 		err := d.Scan("2024-03-15")
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(2024, March, 15), d)
+		assert.Equal(t, MustLocalDateOf(2024, March, 15), d)
 	})
 
 	t.Run("byte slice value", func(t *testing.T) {
 		var d LocalDate
 		err := d.Scan([]byte("2024-03-15"))
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(2024, March, 15), d)
+		assert.Equal(t, MustLocalDateOf(2024, March, 15), d)
 	})
 
 	t.Run("time.LocalTime value", func(t *testing.T) {
@@ -473,12 +473,12 @@ func TestLocalDate_Scan(t *testing.T) {
 		goTime := time.Date(2024, time.March, 15, 14, 30, 0, 0, time.UTC)
 		err := d.Scan(goTime)
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(2024, March, 15), d)
+		assert.Equal(t, MustLocalDateOf(2024, March, 15), d)
 	})
 }
 
 func TestLocalDate_Value(t *testing.T) {
-	d := MustNewLocalDate(2024, March, 15)
+	d := MustLocalDateOf(2024, March, 15)
 	val, err := d.Value()
 	require.NoError(t, err)
 	assert.Equal(t, "2024-03-15", val)
@@ -490,7 +490,7 @@ func TestLocalDate_Value(t *testing.T) {
 }
 
 func TestLocalDate_AppendText(t *testing.T) {
-	d := MustNewLocalDate(2024, March, 15)
+	d := MustLocalDateOf(2024, March, 15)
 	buf := []byte("LocalDate: ")
 	buf, err := d.AppendText(buf)
 	require.NoError(t, err)
@@ -505,30 +505,30 @@ func TestLocalDate_AppendText(t *testing.T) {
 
 func TestLocalDate_SpecialDates(t *testing.T) {
 	t.Run("leap year Feb 29", func(t *testing.T) {
-		d := MustNewLocalDate(2024, February, 29)
+		d := MustLocalDateOf(2024, February, 29)
 		assert.Equal(t, 29, d.DayOfMonth())
 		assert.Equal(t, 60, d.DayOfYear())
 
 		// Add years to non-leap year
 		next := d.PlusYears(1)
-		assert.Equal(t, MustNewLocalDate(2025, February, 28), next)
+		assert.Equal(t, MustLocalDateOf(2025, February, 28), next)
 	})
 
 	t.Run("year boundaries", func(t *testing.T) {
-		d := MustNewLocalDate(2024, December, 31)
+		d := MustLocalDateOf(2024, December, 31)
 		assert.Equal(t, 366, d.DayOfYear()) // leap year
 
 		next := d.PlusDays(1)
-		assert.Equal(t, MustNewLocalDate(2025, January, 1), next)
+		assert.Equal(t, MustLocalDateOf(2025, January, 1), next)
 		assert.Equal(t, 1, next.DayOfYear())
 	})
 
 	t.Run("negative years", func(t *testing.T) {
 		// Test that the system can handle negative years
-		d := MustNewLocalDate(-1, January, 1)
+		d := MustLocalDateOf(-1, January, 1)
 		assert.Equal(t, Year(-1), d.Year())
 
-		d = MustNewLocalDate(-100, December, 31)
+		d = MustLocalDateOf(-100, December, 31)
 		assert.Equal(t, Year(-100), d.Year())
 		assert.Equal(t, December, d.Month())
 	})
@@ -541,11 +541,11 @@ func TestLocalDate_MonthBoundaries(t *testing.T) {
 		addDays  int
 		expected LocalDate
 	}{
-		{"Jan to Feb", MustNewLocalDate(2024, January, 31), 1, MustNewLocalDate(2024, February, 1)},
-		{"Feb to Mar (leap)", MustNewLocalDate(2024, February, 29), 1, MustNewLocalDate(2024, March, 1)},
-		{"Feb to Mar (non-leap)", MustNewLocalDate(2023, February, 28), 1, MustNewLocalDate(2023, March, 1)},
-		{"Apr to May", MustNewLocalDate(2024, April, 30), 1, MustNewLocalDate(2024, May, 1)},
-		{"Dec to Jan", MustNewLocalDate(2024, December, 31), 1, MustNewLocalDate(2025, January, 1)},
+		{"Jan to Feb", MustLocalDateOf(2024, January, 31), 1, MustLocalDateOf(2024, February, 1)},
+		{"Feb to Mar (leap)", MustLocalDateOf(2024, February, 29), 1, MustLocalDateOf(2024, March, 1)},
+		{"Feb to Mar (non-leap)", MustLocalDateOf(2023, February, 28), 1, MustLocalDateOf(2023, March, 1)},
+		{"Apr to May", MustLocalDateOf(2024, April, 30), 1, MustLocalDateOf(2024, May, 1)},
+		{"Dec to Jan", MustLocalDateOf(2024, December, 31), 1, MustLocalDateOf(2025, January, 1)},
 	}
 
 	for _, tt := range tests {
@@ -585,40 +585,40 @@ func TestLocalDateNowUTC(t *testing.T) {
 
 func TestParseLocalDate(t *testing.T) {
 	t.Run("valid dates", func(t *testing.T) {
-		date, err := ParseLocalDate("2024-03-15")
+		date, err := LocalDateParse("2024-03-15")
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(2024, March, 15), date)
+		assert.Equal(t, MustLocalDateOf(2024, March, 15), date)
 
-		date, err = ParseLocalDate("1999-12-31")
+		date, err = LocalDateParse("1999-12-31")
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(1999, December, 31), date)
+		assert.Equal(t, MustLocalDateOf(1999, December, 31), date)
 
-		date, err = ParseLocalDate("2000-02-29") // leap year
+		date, err = LocalDateParse("2000-02-29") // leap year
 		require.NoError(t, err)
-		assert.Equal(t, MustNewLocalDate(2000, February, 29), date)
+		assert.Equal(t, MustLocalDateOf(2000, February, 29), date)
 	})
 
 	t.Run("invalid format", func(t *testing.T) {
-		_, err := ParseLocalDate("2024/03/15")
+		_, err := LocalDateParse("2024/03/15")
 		assert.Error(t, err)
 
-		_, err = ParseLocalDate("2024-3-15")
+		_, err = LocalDateParse("2024-3-15")
 		assert.Error(t, err)
 
-		_, err = ParseLocalDate("not-a-date")
+		_, err = LocalDateParse("not-a-date")
 		assert.Error(t, err)
 	})
 
 	t.Run("invalid date", func(t *testing.T) {
-		_, err := ParseLocalDate("2024-02-30")
+		_, err := LocalDateParse("2024-02-30")
 		assert.Error(t, err)
 
-		_, err = ParseLocalDate("2024-13-01")
+		_, err = LocalDateParse("2024-13-01")
 		assert.Error(t, err)
 	})
 
 	t.Run("empty string", func(t *testing.T) {
-		date, err := ParseLocalDate("")
+		date, err := LocalDateParse("")
 		require.NoError(t, err)
 		assert.True(t, date.IsZero())
 	})
@@ -627,18 +627,18 @@ func TestParseLocalDate(t *testing.T) {
 func TestMustParseLocalDate(t *testing.T) {
 	t.Run("valid date", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			date := MustParseLocalDate("2024-03-15")
-			assert.Equal(t, MustNewLocalDate(2024, March, 15), date)
+			date := MustLocalDateParse("2024-03-15")
+			assert.Equal(t, MustLocalDateOf(2024, March, 15), date)
 		})
 	})
 
 	t.Run("invalid date panics", func(t *testing.T) {
 		assert.Panics(t, func() {
-			MustParseLocalDate("2024-02-30")
+			MustLocalDateParse("2024-02-30")
 		})
 
 		assert.Panics(t, func() {
-			MustParseLocalDate("invalid")
+			MustLocalDateParse("invalid")
 		})
 	})
 }
@@ -670,7 +670,7 @@ func TestLocalDateNowIn(t *testing.T) {
 func TestLocalDate_ValuePostgres(t *testing.T) {
 	var pg = GetPG(t)
 	t.Run("normal", func(t *testing.T) {
-		var expected = MustParseLocalDate("2000-12-29")
+		var expected = MustLocalDateParse("2000-12-29")
 		var actual LocalDate
 		var expectedTrue bool
 		var e = pg.QueryRow("SELECT $1::date, $1::date = '2000-12-29'", expected).Scan(&actual, &expectedTrue)
@@ -691,7 +691,7 @@ func TestLocalDate_ValuePostgres(t *testing.T) {
 func TestLocalDate_ValueMySQL(t *testing.T) {
 	var mysql = GetMySQL(t)
 	t.Run("normal", func(t *testing.T) {
-		var expected = MustParseLocalDate("2000-12-29")
+		var expected = MustLocalDateParse("2000-12-29")
 		var actual LocalDate
 		var expectedTrue bool
 		var e = mysql.QueryRow("SELECT CAST(? AS DATE), CAST(? AS DATE) = '2000-12-29'", expected, expected).Scan(&actual, &expectedTrue)

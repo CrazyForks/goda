@@ -12,7 +12,7 @@ import (
 func TestNewOffsetDateTime(t *testing.T) {
 	t.Run("valid components", func(t *testing.T) {
 		offset := MustZoneOffsetOfHours(1)
-		odt, err := NewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+		odt, err := OffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 		require.NoError(t, err)
 		assert.Equal(t, Year(2024), odt.Year())
 		assert.Equal(t, March, odt.Month())
@@ -26,13 +26,13 @@ func TestNewOffsetDateTime(t *testing.T) {
 
 	t.Run("invalid date", func(t *testing.T) {
 		offset := ZoneOffsetUTC()
-		_, err := NewOffsetDateTime(2024, February, 30, 14, 30, 45, 0, offset)
+		_, err := OffsetDateTimeOf(2024, February, 30, 14, 30, 45, 0, offset)
 		assert.Error(t, err)
 	})
 
 	t.Run("invalid time", func(t *testing.T) {
 		offset := ZoneOffsetUTC()
-		_, err := NewOffsetDateTime(2024, March, 15, 25, 30, 45, 0, offset)
+		_, err := OffsetDateTimeOf(2024, March, 15, 25, 30, 45, 0, offset)
 		assert.Error(t, err)
 	})
 }
@@ -41,7 +41,7 @@ func TestMustNewOffsetDateTime(t *testing.T) {
 	t.Run("valid components", func(t *testing.T) {
 		offset := MustZoneOffsetOfHours(-5)
 		assert.NotPanics(t, func() {
-			odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+			odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 			assert.Equal(t, Year(2024), odt.Year())
 		})
 	})
@@ -49,7 +49,7 @@ func TestMustNewOffsetDateTime(t *testing.T) {
 	t.Run("invalid components panic", func(t *testing.T) {
 		offset := ZoneOffsetUTC()
 		assert.Panics(t, func() {
-			MustNewOffsetDateTime(2024, March, 32, 14, 30, 45, 0, offset)
+			MustOffsetDateTimeOf(2024, March, 32, 14, 30, 45, 0, offset)
 		})
 	})
 }
@@ -96,7 +96,7 @@ func TestOffsetDateTimeNowUTC(t *testing.T) {
 
 func TestParseOffsetDateTime(t *testing.T) {
 	t.Run("with positive offset", func(t *testing.T) {
-		odt, err := ParseOffsetDateTime("2024-03-15T14:30:45.123456789+01:00")
+		odt, err := OffsetDateTimeParse("2024-03-15T14:30:45.123456789+01:00")
 		require.NoError(t, err)
 		assert.Equal(t, Year(2024), odt.Year())
 		assert.Equal(t, 14, odt.Hour())
@@ -104,37 +104,37 @@ func TestParseOffsetDateTime(t *testing.T) {
 	})
 
 	t.Run("with negative offset", func(t *testing.T) {
-		odt, err := ParseOffsetDateTime("2024-03-15T14:30:45-05:00")
+		odt, err := OffsetDateTimeParse("2024-03-15T14:30:45-05:00")
 		require.NoError(t, err)
 		assert.Equal(t, Year(2024), odt.Year())
 		assert.Equal(t, -18000, odt.Offset().TotalSeconds())
 	})
 
 	t.Run("with Z (UTC)", func(t *testing.T) {
-		odt, err := ParseOffsetDateTime("2024-03-15T14:30:45Z")
+		odt, err := OffsetDateTimeParse("2024-03-15T14:30:45Z")
 		require.NoError(t, err)
 		assert.Equal(t, 0, odt.Offset().TotalSeconds())
 	})
 
 	t.Run("with minutes offset", func(t *testing.T) {
-		odt, err := ParseOffsetDateTime("2024-03-15T14:30:45+05:30")
+		odt, err := OffsetDateTimeParse("2024-03-15T14:30:45+05:30")
 		require.NoError(t, err)
 		assert.Equal(t, 19800, odt.Offset().TotalSeconds())
 	})
 
 	t.Run("empty string", func(t *testing.T) {
-		odt, err := ParseOffsetDateTime("")
+		odt, err := OffsetDateTimeParse("")
 		require.NoError(t, err)
 		assert.True(t, odt.IsZero())
 	})
 
 	t.Run("invalid format", func(t *testing.T) {
-		_, err := ParseOffsetDateTime("invalid")
+		_, err := OffsetDateTimeParse("invalid")
 		assert.Error(t, err)
 	})
 
 	t.Run("missing offset", func(t *testing.T) {
-		_, err := ParseOffsetDateTime("2024-03-15T14:30:45")
+		_, err := OffsetDateTimeParse("2024-03-15T14:30:45")
 		assert.Error(t, err)
 	})
 }
@@ -142,21 +142,21 @@ func TestParseOffsetDateTime(t *testing.T) {
 func TestMustParseOffsetDateTime(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			odt := MustParseOffsetDateTime("2024-03-15T14:30:45+01:00")
+			odt := MustOffsetDateTimeParse("2024-03-15T14:30:45+01:00")
 			assert.Equal(t, Year(2024), odt.Year())
 		})
 	})
 
 	t.Run("invalid panics", func(t *testing.T) {
 		assert.Panics(t, func() {
-			MustParseOffsetDateTime("invalid")
+			MustOffsetDateTimeParse("invalid")
 		})
 	})
 }
 
 func TestOffsetDateTime_Accessors(t *testing.T) {
 	offset := MustZoneOffsetOfHours(2)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 
 	assert.Equal(t, Year(2024), odt.Year())
 	assert.Equal(t, March, odt.Month())
@@ -170,9 +170,9 @@ func TestOffsetDateTime_Accessors(t *testing.T) {
 	assert.Equal(t, 123456789, odt.Nanosecond())
 	assert.Equal(t, 7200, odt.Offset().TotalSeconds())
 
-	assert.Equal(t, MustNewLocalDate(2024, March, 15), odt.LocalDate())
-	assert.Equal(t, MustNewLocalTime(14, 30, 45, 123456789), odt.LocalTime())
-	assert.Equal(t, MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789), odt.LocalDateTime())
+	assert.Equal(t, MustLocalDateOf(2024, March, 15), odt.LocalDate())
+	assert.Equal(t, MustLocalTimeOf(14, 30, 45, 123456789), odt.LocalTime())
+	assert.Equal(t, MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789), odt.LocalDateTime())
 }
 
 func TestOffsetDateTime_IsZero(t *testing.T) {
@@ -180,14 +180,14 @@ func TestOffsetDateTime_IsZero(t *testing.T) {
 	assert.True(t, zero.IsZero())
 
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 	assert.False(t, odt.IsZero())
 }
 
 func TestOffsetDateTime_IsLeapYear(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt2024 := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
-	odt2023 := MustNewOffsetDateTime(2023, March, 15, 14, 30, 45, 0, offset)
+	odt2024 := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
+	odt2023 := MustOffsetDateTimeOf(2023, March, 15, 14, 30, 45, 0, offset)
 
 	assert.True(t, odt2024.IsLeapYear())
 	assert.False(t, odt2023.IsLeapYear())
@@ -196,7 +196,7 @@ func TestOffsetDateTime_IsLeapYear(t *testing.T) {
 func TestOffsetDateTime_WithOffsetSameLocal(t *testing.T) {
 	offset1 := MustZoneOffsetOfHours(1)
 	offset2 := MustZoneOffsetOfHours(5)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset1)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset1)
 
 	odt2 := odt.WithOffsetSameLocal(offset2)
 	assert.Equal(t, 14, odt2.Hour()) // Local time unchanged
@@ -209,7 +209,7 @@ func TestOffsetDateTime_WithOffsetSameLocal(t *testing.T) {
 func TestOffsetDateTime_WithOffsetSameInstant(t *testing.T) {
 	offset1 := MustZoneOffsetOfHours(1)
 	offset2 := MustZoneOffsetOfHours(5)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset1)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset1)
 
 	odt2 := odt.WithOffsetSameInstant(offset2)
 
@@ -231,7 +231,7 @@ func TestOffsetDateTime_ToEpochSecond(t *testing.T) {
 	t.Run("UTC", func(t *testing.T) {
 		offset := ZoneOffsetUTC()
 		// 2024-03-15T14:30:45Z
-		odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+		odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 		epochSec := odt.ToEpochSecond()
 
 		// Verify by converting to Go time
@@ -242,12 +242,12 @@ func TestOffsetDateTime_ToEpochSecond(t *testing.T) {
 	t.Run("with positive offset", func(t *testing.T) {
 		offset := MustZoneOffsetOfHours(1)
 		// 2024-03-15T14:30:45+01:00
-		odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+		odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 		epochSec := odt.ToEpochSecond()
 
 		// Should be same as 13:30:45 UTC
 		offsetUTC := ZoneOffsetUTC()
-		odtUTC := MustNewOffsetDateTime(2024, March, 15, 13, 30, 45, 0, offsetUTC)
+		odtUTC := MustOffsetDateTimeOf(2024, March, 15, 13, 30, 45, 0, offsetUTC)
 		assert.Equal(t, odtUTC.ToEpochSecond(), epochSec)
 	})
 
@@ -259,7 +259,7 @@ func TestOffsetDateTime_ToEpochSecond(t *testing.T) {
 
 func TestOffsetDateTime_GoTime(t *testing.T) {
 	offset := MustZoneOffsetOfHours(5)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 
 	goTime := odt.GoTime()
 	assert.Equal(t, 2024, goTime.Year())
@@ -278,9 +278,9 @@ func TestOffsetDateTime_Compare(t *testing.T) {
 	offset1 := MustZoneOffsetOfHours(1)
 	offset2 := MustZoneOffsetOfHours(5)
 
-	odt1 := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset1)
-	odt2 := MustNewOffsetDateTime(2024, March, 15, 18, 30, 45, 0, offset2) // Same instant
-	odt3 := MustNewOffsetDateTime(2024, March, 15, 19, 30, 45, 0, offset2) // Later
+	odt1 := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset1)
+	odt2 := MustOffsetDateTimeOf(2024, March, 15, 18, 30, 45, 0, offset2) // Same instant
+	odt3 := MustOffsetDateTimeOf(2024, March, 15, 19, 30, 45, 0, offset2) // Later
 
 	assert.Equal(t, 0, odt1.Compare(odt2)) // Same instant
 	assert.Equal(t, -1, odt1.Compare(odt3))
@@ -295,8 +295,8 @@ func TestOffsetDateTime_Compare(t *testing.T) {
 
 func TestOffsetDateTime_IsBefore(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt1 := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
-	odt2 := MustNewOffsetDateTime(2024, March, 15, 14, 30, 46, 0, offset)
+	odt1 := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
+	odt2 := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 46, 0, offset)
 
 	assert.True(t, odt1.IsBefore(odt2))
 	assert.False(t, odt2.IsBefore(odt1))
@@ -305,8 +305,8 @@ func TestOffsetDateTime_IsBefore(t *testing.T) {
 
 func TestOffsetDateTime_IsAfter(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt1 := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
-	odt2 := MustNewOffsetDateTime(2024, March, 15, 14, 30, 46, 0, offset)
+	odt1 := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
+	odt2 := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 46, 0, offset)
 
 	assert.True(t, odt2.IsAfter(odt1))
 	assert.False(t, odt1.IsAfter(odt2))
@@ -315,7 +315,7 @@ func TestOffsetDateTime_IsAfter(t *testing.T) {
 
 func TestOffsetDateTime_PlusYears(t *testing.T) {
 	offset := MustZoneOffsetOfHours(1)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	odt2 := odt.PlusYears(1)
 	assert.Equal(t, Year(2025), odt2.Year())
@@ -328,7 +328,7 @@ func TestOffsetDateTime_PlusYears(t *testing.T) {
 
 func TestOffsetDateTime_PlusMonths(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	odt2 := odt.PlusMonths(2)
 	assert.Equal(t, May, odt2.Month())
@@ -339,7 +339,7 @@ func TestOffsetDateTime_PlusMonths(t *testing.T) {
 
 func TestOffsetDateTime_PlusDays(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	odt2 := odt.PlusDays(10)
 	assert.Equal(t, 25, odt2.DayOfMonth())
@@ -350,7 +350,7 @@ func TestOffsetDateTime_PlusDays(t *testing.T) {
 
 func TestOffsetDateTime_PlusHours(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	odt2 := odt.PlusHours(5)
 	assert.Equal(t, 19, odt2.Hour())
@@ -363,7 +363,7 @@ func TestOffsetDateTime_PlusHours(t *testing.T) {
 
 func TestOffsetDateTime_PlusMinutes(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	odt2 := odt.PlusMinutes(45)
 	assert.Equal(t, 15, odt2.Hour())
@@ -376,7 +376,7 @@ func TestOffsetDateTime_PlusMinutes(t *testing.T) {
 
 func TestOffsetDateTime_PlusSeconds(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	odt2 := odt.PlusSeconds(30)
 	assert.Equal(t, 15, odt2.Second())
@@ -387,7 +387,7 @@ func TestOffsetDateTime_PlusSeconds(t *testing.T) {
 
 func TestOffsetDateTime_PlusNanos(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	odt2 := odt.PlusNanos(123456789)
 	assert.Equal(t, 123456789, odt2.Nanosecond())
@@ -405,7 +405,7 @@ func TestOffsetDateTime_PlusNanos(t *testing.T) {
 
 func TestOffsetDateTime_MinusMethods(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 
 	assert.Equal(t, Year(2023), odt.MinusYears(1).Year())
 	assert.Equal(t, February, odt.MinusMonths(1).Month())
@@ -418,7 +418,7 @@ func TestOffsetDateTime_MinusMethods(t *testing.T) {
 
 func TestOffsetDateTime_IsSupportedField(t *testing.T) {
 	offset := ZoneOffsetUTC()
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
 
 	// Date and time fields should be supported
 	assert.True(t, odt.IsSupportedField(FieldYear))
@@ -435,7 +435,7 @@ func TestOffsetDateTime_IsSupportedField(t *testing.T) {
 
 func TestOffsetDateTime_GetField(t *testing.T) {
 	offset := MustZoneOffsetOfHours(2)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 
 	// Date fields
 	assert.Equal(t, int64(2024), odt.GetField(FieldYear).Int64())
@@ -460,12 +460,12 @@ func TestOffsetDateTime_GetField(t *testing.T) {
 
 func TestOffsetDateTime_String(t *testing.T) {
 	offset := MustZoneOffsetOfHours(1)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 	assert.Equal(t, "2024-03-15T14:30:45.123456789+01:00", odt.String())
 
 	// With UTC
 	offsetUTC := ZoneOffsetUTC()
-	odtUTC := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 0, offsetUTC)
+	odtUTC := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offsetUTC)
 	assert.Equal(t, "2024-03-15T14:30:45Z", odtUTC.String())
 
 	// Zero value
@@ -475,7 +475,7 @@ func TestOffsetDateTime_String(t *testing.T) {
 
 func TestOffsetDateTime_MarshalText(t *testing.T) {
 	offset := MustZoneOffsetOfHours(5)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 
 	text, err := odt.MarshalText()
 	require.NoError(t, err)
@@ -507,7 +507,7 @@ func TestOffsetDateTime_UnmarshalText(t *testing.T) {
 
 func TestOffsetDateTime_MarshalJSON(t *testing.T) {
 	offset := MustZoneOffsetOfHours(-5)
-	odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+	odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 
 	data, err := json.Marshal(odt)
 	require.NoError(t, err)
@@ -570,7 +570,7 @@ func TestOffsetDateTime_Scan(t *testing.T) {
 func TestOffsetDateTime_Value(t *testing.T) {
 	t.Run("non-zero", func(t *testing.T) {
 		offset := MustZoneOffsetOfHours(1)
-		odt := MustNewOffsetDateTime(2024, March, 15, 14, 30, 45, 123456789, offset)
+		odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 123456789, offset)
 		val, err := odt.Value()
 		require.NoError(t, err)
 		assert.Equal(t, "2024-03-15T14:30:45.123456789+01:00", val)
@@ -588,7 +588,7 @@ func TestOffsetDateTime_ValuePostgres(t *testing.T) {
 	var pg = GetPG(t)
 
 	t.Run("normal with offset", func(t *testing.T) {
-		expected := MustParseOffsetDateTime("2000-12-29T12:00:00+01:00")
+		expected := MustOffsetDateTimeParse("2000-12-29T12:00:00+01:00")
 		var actual OffsetDateTime
 		var expectedTrue bool
 		// PostgreSQL converts TIMESTAMPTZ to the session time zone
@@ -600,7 +600,7 @@ func TestOffsetDateTime_ValuePostgres(t *testing.T) {
 	})
 
 	t.Run("UTC", func(t *testing.T) {
-		expected := MustParseOffsetDateTime("2000-12-29T12:00:00Z")
+		expected := MustOffsetDateTimeParse("2000-12-29T12:00:00Z")
 		var actual OffsetDateTime
 		var expectedTrue bool
 		err := pg.QueryRow("SELECT $1::text, $1::text = '2000-12-29T12:00:00Z'", expected.String()).Scan(&actual, &expectedTrue)
@@ -620,7 +620,7 @@ func TestOffsetDateTime_ValuePostgres(t *testing.T) {
 
 	t.Run("with timestamptz", func(t *testing.T) {
 		// Test with actual TIMESTAMPTZ type
-		expected := MustParseOffsetDateTime("2000-12-29T12:00:00+01:00")
+		expected := MustOffsetDateTimeParse("2000-12-29T12:00:00+01:00")
 		var actual OffsetDateTime
 		// When scanning from TIMESTAMPTZ, Go's time.Time will be in the session timezone
 		err := pg.QueryRow("SELECT $1::timestamptz", expected.GoTime()).Scan(&actual)
@@ -634,7 +634,7 @@ func TestOffsetDateTime_ValueMySQL(t *testing.T) {
 	var mysql = GetMySQL(t)
 
 	t.Run("normal with offset", func(t *testing.T) {
-		expected := MustParseOffsetDateTime("2000-12-29T12:00:00+01:00")
+		expected := MustOffsetDateTimeParse("2000-12-29T12:00:00+01:00")
 		var actual OffsetDateTime
 		var expectedTrue bool
 		// MySQL doesn't have native timezone support in DATETIME, so we test with string
@@ -645,7 +645,7 @@ func TestOffsetDateTime_ValueMySQL(t *testing.T) {
 	})
 
 	t.Run("UTC", func(t *testing.T) {
-		expected := MustParseOffsetDateTime("2000-12-29T12:00:00Z")
+		expected := MustOffsetDateTimeParse("2000-12-29T12:00:00Z")
 		var actual OffsetDateTime
 		var expectedTrue bool
 		err := mysql.QueryRow("SELECT ?, ? = '2000-12-29T12:00:00Z'", expected.String(), expected.String()).Scan(&actual, &expectedTrue)
@@ -665,7 +665,7 @@ func TestOffsetDateTime_ValueMySQL(t *testing.T) {
 
 	t.Run("round_trip_instant", func(t *testing.T) {
 		// Test that we can store and retrieve the instant correctly
-		expected := MustParseOffsetDateTime("2000-12-29T12:00:00+05:30")
+		expected := MustOffsetDateTimeParse("2000-12-29T12:00:00+05:30")
 		var actual OffsetDateTime
 		err := mysql.QueryRow("SELECT ?", expected.String()).Scan(&actual)
 		assert.NoError(t, err)

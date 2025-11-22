@@ -22,8 +22,8 @@
 // Creating dates and times:
 //
 //	// Specific date and time
-//	date := goda.MustNewLocalDate(2024, goda.March, 15)
-//	time := goda.MustNewLocalTime(14, 30, 45, 0)
+//	date := goda.MustLocalDateOf(2024, goda.March, 15)
+//	time := goda.MustLocalTimeOf(14, 30, 45, 0)
 //	datetime := date.AtTime(time)  // Combine date and time
 //
 //	// With timezone offset
@@ -37,10 +37,10 @@
 //	currentOffsetDateTime := goda.OffsetDateTimeNow()
 //
 //	// Parse from string
-//	date = goda.MustParseLocalDate("2024-03-15")
-//	time = goda.MustParseLocalTime("14:30:45.123456789")
-//	datetime = goda.MustParseLocalDateTime("2024-03-15T14:30:45.123456789")
-//	offsetDateTime = goda.MustParseOffsetDateTime("2024-03-15T14:30:45+08:00")
+//	date = goda.MustLocalDateParse("2024-03-15")
+//	time = goda.MustLocalTimeParse("14:30:45.123456789")
+//	datetime = goda.MustLocalDateTimeParse("2024-03-15T14:30:45.123456789")
+//	offsetDateTime = goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
 //
 // LocalDate arithmetic:
 //

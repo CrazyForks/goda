@@ -7,7 +7,7 @@ import (
 )
 
 func TestLocalDate_IsSupportedField(t *testing.T) {
-	date := MustNewLocalDate(2024, March, 15)
+	date := MustLocalDateOf(2024, March, 15)
 
 	// Supported fields
 	assert.True(t, date.IsSupportedField(FieldDayOfWeek))
@@ -28,7 +28,7 @@ func TestLocalDate_IsSupportedField(t *testing.T) {
 }
 
 func TestLocalTime_IsSupportedField(t *testing.T) {
-	time := MustNewLocalTime(14, 30, 45, 123456789)
+	time := MustLocalTimeOf(14, 30, 45, 123456789)
 
 	// Supported fields
 	assert.True(t, time.IsSupportedField(FieldNanoOfSecond))
@@ -54,7 +54,7 @@ func TestLocalTime_IsSupportedField(t *testing.T) {
 }
 
 func TestLocalDateTime_IsSupportedField(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 
 	// Should support both date and time fields
 	assert.True(t, dt.IsSupportedField(FieldDayOfMonth))
@@ -71,7 +71,7 @@ func TestLocalDateTime_IsSupportedField(t *testing.T) {
 }
 
 func TestLocalDate_GetField(t *testing.T) {
-	date := MustNewLocalDate(2024, March, 15) // Friday
+	date := MustLocalDateOf(2024, March, 15) // Friday
 
 	t.Run("supported fields", func(t *testing.T) {
 		// Test FieldDayOfWeek
@@ -140,7 +140,7 @@ func TestLocalDate_GetField(t *testing.T) {
 	})
 
 	t.Run("BCE date", func(t *testing.T) {
-		bceDate := MustNewLocalDate(-100, January, 1)
+		bceDate := MustLocalDateOf(-100, January, 1)
 		era := bceDate.GetField(FieldEra)
 		assert.True(t, era.Valid())
 		assert.Equal(t, int64(0), era.Int64()) // BCE
@@ -149,7 +149,7 @@ func TestLocalDate_GetField(t *testing.T) {
 
 func TestLocalTime_GetField(t *testing.T) {
 	// Test 14:30:45.123456789 (PM)
-	time := MustNewLocalTime(14, 30, 45, 123456789)
+	time := MustLocalTimeOf(14, 30, 45, 123456789)
 
 	t.Run("supported fields", func(t *testing.T) {
 		// Test FieldNanoOfSecond
@@ -231,7 +231,7 @@ func TestLocalTime_GetField(t *testing.T) {
 	})
 
 	t.Run("midnight special cases", func(t *testing.T) {
-		midnight := MustNewLocalTime(0, 0, 0, 0)
+		midnight := MustLocalTimeOf(0, 0, 0, 0)
 
 		// FieldClockHourOfDay at midnight should be 24
 		clockHourOfDay := midnight.GetField(FieldClockHourOfDay)
@@ -250,7 +250,7 @@ func TestLocalTime_GetField(t *testing.T) {
 	})
 
 	t.Run("noon special cases", func(t *testing.T) {
-		noon := MustNewLocalTime(12, 0, 0, 0)
+		noon := MustLocalTimeOf(12, 0, 0, 0)
 
 		// FieldClockHourOfDay at noon should be 12
 		clockHourOfDay := noon.GetField(FieldClockHourOfDay)
@@ -288,7 +288,7 @@ func TestLocalTime_GetField(t *testing.T) {
 }
 
 func TestLocalDateTime_GetField(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 
 	t.Run("date fields", func(t *testing.T) {
 		// Test FieldDayOfWeek

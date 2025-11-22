@@ -346,167 +346,6 @@ func (t LocalTime) GetField(field Field) TemporalValue {
 	return TemporalValue{v: v}
 }
 
-// NewLocalTime creates a new LocalTime from the specified hour, minute, second, and nanosecond.
-// Returns an error if any component is out of range:
-// - hour must be 0-23
-// - minute must be 0-59
-// - second must be 0-59
-// - nanosecond must be 0-999999999
-func NewLocalTime(hour, minute, second, nanosecond int) (LocalTime, error) {
-	if hour < 0 || hour >= 24 {
-		return LocalTime{}, newError("hour %d out of range", hour)
-	}
-	if minute < 0 || minute >= 60 {
-		return LocalTime{}, newError("minute %d out of range", minute)
-	}
-	if second < 0 || second >= 60 {
-		return LocalTime{}, newError("second %d out of range", second)
-	}
-	if nanosecond < 0 || nanosecond >= 1000000000 {
-		return LocalTime{}, newError("nanosecond %d out of range", nanosecond)
-	}
-	nanos := int64(hour)*int64(time.Hour) +
-		int64(minute)*int64(time.Minute) +
-		int64(second)*int64(time.Second) +
-		int64(nanosecond)
-	return LocalTime{
-		v: nanos | localTimeValidBit,
-	}, nil
-}
-
-// MustNewLocalTime creates a new LocalTime from the specified hour, minute, second, and nanosecond.
-// Panics if any component is out of range. Use NewLocalTime for error handling.
-func MustNewLocalTime(hour, minute, second, nanosecond int) LocalTime {
-	return mustValue(NewLocalTime(hour, minute, second, nanosecond))
-}
-
-// LocalTimeOfGoTime creates a LocalTime from a time.Time.
-// The date and time zone components are ignored.
-// Returns zero value if t.IsZero().
-func LocalTimeOfGoTime(t time.Time) LocalTime {
-	if t.IsZero() {
-		return LocalTime{}
-	}
-	nanos := time.Date(1970, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC).UnixNano()
-	return LocalTime{
-		v: nanos | localTimeValidBit,
-	}
-}
-
-// LocalTimeOfNanoOfDay creates a LocalTime from the nanosecond-of-day value.
-// Returns an error if nanoOfDay is out of the valid range (0 to 86,399,999,999,999).
-// The valid range represents 00:00:00.000000000 to 23:59:59.999999999.
-//
-// Example:
-//
-//	// Create time for 12:00:00
-//	lt, err := LocalTimeOfNanoOfDay(12 * 60 * 60 * 1000000000)
-func LocalTimeOfNanoOfDay(nanoOfDay int64) (LocalTime, error) {
-	const nanosPerDay = 24 * int64(time.Hour)
-	if nanoOfDay < 0 || nanoOfDay >= nanosPerDay {
-		return LocalTime{}, newError("nanoOfDay %d out of range [0, %d)", nanoOfDay, nanosPerDay)
-	}
-	return LocalTime{
-		v: nanoOfDay | localTimeValidBit,
-	}, nil
-}
-
-// MustLocalTimeOfNanoOfDay creates a LocalTime from the nanosecond-of-day value.
-// Panics if nanoOfDay is out of range. Use LocalTimeOfNanoOfDay for error handling.
-//
-// Example:
-//
-//	// Create time for 12:00:00
-//	lt := MustLocalTimeOfNanoOfDay(12 * 60 * 60 * 1000000000)
-func MustLocalTimeOfNanoOfDay(nanoOfDay int64) LocalTime {
-	return mustValue(LocalTimeOfNanoOfDay(nanoOfDay))
-}
-
-// LocalTimeOfSecondOfDay creates a LocalTime from the second-of-day value.
-// Returns an error if secondOfDay is out of the valid range (0 to 86,399).
-// The valid range represents 00:00:00 to 23:59:59.
-// The nanosecond component will be set to zero.
-//
-// Example:
-//
-//	// Create time for 12:00:00
-//	lt, err := LocalTimeOfSecondOfDay(12 * 60 * 60)
-func LocalTimeOfSecondOfDay(secondOfDay int) (LocalTime, error) {
-	const secondsPerDay = 24 * 60 * 60
-	if secondOfDay < 0 || secondOfDay >= secondsPerDay {
-		return LocalTime{}, newError("secondOfDay %d out of range [0, %d)", secondOfDay, secondsPerDay)
-	}
-	nanos := int64(secondOfDay) * int64(time.Second)
-	return LocalTime{
-		v: nanos | localTimeValidBit,
-	}, nil
-}
-
-// MustLocalTimeOfSecondOfDay creates a LocalTime from the second-of-day value.
-// Panics if secondOfDay is out of range. Use LocalTimeOfSecondOfDay for error handling.
-//
-// Example:
-//
-//	// Create time for 12:00:00
-//	lt := MustLocalTimeOfSecondOfDay(12 * 60 * 60)
-func MustLocalTimeOfSecondOfDay(secondOfDay int) LocalTime {
-	return mustValue(LocalTimeOfSecondOfDay(secondOfDay))
-}
-
-// LocalTimeNow returns the current time in the system's local time zone.
-// This is equivalent to LocalTimeOfGoTime(time.Now()).
-// For UTC time, use LocalTimeNowUTC. For a specific timezone, use LocalTimeNowIn.
-func LocalTimeNow() LocalTime {
-	return LocalTimeOfGoTime(time.Now())
-}
-
-// LocalTimeNowIn returns the current time in the specified time zone.
-// This is equivalent to LocalTimeOfGoTime(time.Now().In(loc)).
-func LocalTimeNowIn(loc *time.Location) LocalTime {
-	return LocalTimeOfGoTime(time.Now().In(loc))
-}
-
-// LocalTimeNowUTC returns the current time in UTC.
-// This is equivalent to LocalTimeOfGoTime(time.Now().UTC()).
-func LocalTimeNowUTC() LocalTime {
-	return LocalTimeOfGoTime(time.Now().UTC())
-}
-
-// ParseLocalTime parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
-// Returns an error if the string is invalid or represents an invalid time.
-//
-// Accepts fractional seconds of any length (1-9 digits):
-//   - HH:mm:ss (e.g., "14:30:45")
-//   - HH:mm:ss.f (e.g., "14:30:45.1" → 100 milliseconds)
-//   - HH:mm:ss.fff (e.g., "14:30:45.123" → 123 milliseconds)
-//   - HH:mm:ss.ffffff (e.g., "14:30:45.123456" → 123.456 milliseconds)
-//   - HH:mm:ss.nnnnnnnnn (e.g., "14:30:45.123456789" → full nanosecond precision)
-//
-// Note: Output formatting aligns to 3-digit boundaries (milliseconds, microseconds, nanoseconds).
-// Timezone offsets are not supported.
-//
-// Example:
-//
-//	time, err := ParseLocalTime("14:30:45.123")
-//	if err != nil {
-//	    // handle error
-//	}
-func ParseLocalTime(s string) (LocalTime, error) {
-	var t LocalTime
-	err := t.UnmarshalText([]byte(s))
-	return t, err
-}
-
-// MustParseLocalTime parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
-// Panics if the string is invalid. Use ParseLocalTime for error handling.
-//
-// Example:
-//
-//	time := MustParseLocalTime("14:30:45.123456789")
-func MustParseLocalTime(s string) LocalTime {
-	return mustValue(ParseLocalTime(s))
-}
-
 // IsZero returns true if this is the zero value of LocalTime.
 func (t LocalTime) IsZero() bool {
 	return t.v == 0
@@ -627,6 +466,167 @@ func (t LocalTime) plusNanos(nanosToAdd int64) LocalTime {
 	}
 
 	return LocalTime{v: newNanos | localTimeValidBit}
+}
+
+// LocalTimeOf creates a new LocalTime from the specified hour, minute, second, and nanosecond.
+// Returns an error if any component is out of range:
+// - hour must be 0-23
+// - minute must be 0-59
+// - second must be 0-59
+// - nanosecond must be 0-999999999
+func LocalTimeOf(hour, minute, second, nanosecond int) (LocalTime, error) {
+	if hour < 0 || hour >= 24 {
+		return LocalTime{}, newError("hour %d out of range", hour)
+	}
+	if minute < 0 || minute >= 60 {
+		return LocalTime{}, newError("minute %d out of range", minute)
+	}
+	if second < 0 || second >= 60 {
+		return LocalTime{}, newError("second %d out of range", second)
+	}
+	if nanosecond < 0 || nanosecond >= 1000000000 {
+		return LocalTime{}, newError("nanosecond %d out of range", nanosecond)
+	}
+	nanos := int64(hour)*int64(time.Hour) +
+		int64(minute)*int64(time.Minute) +
+		int64(second)*int64(time.Second) +
+		int64(nanosecond)
+	return LocalTime{
+		v: nanos | localTimeValidBit,
+	}, nil
+}
+
+// MustLocalTimeOf creates a new LocalTime from the specified hour, minute, second, and nanosecond.
+// Panics if any component is out of range. Use LocalTimeOf for error handling.
+func MustLocalTimeOf(hour, minute, second, nanosecond int) LocalTime {
+	return mustValue(LocalTimeOf(hour, minute, second, nanosecond))
+}
+
+// LocalTimeOfGoTime creates a LocalTime from a time.Time.
+// The date and time zone components are ignored.
+// Returns zero value if t.IsZero().
+func LocalTimeOfGoTime(t time.Time) LocalTime {
+	if t.IsZero() {
+		return LocalTime{}
+	}
+	nanos := time.Date(1970, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC).UnixNano()
+	return LocalTime{
+		v: nanos | localTimeValidBit,
+	}
+}
+
+// LocalTimeOfNanoOfDay creates a LocalTime from the nanosecond-of-day value.
+// Returns an error if nanoOfDay is out of the valid range (0 to 86,399,999,999,999).
+// The valid range represents 00:00:00.000000000 to 23:59:59.999999999.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt, err := LocalTimeOfNanoOfDay(12 * 60 * 60 * 1000000000)
+func LocalTimeOfNanoOfDay(nanoOfDay int64) (LocalTime, error) {
+	const nanosPerDay = 24 * int64(time.Hour)
+	if nanoOfDay < 0 || nanoOfDay >= nanosPerDay {
+		return LocalTime{}, newError("nanoOfDay %d out of range [0, %d)", nanoOfDay, nanosPerDay)
+	}
+	return LocalTime{
+		v: nanoOfDay | localTimeValidBit,
+	}, nil
+}
+
+// MustLocalTimeOfNanoOfDay creates a LocalTime from the nanosecond-of-day value.
+// Panics if nanoOfDay is out of range. Use LocalTimeOfNanoOfDay for error handling.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt := MustLocalTimeOfNanoOfDay(12 * 60 * 60 * 1000000000)
+func MustLocalTimeOfNanoOfDay(nanoOfDay int64) LocalTime {
+	return mustValue(LocalTimeOfNanoOfDay(nanoOfDay))
+}
+
+// LocalTimeOfSecondOfDay creates a LocalTime from the second-of-day value.
+// Returns an error if secondOfDay is out of the valid range (0 to 86,399).
+// The valid range represents 00:00:00 to 23:59:59.
+// The nanosecond component will be set to zero.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt, err := LocalTimeOfSecondOfDay(12 * 60 * 60)
+func LocalTimeOfSecondOfDay(secondOfDay int) (LocalTime, error) {
+	const secondsPerDay = 24 * 60 * 60
+	if secondOfDay < 0 || secondOfDay >= secondsPerDay {
+		return LocalTime{}, newError("secondOfDay %d out of range [0, %d)", secondOfDay, secondsPerDay)
+	}
+	nanos := int64(secondOfDay) * int64(time.Second)
+	return LocalTime{
+		v: nanos | localTimeValidBit,
+	}, nil
+}
+
+// MustLocalTimeOfSecondOfDay creates a LocalTime from the second-of-day value.
+// Panics if secondOfDay is out of range. Use LocalTimeOfSecondOfDay for error handling.
+//
+// Example:
+//
+//	// Create time for 12:00:00
+//	lt := MustLocalTimeOfSecondOfDay(12 * 60 * 60)
+func MustLocalTimeOfSecondOfDay(secondOfDay int) LocalTime {
+	return mustValue(LocalTimeOfSecondOfDay(secondOfDay))
+}
+
+// LocalTimeNow returns the current time in the system's local time zone.
+// This is equivalent to LocalTimeOfGoTime(time.Now()).
+// For UTC time, use LocalTimeNowUTC. For a specific timezone, use LocalTimeNowIn.
+func LocalTimeNow() LocalTime {
+	return LocalTimeOfGoTime(time.Now())
+}
+
+// LocalTimeNowIn returns the current time in the specified time zone.
+// This is equivalent to LocalTimeOfGoTime(time.Now().In(loc)).
+func LocalTimeNowIn(loc *time.Location) LocalTime {
+	return LocalTimeOfGoTime(time.Now().In(loc))
+}
+
+// LocalTimeNowUTC returns the current time in UTC.
+// This is equivalent to LocalTimeOfGoTime(time.Now().UTC()).
+func LocalTimeNowUTC() LocalTime {
+	return LocalTimeOfGoTime(time.Now().UTC())
+}
+
+// LocalTimeParse parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
+// Returns an error if the string is invalid or represents an invalid time.
+//
+// Accepts fractional seconds of any length (1-9 digits):
+//   - HH:mm:ss (e.g., "14:30:45")
+//   - HH:mm:ss.f (e.g., "14:30:45.1" → 100 milliseconds)
+//   - HH:mm:ss.fff (e.g., "14:30:45.123" → 123 milliseconds)
+//   - HH:mm:ss.ffffff (e.g., "14:30:45.123456" → 123.456 milliseconds)
+//   - HH:mm:ss.nnnnnnnnn (e.g., "14:30:45.123456789" → full nanosecond precision)
+//
+// Note: Output formatting aligns to 3-digit boundaries (milliseconds, microseconds, nanoseconds).
+// Timezone offsets are not supported.
+//
+// Example:
+//
+//	time, err := LocalTimeParse("14:30:45.123")
+//	if err != nil {
+//	    // handle error
+//	}
+func LocalTimeParse(s string) (LocalTime, error) {
+	var t LocalTime
+	err := t.UnmarshalText([]byte(s))
+	return t, err
+}
+
+// MustLocalTimeParse parses a time string in HH:mm:ss[.nnnnnnnnn] format (24-hour).
+// Panics if the string is invalid. Use LocalTimeParse for error handling.
+//
+// Example:
+//
+//	time := MustLocalTimeParse("14:30:45.123456789")
+func MustLocalTimeParse(s string) LocalTime {
+	return mustValue(LocalTimeParse(s))
 }
 
 var (

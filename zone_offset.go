@@ -45,133 +45,6 @@ func (z ZoneOffset) GetField(field Field) TemporalValue {
 	return TemporalValue{unsupported: true}
 }
 
-// ZoneOffsetUTC returns UTC offset (+00:00).
-func ZoneOffsetUTC() ZoneOffset {
-	return ZoneOffset{totalSeconds: 0}
-}
-
-// ZoneOffsetMin returns the minimum supported offset (-18:00).
-func ZoneOffsetMin() ZoneOffset {
-	return ZoneOffset{totalSeconds: -18 * 3600}
-}
-
-// ZoneOffsetMax returns the maximum supported offset (+18:00).
-func ZoneOffsetMax() ZoneOffset {
-	return ZoneOffset{totalSeconds: 18 * 3600}
-}
-
-// ZoneOffsetOfSeconds creates a ZoneOffset from the total offset in seconds.
-// The offset must be in the range -18:00 to +18:00, which corresponds to -64800 to +64800 seconds.
-//
-// Returns an error if the offset is outside the valid range.
-func ZoneOffsetOfSeconds(seconds int) (ZoneOffset, error) {
-	if seconds > 18*3600 || seconds < -18*3600 {
-		return ZoneOffset{}, newError("zone offset seconds must be in range -64800 to +64800, got %d", seconds)
-	}
-	return ZoneOffset{totalSeconds: int32(seconds)}, nil
-}
-
-// MustZoneOffsetOfSeconds creates a ZoneOffset from the total offset in seconds.
-// Panics if the offset is outside the valid range.
-func MustZoneOffsetOfSeconds(seconds int) ZoneOffset {
-	return mustValue(ZoneOffsetOfSeconds(seconds))
-}
-
-// ZoneOffsetOf creates a ZoneOffset from hours, minutes, and seconds.
-// The offset must be in the range -18:00 to +18:00.
-//
-// The sign of all components must be the same. If any component is negative,
-// all non-zero components must be negative or zero.
-//
-// Returns an error if the offset is invalid.
-func ZoneOffsetOf(hours, minutes, seconds int) (ZoneOffset, error) {
-	// Validate that signs are consistent
-	if hours < 0 {
-		if minutes > 0 || seconds > 0 {
-			return ZoneOffset{}, newError("zone offset minutes and seconds must not be positive when hours is negative")
-		}
-	} else if hours > 0 {
-		if minutes < 0 || seconds < 0 {
-			return ZoneOffset{}, newError("zone offset minutes and seconds must not be negative when hours is positive")
-		}
-	} else if minutes < 0 {
-		if seconds > 0 {
-			return ZoneOffset{}, newError("zone offset seconds must not be positive when minutes is negative")
-		}
-	} else if minutes > 0 {
-		if seconds < 0 {
-			return ZoneOffset{}, newError("zone offset seconds must not be negative when minutes is positive")
-		}
-	}
-
-	// Validate ranges
-	if hours < -18 || hours > 18 {
-		return ZoneOffset{}, newError("zone offset hours must be in range -18 to +18, got %d", hours)
-	}
-	if minutes < -59 || minutes > 59 {
-		return ZoneOffset{}, newError("zone offset minutes must be in range -59 to +59, got %d", minutes)
-	}
-	if seconds < -59 || seconds > 59 {
-		return ZoneOffset{}, newError("zone offset seconds must be in range -59 to +59, got %d", seconds)
-	}
-
-	totalSeconds := hours*3600 + minutes*60 + seconds
-	return ZoneOffsetOfSeconds(totalSeconds)
-}
-
-// MustZoneOffsetOf creates a ZoneOffset from hours, minutes, and seconds.
-// Panics if the offset is invalid.
-func MustZoneOffsetOf(hours, minutes, seconds int) ZoneOffset {
-	return mustValue(ZoneOffsetOf(hours, minutes, seconds))
-}
-
-// ZoneOffsetOfHours creates a ZoneOffset from hours only.
-// The offset must be in the range -18 to +18.
-func ZoneOffsetOfHours(hours int) (ZoneOffset, error) {
-	return ZoneOffsetOf(hours, 0, 0)
-}
-
-// MustZoneOffsetOfHours creates a ZoneOffset from hours only.
-// Panics if the offset is invalid.
-func MustZoneOffsetOfHours(hours int) ZoneOffset {
-	return mustValue(ZoneOffsetOfHours(hours))
-}
-
-// ZoneOffsetOfHoursMinutes creates a ZoneOffset from hours and minutes.
-// The offset must be in the range -18:00 to +18:00.
-func ZoneOffsetOfHoursMinutes(hours, minutes int) (ZoneOffset, error) {
-	return ZoneOffsetOf(hours, minutes, 0)
-}
-
-// MustZoneOffsetOfHoursMinutes creates a ZoneOffset from hours and minutes.
-// Panics if the offset is invalid.
-func MustZoneOffsetOfHoursMinutes(hours, minutes int) ZoneOffset {
-	return mustValue(ZoneOffsetOfHoursMinutes(hours, minutes))
-}
-
-// ParseZoneOffset parses a zone offset string.
-// Accepts the following formats:
-//   - Z: UTC
-//   - ±H: hour offset (-9, +9)
-//   - ±HH: hour offset (-09, +09)
-//   - ±HH:MM: hour and minute offset (-09:30, +09:30)
-//   - ±HHMM: hour and minute offset (-0930, +0930)
-//   - ±HH:MM:SS: hour, minute, and second offset (-09:30:45, +09:30:45)
-//   - ±HHMMSS: hour, minute, and second offset (-093045, +093045)
-//
-// Returns an error if the string is invalid.
-func ParseZoneOffset(s string) (ZoneOffset, error) {
-	var z ZoneOffset
-	err := z.UnmarshalText([]byte(s))
-	return z, err
-}
-
-// MustParseZoneOffset parses a zone offset string.
-// Panics if the string is invalid.
-func MustParseZoneOffset(s string) ZoneOffset {
-	return mustValue(ParseZoneOffset(s))
-}
-
 // TotalSeconds returns the total zone offset in seconds.
 func (z ZoneOffset) TotalSeconds() int {
 	return int(z.totalSeconds)
@@ -387,6 +260,133 @@ func (z ZoneOffset) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements json.Unmarshaler.
 func (z *ZoneOffset) UnmarshalJSON(data []byte) error {
 	return unmarshalJsonImpl(z, data)
+}
+
+// ZoneOffsetUTC returns UTC offset (+00:00).
+func ZoneOffsetUTC() ZoneOffset {
+	return ZoneOffset{totalSeconds: 0}
+}
+
+// ZoneOffsetMin returns the minimum supported offset (-18:00).
+func ZoneOffsetMin() ZoneOffset {
+	return ZoneOffset{totalSeconds: -18 * 3600}
+}
+
+// ZoneOffsetMax returns the maximum supported offset (+18:00).
+func ZoneOffsetMax() ZoneOffset {
+	return ZoneOffset{totalSeconds: 18 * 3600}
+}
+
+// ZoneOffsetOfSeconds creates a ZoneOffset from the total offset in seconds.
+// The offset must be in the range -18:00 to +18:00, which corresponds to -64800 to +64800 seconds.
+//
+// Returns an error if the offset is outside the valid range.
+func ZoneOffsetOfSeconds(seconds int) (ZoneOffset, error) {
+	if seconds > 18*3600 || seconds < -18*3600 {
+		return ZoneOffset{}, newError("zone offset seconds must be in range -64800 to +64800, got %d", seconds)
+	}
+	return ZoneOffset{totalSeconds: int32(seconds)}, nil
+}
+
+// MustZoneOffsetOfSeconds creates a ZoneOffset from the total offset in seconds.
+// Panics if the offset is outside the valid range.
+func MustZoneOffsetOfSeconds(seconds int) ZoneOffset {
+	return mustValue(ZoneOffsetOfSeconds(seconds))
+}
+
+// ZoneOffsetOf creates a ZoneOffset from hours, minutes, and seconds.
+// The offset must be in the range -18:00 to +18:00.
+//
+// The sign of all components must be the same. If any component is negative,
+// all non-zero components must be negative or zero.
+//
+// Returns an error if the offset is invalid.
+func ZoneOffsetOf(hours, minutes, seconds int) (ZoneOffset, error) {
+	// Validate that signs are consistent
+	if hours < 0 {
+		if minutes > 0 || seconds > 0 {
+			return ZoneOffset{}, newError("zone offset minutes and seconds must not be positive when hours is negative")
+		}
+	} else if hours > 0 {
+		if minutes < 0 || seconds < 0 {
+			return ZoneOffset{}, newError("zone offset minutes and seconds must not be negative when hours is positive")
+		}
+	} else if minutes < 0 {
+		if seconds > 0 {
+			return ZoneOffset{}, newError("zone offset seconds must not be positive when minutes is negative")
+		}
+	} else if minutes > 0 {
+		if seconds < 0 {
+			return ZoneOffset{}, newError("zone offset seconds must not be negative when minutes is positive")
+		}
+	}
+
+	// Validate ranges
+	if hours < -18 || hours > 18 {
+		return ZoneOffset{}, newError("zone offset hours must be in range -18 to +18, got %d", hours)
+	}
+	if minutes < -59 || minutes > 59 {
+		return ZoneOffset{}, newError("zone offset minutes must be in range -59 to +59, got %d", minutes)
+	}
+	if seconds < -59 || seconds > 59 {
+		return ZoneOffset{}, newError("zone offset seconds must be in range -59 to +59, got %d", seconds)
+	}
+
+	totalSeconds := hours*3600 + minutes*60 + seconds
+	return ZoneOffsetOfSeconds(totalSeconds)
+}
+
+// MustZoneOffsetOf creates a ZoneOffset from hours, minutes, and seconds.
+// Panics if the offset is invalid.
+func MustZoneOffsetOf(hours, minutes, seconds int) ZoneOffset {
+	return mustValue(ZoneOffsetOf(hours, minutes, seconds))
+}
+
+// ZoneOffsetOfHours creates a ZoneOffset from hours only.
+// The offset must be in the range -18 to +18.
+func ZoneOffsetOfHours(hours int) (ZoneOffset, error) {
+	return ZoneOffsetOf(hours, 0, 0)
+}
+
+// MustZoneOffsetOfHours creates a ZoneOffset from hours only.
+// Panics if the offset is invalid.
+func MustZoneOffsetOfHours(hours int) ZoneOffset {
+	return mustValue(ZoneOffsetOfHours(hours))
+}
+
+// ZoneOffsetOfHoursMinutes creates a ZoneOffset from hours and minutes.
+// The offset must be in the range -18:00 to +18:00.
+func ZoneOffsetOfHoursMinutes(hours, minutes int) (ZoneOffset, error) {
+	return ZoneOffsetOf(hours, minutes, 0)
+}
+
+// MustZoneOffsetOfHoursMinutes creates a ZoneOffset from hours and minutes.
+// Panics if the offset is invalid.
+func MustZoneOffsetOfHoursMinutes(hours, minutes int) ZoneOffset {
+	return mustValue(ZoneOffsetOfHoursMinutes(hours, minutes))
+}
+
+// ZoneOffsetParse parses a zone offset string.
+// Accepts the following formats:
+//   - Z: UTC
+//   - ±H: hour offset (-9, +9)
+//   - ±HH: hour offset (-09, +09)
+//   - ±HH:MM: hour and minute offset (-09:30, +09:30)
+//   - ±HHMM: hour and minute offset (-0930, +0930)
+//   - ±HH:MM:SS: hour, minute, and second offset (-09:30:45, +09:30:45)
+//   - ±HHMMSS: hour, minute, and second offset (-093045, +093045)
+//
+// Returns an error if the string is invalid.
+func ZoneOffsetParse(s string) (ZoneOffset, error) {
+	var z ZoneOffset
+	err := z.UnmarshalText([]byte(s))
+	return z, err
+}
+
+// MustZoneOffsetParse parses a zone offset string.
+// Panics if the string is invalid.
+func MustZoneOffsetParse(s string) ZoneOffset {
+	return mustValue(ZoneOffsetParse(s))
 }
 
 // Compile-time interface checks

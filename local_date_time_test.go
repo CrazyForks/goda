@@ -13,8 +13,8 @@ import (
 )
 
 func TestLocalDate_AtTime(t *testing.T) {
-	date := MustNewLocalDate(2024, March, 15)
-	time := MustNewLocalTime(14, 30, 45, 123456789)
+	date := MustLocalDateOf(2024, March, 15)
+	time := MustLocalTimeOf(14, 30, 45, 123456789)
 	dt := date.AtTime(time)
 
 	assert.Equal(t, date, dt.LocalDate())
@@ -23,8 +23,8 @@ func TestLocalDate_AtTime(t *testing.T) {
 }
 
 func TestLocalTime_AtDate(t *testing.T) {
-	date := MustNewLocalDate(2024, March, 15)
-	time := MustNewLocalTime(14, 30, 45, 123456789)
+	date := MustLocalDateOf(2024, March, 15)
+	time := MustLocalTimeOf(14, 30, 45, 123456789)
 	dt := time.AtDate(date)
 
 	assert.Equal(t, date, dt.LocalDate())
@@ -34,7 +34,7 @@ func TestLocalTime_AtDate(t *testing.T) {
 
 func TestNewLocalDateTime(t *testing.T) {
 	t.Run("valid components", func(t *testing.T) {
-		dt, err := NewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+		dt, err := LocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 		require.NoError(t, err)
 		assert.Equal(t, Year(2024), dt.Year())
 		assert.Equal(t, March, dt.Month())
@@ -46,12 +46,12 @@ func TestNewLocalDateTime(t *testing.T) {
 	})
 
 	t.Run("invalid date", func(t *testing.T) {
-		_, err := NewLocalDateTime(2024, February, 30, 14, 30, 45, 0)
+		_, err := LocalDateTimeOf(2024, February, 30, 14, 30, 45, 0)
 		assert.Error(t, err)
 	})
 
 	t.Run("invalid time", func(t *testing.T) {
-		_, err := NewLocalDateTime(2024, March, 15, 25, 30, 45, 0)
+		_, err := LocalDateTimeOf(2024, March, 15, 25, 30, 45, 0)
 		assert.Error(t, err)
 	})
 }
@@ -59,14 +59,14 @@ func TestNewLocalDateTime(t *testing.T) {
 func TestMustNewLocalDateTime(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+			dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 			assert.Equal(t, Year(2024), dt.Year())
 		})
 	})
 
 	t.Run("invalid panics", func(t *testing.T) {
 		assert.Panics(t, func() {
-			MustNewLocalDateTime(2024, February, 30, 14, 30, 45, 0)
+			MustLocalDateTimeOf(2024, February, 30, 14, 30, 45, 0)
 		})
 	})
 }
@@ -98,18 +98,18 @@ func TestLocalDateTime_IsZero(t *testing.T) {
 	})
 
 	t.Run("non-zero value", func(t *testing.T) {
-		dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
+		dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
 		assert.False(t, dt.IsZero())
 	})
 
 	t.Run("midnight is not zero", func(t *testing.T) {
-		dt := MustNewLocalDateTime(2024, March, 15, 0, 0, 0, 0)
+		dt := MustLocalDateTimeOf(2024, March, 15, 0, 0, 0, 0)
 		assert.False(t, dt.IsZero())
 	})
 }
 
 func TestLocalDateTime_ComponentAccessors(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 
 	// LocalDate components
 	assert.Equal(t, Year(2024), dt.Year())
@@ -128,7 +128,7 @@ func TestLocalDateTime_ComponentAccessors(t *testing.T) {
 
 func TestLocalDateTime_GoTime(t *testing.T) {
 	t.Run("non-zero", func(t *testing.T) {
-		dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+		dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 		goTime := dt.GoTime()
 
 		assert.Equal(t, 2024, goTime.Year())
@@ -149,11 +149,11 @@ func TestLocalDateTime_GoTime(t *testing.T) {
 }
 
 func TestLocalDateTime_Compare(t *testing.T) {
-	dt1 := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
-	dt2 := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
-	dt3 := MustNewLocalDateTime(2024, March, 15, 14, 30, 46, 0)
-	dt4 := MustNewLocalDateTime(2024, March, 16, 14, 30, 45, 0)
-	dt5 := MustNewLocalDateTime(2024, March, 15, 15, 30, 45, 0)
+	dt1 := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
+	dt2 := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
+	dt3 := MustLocalDateTimeOf(2024, March, 15, 14, 30, 46, 0)
+	dt4 := MustLocalDateTimeOf(2024, March, 16, 14, 30, 45, 0)
+	dt5 := MustLocalDateTimeOf(2024, March, 15, 15, 30, 45, 0)
 
 	assert.Equal(t, 0, dt1.Compare(dt2))
 	assert.Equal(t, -1, dt1.Compare(dt3))
@@ -165,9 +165,9 @@ func TestLocalDateTime_Compare(t *testing.T) {
 }
 
 func TestLocalDateTime_IsBefore_IsAfter(t *testing.T) {
-	dt1 := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
-	dt2 := MustNewLocalDateTime(2024, March, 15, 14, 30, 46, 0)
-	dt3 := MustNewLocalDateTime(2024, March, 16, 14, 30, 45, 0)
+	dt1 := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
+	dt2 := MustLocalDateTimeOf(2024, March, 15, 14, 30, 46, 0)
+	dt3 := MustLocalDateTimeOf(2024, March, 16, 14, 30, 45, 0)
 
 	assert.True(t, dt1.IsBefore(dt2))
 	assert.False(t, dt2.IsBefore(dt1))
@@ -182,7 +182,7 @@ func TestLocalDateTime_IsBefore_IsAfter(t *testing.T) {
 }
 
 func TestLocalDateTime_PlusDays(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
 
 	dt2 := dt.PlusDays(10)
 	assert.Equal(t, Year(2024), dt2.Year())
@@ -196,7 +196,7 @@ func TestLocalDateTime_PlusDays(t *testing.T) {
 }
 
 func TestLocalDateTime_MinusDays(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
 
 	dt2 := dt.MinusDays(10)
 	assert.Equal(t, 5, dt2.DayOfMonth())
@@ -204,7 +204,7 @@ func TestLocalDateTime_MinusDays(t *testing.T) {
 }
 
 func TestLocalDateTime_PlusMonths(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, January, 31, 14, 30, 45, 0)
+	dt := MustLocalDateTimeOf(2024, January, 31, 14, 30, 45, 0)
 
 	dt2 := dt.PlusMonths(1)
 	assert.Equal(t, February, dt2.Month())
@@ -213,7 +213,7 @@ func TestLocalDateTime_PlusMonths(t *testing.T) {
 }
 
 func TestLocalDateTime_MinusMonths(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
 
 	dt2 := dt.MinusMonths(1)
 	assert.Equal(t, February, dt2.Month())
@@ -221,7 +221,7 @@ func TestLocalDateTime_MinusMonths(t *testing.T) {
 }
 
 func TestLocalDateTime_PlusYears(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, February, 29, 14, 30, 45, 0)
+	dt := MustLocalDateTimeOf(2024, February, 29, 14, 30, 45, 0)
 
 	dt2 := dt.PlusYears(1)
 	assert.Equal(t, Year(2025), dt2.Year())
@@ -230,7 +230,7 @@ func TestLocalDateTime_PlusYears(t *testing.T) {
 }
 
 func TestLocalDateTime_MinusYears(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
 
 	dt2 := dt.MinusYears(1)
 	assert.Equal(t, Year(2023), dt2.Year())
@@ -244,22 +244,22 @@ func TestLocalDateTime_String(t *testing.T) {
 	}{
 		{
 			name:     "full nanoseconds",
-			dt:       MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789),
+			dt:       MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789),
 			expected: "2024-03-15T14:30:45.123456789",
 		},
 		{
 			name:     "milliseconds",
-			dt:       MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123000000),
+			dt:       MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123000000),
 			expected: "2024-03-15T14:30:45.123",
 		},
 		{
 			name:     "no fractional seconds",
-			dt:       MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0),
+			dt:       MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0),
 			expected: "2024-03-15T14:30:45",
 		},
 		{
 			name:     "midnight",
-			dt:       MustNewLocalDateTime(2024, March, 15, 0, 0, 0, 0),
+			dt:       MustLocalDateTimeOf(2024, March, 15, 0, 0, 0, 0),
 			expected: "2024-03-15T00:00:00",
 		},
 		{
@@ -277,7 +277,7 @@ func TestLocalDateTime_String(t *testing.T) {
 }
 
 func TestLocalDateTime_MarshalText(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 	text, err := dt.MarshalText()
 	require.NoError(t, err)
 	assert.Equal(t, "2024-03-15T14:30:45.123456789", string(text))
@@ -326,7 +326,7 @@ func TestLocalDateTime_UnmarshalText(t *testing.T) {
 }
 
 func TestLocalDateTime_MarshalJSON(t *testing.T) {
-	dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 	jsonBytes, err := json.Marshal(dt)
 	require.NoError(t, err)
 	assert.Equal(t, `"2024-03-15T14:30:45.123456789"`, string(jsonBytes))
@@ -384,7 +384,7 @@ func TestLocalDateTime_Scan(t *testing.T) {
 
 func TestLocalDateTime_Value(t *testing.T) {
 	t.Run("non-zero", func(t *testing.T) {
-		dt := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 123456789)
+		dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 123456789)
 		val, err := dt.Value()
 		require.NoError(t, err)
 		assert.Equal(t, "2024-03-15T14:30:45.123456789", val)
@@ -400,18 +400,18 @@ func TestLocalDateTime_Value(t *testing.T) {
 
 func TestParseLocalDateTime(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
-		dt, err := ParseLocalDateTime("2024-03-15T14:30:45.123456789")
+		dt, err := LocalDateTimeParse("2024-03-15T14:30:45.123456789")
 		require.NoError(t, err)
 		assert.Equal(t, Year(2024), dt.Year())
 		assert.Equal(t, 14, dt.Hour())
 
-		dt, err = ParseLocalDateTime("2024-03-15T14:30:45")
+		dt, err = LocalDateTimeParse("2024-03-15T14:30:45")
 		require.NoError(t, err)
 		assert.Equal(t, Year(2024), dt.Year())
 	})
 
 	t.Run("empty", func(t *testing.T) {
-		dt, err := ParseLocalDateTime("")
+		dt, err := LocalDateTimeParse("")
 		require.NoError(t, err)
 		assert.True(t, dt.IsZero())
 	})
@@ -420,14 +420,14 @@ func TestParseLocalDateTime(t *testing.T) {
 func TestMustParseLocalDateTime(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			dt := MustParseLocalDateTime("2024-03-15T14:30:45.123456789")
+			dt := MustLocalDateTimeParse("2024-03-15T14:30:45.123456789")
 			assert.Equal(t, Year(2024), dt.Year())
 		})
 	})
 
 	t.Run("invalid panics", func(t *testing.T) {
 		assert.Panics(t, func() {
-			MustParseLocalDateTime("invalid")
+			MustLocalDateTimeParse("invalid")
 		})
 	})
 }
@@ -455,8 +455,8 @@ func TestLocalDateTimeNowIn(t *testing.T) {
 }
 
 func TestLocalDateTime_IsLeapYear(t *testing.T) {
-	dt2024 := MustNewLocalDateTime(2024, March, 15, 14, 30, 45, 0)
-	dt2023 := MustNewLocalDateTime(2023, March, 15, 14, 30, 45, 0)
+	dt2024 := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
+	dt2023 := MustLocalDateTimeOf(2023, March, 15, 14, 30, 45, 0)
 
 	assert.True(t, dt2024.IsLeapYear())
 	assert.False(t, dt2023.IsLeapYear())
@@ -473,7 +473,7 @@ func TestFieldGetter(t *testing.T) {
 			continue
 		}
 		cols := strings.Split(line, ",")
-		dt, e := ParseLocalDateTime(cols[0])
+		dt, e := LocalDateTimeParse(cols[0])
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -493,7 +493,7 @@ func TestFieldGetter(t *testing.T) {
 func TestLocalDateTime_ValuePostgres(t *testing.T) {
 	var pg = GetPG(t)
 	t.Run("normal", func(t *testing.T) {
-		var expected = MustParseLocalDateTime("2000-12-29 12:00:00")
+		var expected = MustLocalDateTimeParse("2000-12-29 12:00:00")
 		var actual LocalDateTime
 		var expectedTrue bool
 		var e = pg.QueryRow("SELECT $1::timestamp without time zone, $1::timestamp without time zone = '2000-12-29 12:00:00'", expected).Scan(&actual, &expectedTrue)
@@ -514,7 +514,7 @@ func TestLocalDateTime_ValuePostgres(t *testing.T) {
 func TestLocalDateTime_ValueMySQL(t *testing.T) {
 	var pg = GetMySQL(t)
 	t.Run("normal", func(t *testing.T) {
-		var expected = MustParseLocalDateTime("2000-12-29 12:00:00")
+		var expected = MustLocalDateTimeParse("2000-12-29 12:00:00")
 		var actual LocalDateTime
 		var expectedTrue bool
 		var e = pg.QueryRow("SELECT CAST(? AS DATETIME), CAST(? AS DATETIME)  = '2000-12-29 12:00:00'", expected, expected).Scan(&actual, &expectedTrue)

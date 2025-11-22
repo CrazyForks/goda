@@ -212,7 +212,7 @@ func TestParseZoneOffset(t *testing.T) {
 	t.Run("UTC formats", func(t *testing.T) {
 		tests := []string{"Z", "z"}
 		for _, s := range tests {
-			z, err := ParseZoneOffset(s)
+			z, err := ZoneOffsetParse(s)
 			require.NoError(t, err)
 			assert.Equal(t, 0, z.TotalSeconds())
 			assert.True(t, z.IsZero())
@@ -237,7 +237,7 @@ func TestParseZoneOffset(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			z, err := ParseZoneOffset(tt.input)
+			z, err := ZoneOffsetParse(tt.input)
 			require.NoError(t, err, "input: %s", tt.input)
 			assert.Equal(t, tt.seconds, z.TotalSeconds(), "input: %s", tt.input)
 		}
@@ -261,7 +261,7 @@ func TestParseZoneOffset(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			z, err := ParseZoneOffset(tt.input)
+			z, err := ZoneOffsetParse(tt.input)
 			require.NoError(t, err, "input: %s", tt.input)
 			assert.Equal(t, tt.seconds, z.TotalSeconds(), "input: %s", tt.input)
 		}
@@ -283,7 +283,7 @@ func TestParseZoneOffset(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			z, err := ParseZoneOffset(tt.input)
+			z, err := ZoneOffsetParse(tt.input)
 			require.NoError(t, err, "input: %s", tt.input)
 			assert.Equal(t, tt.seconds, z.TotalSeconds(), "input: %s", tt.input)
 		}
@@ -302,7 +302,7 @@ func TestParseZoneOffset(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			z, err := ParseZoneOffset(tt.input)
+			z, err := ZoneOffsetParse(tt.input)
 			require.NoError(t, err, "input: %s", tt.input)
 			assert.Equal(t, tt.seconds, z.TotalSeconds(), "input: %s", tt.input)
 		}
@@ -320,7 +320,7 @@ func TestParseZoneOffset(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			z, err := ParseZoneOffset(tt.input)
+			z, err := ZoneOffsetParse(tt.input)
 			require.NoError(t, err, "input: %s", tt.input)
 			assert.Equal(t, tt.seconds, z.TotalSeconds(), "input: %s", tt.input)
 		}
@@ -342,7 +342,7 @@ func TestParseZoneOffset(t *testing.T) {
 		}
 
 		for _, s := range invalid {
-			_, err := ParseZoneOffset(s)
+			_, err := ZoneOffsetParse(s)
 			assert.Error(t, err, "should fail for: %s", s)
 		}
 	})
@@ -351,14 +351,14 @@ func TestParseZoneOffset(t *testing.T) {
 func TestMustParseZoneOffset(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			z := MustParseZoneOffset("+01:00")
+			z := MustZoneOffsetParse("+01:00")
 			assert.Equal(t, 3600, z.TotalSeconds())
 		})
 	})
 
 	t.Run("invalid panics", func(t *testing.T) {
 		assert.Panics(t, func() {
-			MustParseZoneOffset("invalid")
+			MustZoneOffsetParse("invalid")
 		})
 	})
 }
@@ -508,7 +508,7 @@ func TestZoneOffset_RoundTrip(t *testing.T) {
 
 		// String round-trip
 		s := z1.String()
-		z2, err := ParseZoneOffset(s)
+		z2, err := ZoneOffsetParse(s)
 		require.NoError(t, err)
 		assert.Equal(t, z1.TotalSeconds(), z2.TotalSeconds())
 
@@ -543,7 +543,7 @@ func TestZoneOffset_CommonOffsets(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			z, err := ParseZoneOffset(tt.offset)
+			z, err := ZoneOffsetParse(tt.offset)
 			require.NoError(t, err)
 			assert.Equal(t, tt.seconds, z.TotalSeconds())
 

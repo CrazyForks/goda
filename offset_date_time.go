@@ -28,70 +28,6 @@ type OffsetDateTime struct {
 	offset   ZoneOffset
 }
 
-// NewOffsetDateTime creates a new OffsetDateTime from individual components.
-// Returns an error if any component is invalid.
-func NewOffsetDateTime(year Year, month Month, day int, hour int, minute int, second int, nanosecond int, offset ZoneOffset) (OffsetDateTime, error) {
-	dt, err := NewLocalDateTime(year, month, day, hour, minute, second, nanosecond)
-	if err != nil {
-		return OffsetDateTime{}, err
-	}
-	return OffsetDateTime{
-		datetime: dt,
-		offset:   offset,
-	}, nil
-}
-
-// MustNewOffsetDateTime creates a new OffsetDateTime from individual components.
-// Panics if any component is invalid.
-func MustNewOffsetDateTime(year Year, month Month, day int, hour int, minute int, second int, nanosecond int, offset ZoneOffset) OffsetDateTime {
-	return mustValue(NewOffsetDateTime(year, month, day, hour, minute, second, nanosecond, offset))
-}
-
-// OffsetDateTimeNow returns the current date-time with offset in the system's local time zone.
-func OffsetDateTimeNow() OffsetDateTime {
-	return OffsetDateTimeOfGoTime(time.Now())
-}
-
-// OffsetDateTimeNowUTC returns the current date-time with offset in UTC.
-func OffsetDateTimeNowUTC() OffsetDateTime {
-	return OffsetDateTimeOfGoTime(time.Now().UTC())
-}
-
-// OffsetDateTimeOfGoTime creates an OffsetDateTime from a time.Time.
-// Returns zero value if t.IsZero().
-func OffsetDateTimeOfGoTime(t time.Time) OffsetDateTime {
-	if t.IsZero() {
-		return OffsetDateTime{}
-	}
-	_, offsetSeconds := t.Zone()
-	offset := MustZoneOffsetOfSeconds(offsetSeconds)
-	return LocalDateTimeOfGoTime(t).AtOffset(offset)
-}
-
-// ParseOffsetDateTime parses a date-time string in RFC3339-compatible format.
-// The format is yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]±HH:mm[:ss] or with 'Z' for UTC.
-//
-// Examples:
-//
-//	odt, err := ParseOffsetDateTime("2024-03-15T14:30:45.123456789+01:00")
-//	odt, err := ParseOffsetDateTime("2024-03-15T14:30:45Z")
-//	odt, err := ParseOffsetDateTime("2024-03-15T14:30:45+05:30")
-func ParseOffsetDateTime(s string) (OffsetDateTime, error) {
-	var odt OffsetDateTime
-	err := odt.UnmarshalText([]byte(s))
-	return odt, err
-}
-
-// MustParseOffsetDateTime parses a date-time string with offset.
-// Panics if the string is invalid.
-func MustParseOffsetDateTime(s string) OffsetDateTime {
-	odt, err := ParseOffsetDateTime(s)
-	if err != nil {
-		panic(err)
-	}
-	return odt
-}
-
 // LocalDateTime returns the local date-time part without the offset.
 func (odt OffsetDateTime) LocalDateTime() LocalDateTime {
 	return odt.datetime
@@ -512,6 +448,70 @@ func (odt OffsetDateTime) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return odt.String(), nil
+}
+
+// OffsetDateTimeOf creates a new OffsetDateTime from individual components.
+// Returns an error if any component is invalid.
+func OffsetDateTimeOf(year Year, month Month, day int, hour int, minute int, second int, nanosecond int, offset ZoneOffset) (OffsetDateTime, error) {
+	dt, err := LocalDateTimeOf(year, month, day, hour, minute, second, nanosecond)
+	if err != nil {
+		return OffsetDateTime{}, err
+	}
+	return OffsetDateTime{
+		datetime: dt,
+		offset:   offset,
+	}, nil
+}
+
+// MustOffsetDateTimeOf creates a new OffsetDateTime from individual components.
+// Panics if any component is invalid.
+func MustOffsetDateTimeOf(year Year, month Month, day int, hour int, minute int, second int, nanosecond int, offset ZoneOffset) OffsetDateTime {
+	return mustValue(OffsetDateTimeOf(year, month, day, hour, minute, second, nanosecond, offset))
+}
+
+// OffsetDateTimeNow returns the current date-time with offset in the system's local time zone.
+func OffsetDateTimeNow() OffsetDateTime {
+	return OffsetDateTimeOfGoTime(time.Now())
+}
+
+// OffsetDateTimeNowUTC returns the current date-time with offset in UTC.
+func OffsetDateTimeNowUTC() OffsetDateTime {
+	return OffsetDateTimeOfGoTime(time.Now().UTC())
+}
+
+// OffsetDateTimeOfGoTime creates an OffsetDateTime from a time.Time.
+// Returns zero value if t.IsZero().
+func OffsetDateTimeOfGoTime(t time.Time) OffsetDateTime {
+	if t.IsZero() {
+		return OffsetDateTime{}
+	}
+	_, offsetSeconds := t.Zone()
+	offset := MustZoneOffsetOfSeconds(offsetSeconds)
+	return LocalDateTimeOfGoTime(t).AtOffset(offset)
+}
+
+// OffsetDateTimeParse parses a date-time string in RFC3339-compatible format.
+// The format is yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]±HH:mm[:ss] or with 'Z' for UTC.
+//
+// Examples:
+//
+//	odt, err := OffsetDateTimeParse("2024-03-15T14:30:45.123456789+01:00")
+//	odt, err := OffsetDateTimeParse("2024-03-15T14:30:45Z")
+//	odt, err := OffsetDateTimeParse("2024-03-15T14:30:45+05:30")
+func OffsetDateTimeParse(s string) (OffsetDateTime, error) {
+	var odt OffsetDateTime
+	err := odt.UnmarshalText([]byte(s))
+	return odt, err
+}
+
+// MustOffsetDateTimeParse parses a date-time string with offset.
+// Panics if the string is invalid.
+func MustOffsetDateTimeParse(s string) OffsetDateTime {
+	odt, err := OffsetDateTimeParse(s)
+	if err != nil {
+		panic(err)
+	}
+	return odt
 }
 
 // Compile-time interface checks

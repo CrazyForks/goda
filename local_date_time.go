@@ -27,76 +27,6 @@ type LocalDateTime struct {
 	time LocalTime
 }
 
-// NewLocalDateTime creates a new LocalDateTime from individual components.
-// Returns an error if any component is invalid.
-func NewLocalDateTime(year Year, month Month, day, hour, minute, second, nanosecond int) (LocalDateTime, error) {
-	date, err := NewLocalDate(year, month, day)
-	if err != nil {
-		return LocalDateTime{}, err
-	}
-	time, err := NewLocalTime(hour, minute, second, nanosecond)
-	if err != nil {
-		return LocalDateTime{}, err
-	}
-	return LocalDateTime{
-		date: date,
-		time: time,
-	}, nil
-}
-
-// MustNewLocalDateTime creates a new LocalDateTime from individual components.
-// Panics if any component is invalid.
-func MustNewLocalDateTime(year Year, month Month, day, hour, minute, second, nanosecond int) LocalDateTime {
-	return mustValue(NewLocalDateTime(year, month, day, hour, minute, second, nanosecond))
-}
-
-// LocalDateTimeNow returns the current date-time in the system's local time zone.
-func LocalDateTimeNow() LocalDateTime {
-	return LocalDateTimeOfGoTime(time.Now())
-}
-
-// LocalDateTimeNowIn returns the current date-time in the specified time zone.
-func LocalDateTimeNowIn(loc *time.Location) LocalDateTime {
-	return LocalDateTimeOfGoTime(time.Now().In(loc))
-}
-
-// LocalDateTimeNowUTC returns the current date-time in UTC.
-func LocalDateTimeNowUTC() LocalDateTime {
-	return LocalDateTimeOfGoTime(time.Now().UTC())
-}
-
-// LocalDateTimeOfGoTime creates a LocalDateTime from a time.Time.
-// Returns zero value if t.IsZero().
-func LocalDateTimeOfGoTime(t time.Time) LocalDateTime {
-	if t.IsZero() {
-		return LocalDateTime{}
-	}
-	return LocalDateOfGoTime(t).AtTime(LocalTimeOfGoTime(t))
-}
-
-// ParseLocalDateTime parses a date-time string in RFC3339-compatible format.
-// The date must be in yyyy-MM-dd form, and the time must be in HH:mm:ss or
-// HH:mm:ss[.nnnnnnnnn] form.
-//
-// The separator between the date and time may be 'T', 't', or a single space.
-//
-// Examples:
-//
-//	dt, err := ParseLocalDateTime("2024-03-15T14:30:45.123456789")
-//	dt, err := ParseLocalDateTime("2024-03-15 14:30:45")
-//	dt, err := ParseLocalDateTime("2024-03-15t14:30:45")
-func ParseLocalDateTime(s string) (LocalDateTime, error) {
-	var dt LocalDateTime
-	err := dt.UnmarshalText([]byte(s))
-	return dt, err
-}
-
-// MustParseLocalDateTime parses a date-time string in yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] format.
-// Panics if the string is invalid.
-func MustParseLocalDateTime(s string) LocalDateTime {
-	return mustValue(ParseLocalDateTime(s))
-}
-
 // LocalDate returns the date part of this date-time.
 func (dt LocalDateTime) LocalDate() LocalDate {
 	return dt.date
@@ -392,6 +322,76 @@ func (dt LocalDateTime) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return dt.String(), nil
+}
+
+// LocalDateTimeOf creates a new LocalDateTime from individual components.
+// Returns an error if any component is invalid.
+func LocalDateTimeOf(year Year, month Month, day, hour, minute, second, nanosecond int) (LocalDateTime, error) {
+	date, err := LocalDateOf(year, month, day)
+	if err != nil {
+		return LocalDateTime{}, err
+	}
+	time, err := LocalTimeOf(hour, minute, second, nanosecond)
+	if err != nil {
+		return LocalDateTime{}, err
+	}
+	return LocalDateTime{
+		date: date,
+		time: time,
+	}, nil
+}
+
+// MustLocalDateTimeOf creates a new LocalDateTime from individual components.
+// Panics if any component is invalid.
+func MustLocalDateTimeOf(year Year, month Month, day, hour, minute, second, nanosecond int) LocalDateTime {
+	return mustValue(LocalDateTimeOf(year, month, day, hour, minute, second, nanosecond))
+}
+
+// LocalDateTimeNow returns the current date-time in the system's local time zone.
+func LocalDateTimeNow() LocalDateTime {
+	return LocalDateTimeOfGoTime(time.Now())
+}
+
+// LocalDateTimeNowIn returns the current date-time in the specified time zone.
+func LocalDateTimeNowIn(loc *time.Location) LocalDateTime {
+	return LocalDateTimeOfGoTime(time.Now().In(loc))
+}
+
+// LocalDateTimeNowUTC returns the current date-time in UTC.
+func LocalDateTimeNowUTC() LocalDateTime {
+	return LocalDateTimeOfGoTime(time.Now().UTC())
+}
+
+// LocalDateTimeOfGoTime creates a LocalDateTime from a time.Time.
+// Returns zero value if t.IsZero().
+func LocalDateTimeOfGoTime(t time.Time) LocalDateTime {
+	if t.IsZero() {
+		return LocalDateTime{}
+	}
+	return LocalDateOfGoTime(t).AtTime(LocalTimeOfGoTime(t))
+}
+
+// LocalDateTimeParse parses a date-time string in RFC3339-compatible format.
+// The date must be in yyyy-MM-dd form, and the time must be in HH:mm:ss or
+// HH:mm:ss[.nnnnnnnnn] form.
+//
+// The separator between the date and time may be 'T', 't', or a single space.
+//
+// Examples:
+//
+//	dt, err := LocalDateTimeParse("2024-03-15T14:30:45.123456789")
+//	dt, err := LocalDateTimeParse("2024-03-15 14:30:45")
+//	dt, err := LocalDateTimeParse("2024-03-15t14:30:45")
+func LocalDateTimeParse(s string) (LocalDateTime, error) {
+	var dt LocalDateTime
+	err := dt.UnmarshalText([]byte(s))
+	return dt, err
+}
+
+// MustLocalDateTimeParse parses a date-time string in yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn] format.
+// Panics if the string is invalid.
+func MustLocalDateTimeParse(s string) LocalDateTime {
+	return mustValue(LocalDateTimeParse(s))
 }
 
 // Compile-time interface checks
