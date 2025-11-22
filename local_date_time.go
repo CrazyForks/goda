@@ -179,11 +179,7 @@ func (dt LocalDateTime) GoTime() time.Time {
 // Compare compares this date-time with another.
 // Returns -1 if this is before other, 0 if equal, 1 if after.
 func (dt LocalDateTime) Compare(other LocalDateTime) int {
-	return doCompare(dt, other,
-		compareZero,
-		func(a, b LocalDateTime) int { return a.date.Compare(b.date) },
-		func(a, b LocalDateTime) int { return a.time.Compare(b.time) },
-	)
+	return doCompare(dt, other, compareZero, comparing1(LocalDateTime.LocalDate), comparing1(LocalDateTime.LocalTime))
 }
 
 // IsBefore returns true if this date-time is before the specified date-time.
