@@ -160,7 +160,7 @@ func (odt OffsetDateTime) GetField(field Field) TemporalValue {
 	// Handle offset-specific fields
 	switch field {
 	case FieldInstantSeconds:
-		return TemporalValue{v: odt.ToEpochSecond() - int64(odt.offset.TotalSeconds())}
+		return TemporalValue{v: odt.EpochSecond() - int64(odt.offset.TotalSeconds())}
 	}
 
 	// Delegate to LocalDateTime for date and time fields
@@ -178,8 +178,8 @@ func (odt OffsetDateTime) GoTime() time.Time {
 	return time.Date(int(odt.Year()), time.Month(odt.Month()), odt.DayOfMonth(), odt.Hour(), odt.Minute(), odt.Second(), odt.Nanosecond(), loc)
 }
 
-// ToEpochSecond returns the number of seconds since Unix epoch (1970-01-01T00:00:00Z).
-func (odt OffsetDateTime) ToEpochSecond() int64 {
+// EpochSecond returns the number of seconds since Unix epoch (1970-01-01T00:00:00Z).
+func (odt OffsetDateTime) EpochSecond() int64 {
 	if odt.IsZero() {
 		return 0
 	}
@@ -192,17 +192,17 @@ func (odt OffsetDateTime) ToEpochSecond() int64 {
 // The comparison is based on the instant then on the local date-time.
 // Returns -1 if this is before other, 0 if equal, 1 if after.
 func (odt OffsetDateTime) Compare(other OffsetDateTime) int {
-	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.ToEpochSecond), comparing(OffsetDateTime.Nanosecond), comparing1(OffsetDateTime.LocalDateTime))
+	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.EpochSecond), comparing(OffsetDateTime.Nanosecond), comparing1(OffsetDateTime.LocalDateTime))
 }
 
 // IsBefore returns true if this offset date-time is before the specified offset date-time.
 func (odt OffsetDateTime) IsBefore(other OffsetDateTime) bool {
-	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.ToEpochSecond), comparing(OffsetDateTime.Nanosecond)) < 0
+	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.EpochSecond), comparing(OffsetDateTime.Nanosecond)) < 0
 }
 
 // IsAfter returns true if this offset date-time is after the specified offset date-time.
 func (odt OffsetDateTime) IsAfter(other OffsetDateTime) bool {
-	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.ToEpochSecond), comparing(OffsetDateTime.Nanosecond)) > 0
+	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.EpochSecond), comparing(OffsetDateTime.Nanosecond)) > 0
 }
 
 // PlusYears returns a copy with the specified number of years added.

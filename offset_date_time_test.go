@@ -203,7 +203,7 @@ func TestOffsetDateTime_WithOffsetSameLocal(t *testing.T) {
 	assert.Equal(t, 5*3600, odt2.Offset().TotalSeconds())
 
 	// Check that the instant changed (because local time is the same but offset changed)
-	assert.NotEqual(t, odt.ToEpochSecond(), odt2.ToEpochSecond())
+	assert.NotEqual(t, odt.EpochSecond(), odt2.EpochSecond())
 }
 
 func TestOffsetDateTime_WithOffsetSameInstant(t *testing.T) {
@@ -224,7 +224,7 @@ func TestOffsetDateTime_WithOffsetSameInstant(t *testing.T) {
 	assert.Equal(t, 5*3600, odt2.Offset().TotalSeconds())
 
 	// Check that the instant is the same
-	assert.Equal(t, odt.ToEpochSecond(), odt2.ToEpochSecond())
+	assert.Equal(t, odt.EpochSecond(), odt2.EpochSecond())
 }
 
 func TestOffsetDateTime_ToEpochSecond(t *testing.T) {
@@ -232,7 +232,7 @@ func TestOffsetDateTime_ToEpochSecond(t *testing.T) {
 		offset := ZoneOffsetUTC()
 		// 2024-03-15T14:30:45Z
 		odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
-		epochSec := odt.ToEpochSecond()
+		epochSec := odt.EpochSecond()
 
 		// Verify by converting to Go time
 		goTime := odt.GoTime()
@@ -243,17 +243,17 @@ func TestOffsetDateTime_ToEpochSecond(t *testing.T) {
 		offset := MustZoneOffsetOfHours(1)
 		// 2024-03-15T14:30:45+01:00
 		odt := MustOffsetDateTimeOf(2024, March, 15, 14, 30, 45, 0, offset)
-		epochSec := odt.ToEpochSecond()
+		epochSec := odt.EpochSecond()
 
 		// Should be same as 13:30:45 UTC
 		offsetUTC := ZoneOffsetUTC()
 		odtUTC := MustOffsetDateTimeOf(2024, March, 15, 13, 30, 45, 0, offsetUTC)
-		assert.Equal(t, odtUTC.ToEpochSecond(), epochSec)
+		assert.Equal(t, odtUTC.EpochSecond(), epochSec)
 	})
 
 	t.Run("zero value", func(t *testing.T) {
 		var odt OffsetDateTime
-		assert.Equal(t, int64(0), odt.ToEpochSecond())
+		assert.Equal(t, int64(0), odt.EpochSecond())
 	})
 }
 
@@ -626,7 +626,7 @@ func TestOffsetDateTime_ValuePostgres(t *testing.T) {
 		err := pg.QueryRow("SELECT $1::timestamptz", expected.GoTime()).Scan(&actual)
 		assert.NoError(t, err)
 		// The instant should be the same even if the offset differs
-		assert.Equal(t, expected.ToEpochSecond(), actual.ToEpochSecond())
+		assert.Equal(t, expected.EpochSecond(), actual.EpochSecond())
 	})
 }
 
@@ -669,7 +669,7 @@ func TestOffsetDateTime_ValueMySQL(t *testing.T) {
 		var actual OffsetDateTime
 		err := mysql.QueryRow("SELECT ?", expected.String()).Scan(&actual)
 		assert.NoError(t, err)
-		assert.Equal(t, expected.ToEpochSecond(), actual.ToEpochSecond())
+		assert.Equal(t, expected.EpochSecond(), actual.EpochSecond())
 		assert.Equal(t, expected, actual)
 	})
 }

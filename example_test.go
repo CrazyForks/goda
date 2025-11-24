@@ -972,7 +972,7 @@ func ExampleOffsetDateTime_WithOffsetSameLocal() {
 
 	// Note: These represent different instants in time!
 	fmt.Printf("Different instants: %v\n",
-		odtEST.ToEpochSecond() != odtPST.ToEpochSecond())
+		odtEST.EpochSecond() != odtPST.EpochSecond())
 
 	// Output:
 	// Original (EST): 2024-03-15T14:30:45-05:00
@@ -995,7 +995,7 @@ func ExampleOffsetDateTime_WithOffsetSameInstant() {
 
 	// The local time is adjusted: 14:30 EST = 11:30 PST
 	fmt.Printf("Same instant: %v\n",
-		odtEST.ToEpochSecond() == odtPST.ToEpochSecond())
+		odtEST.EpochSecond() == odtPST.EpochSecond())
 
 	// Output:
 	// Original (EST): 2024-03-15T14:30:45-05:00
@@ -1040,14 +1040,14 @@ func ExampleOffsetDateTime_PlusHours() {
 	// 2 hours earlier: 2024-03-15T12:30:45+08:00
 }
 
-// ExampleOffsetDateTime_ToEpochSecond demonstrates Unix timestamp conversion.
-func ExampleOffsetDateTime_ToEpochSecond() {
+// ExampleOffsetDateTime_EpochSecond demonstrates Unix timestamp conversion.
+func ExampleOffsetDateTime_EpochSecond() {
 	// Different offsets, same instant
 	odt1 := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
 	odt2 := goda.MustOffsetDateTimeParse("2024-03-15T06:30:45Z")
 
-	epoch1 := odt1.ToEpochSecond()
-	epoch2 := odt2.ToEpochSecond()
+	epoch1 := odt1.EpochSecond()
+	epoch2 := odt2.EpochSecond()
 
 	fmt.Printf("Has epoch seconds: %v\n", epoch1 > 0)
 	fmt.Printf("Same instant: %v\n", epoch1 == epoch2)
