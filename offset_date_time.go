@@ -197,12 +197,12 @@ func (odt OffsetDateTime) Compare(other OffsetDateTime) int {
 
 // IsBefore returns true if this offset date-time is before the specified offset date-time.
 func (odt OffsetDateTime) IsBefore(other OffsetDateTime) bool {
-	return odt.Compare(other) < 0
+	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.ToEpochSecond), comparing(OffsetDateTime.Nanosecond)) < 0
 }
 
 // IsAfter returns true if this offset date-time is after the specified offset date-time.
 func (odt OffsetDateTime) IsAfter(other OffsetDateTime) bool {
-	return odt.Compare(other) > 0
+	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.ToEpochSecond), comparing(OffsetDateTime.Nanosecond)) > 0
 }
 
 // PlusYears returns a copy with the specified number of years added.
