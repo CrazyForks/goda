@@ -538,18 +538,30 @@ func (t LocalTime) WithTemporal(field Field, value TemporalValue) (r LocalTime, 
 		n = v
 	case FieldNanoOfDay:
 		e = checkTemporalInRange(FieldNanoOfDay, 0, 86_399_999_999_999, value, e)
+		if e != nil {
+			return
+		}
 		return LocalTimeOfNanoOfDay(v)
 	case FieldMicroOfSecond:
 		e = checkTemporalInRange(FieldMicroOfSecond, 0, 999_999, value, e)
+		if e != nil {
+			return
+		}
 		n = v * 1_000
 	case FieldMicroOfDay:
 		e = checkTemporalInRange(FieldMicroOfDay, 0, 86_399_999_999, value, e)
+		if e != nil {
+			return
+		}
 		return LocalTimeOfNanoOfDay(v * 1_000)
 	case FieldMilliOfSecond:
 		e = checkTemporalInRange(FieldMilliOfSecond, 0, 999, value, e)
 		n = v * 1_000_000
 	case FieldMilliOfDay:
 		e = checkTemporalInRange(FieldMilliOfDay, 0, 86_399_999, value, e)
+		if e != nil {
+			return
+		}
 		return LocalTimeOfNanoOfDay(v * 1_000_000)
 	case FieldSecondOfMinute:
 		e = checkTemporalInRange(FieldSecondOfMinute, 0, 59, value, e)
