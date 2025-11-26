@@ -708,3 +708,377 @@ func TestLocalDate_ValueMySQL(t *testing.T) {
 		assert.True(t, expectedTrue)
 	})
 }
+
+func TestLocalDate_PlusWeeks(t *testing.T) {
+	tests := []struct {
+		name     string
+		date     LocalDate
+		weeks    int
+		expected LocalDate
+	}{
+		{"Add 1 week", MustLocalDateOf(2024, January, 15), 1, MustLocalDateOf(2024, January, 22)},
+		{"Add 2 weeks", MustLocalDateOf(2024, January, 15), 2, MustLocalDateOf(2024, January, 29)},
+		{"Add 0 weeks", MustLocalDateOf(2024, March, 15), 0, MustLocalDateOf(2024, March, 15)},
+		{"Add negative weeks", MustLocalDateOf(2024, March, 15), -2, MustLocalDateOf(2024, March, 1)},
+		{"Cross month boundary", MustLocalDateOf(2024, January, 29), 1, MustLocalDateOf(2024, February, 5)},
+		{"Cross year boundary", MustLocalDateOf(2024, December, 25), 2, MustLocalDateOf(2025, January, 8)},
+		{"Large number of weeks", MustLocalDateOf(2024, January, 1), 52, MustLocalDateOf(2024, December, 30)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.date.PlusWeeks(tt.weeks)
+			assert.Equal(t, tt.expected, result, "date: %s, weeks: %d", tt.date.String(), tt.weeks)
+		})
+	}
+
+	t.Run("zero value", func(t *testing.T) {
+		var zero LocalDate
+		assert.Equal(t, zero, zero.PlusWeeks(5))
+	})
+}
+
+func TestLocalDate_MinusWeeks(t *testing.T) {
+	tests := []struct {
+		name     string
+		date     LocalDate
+		weeks    int
+		expected LocalDate
+	}{
+		{"Minus 1 week", MustLocalDateOf(2024, January, 22), 1, MustLocalDateOf(2024, January, 15)},
+		{"Minus 2 weeks", MustLocalDateOf(2024, January, 29), 2, MustLocalDateOf(2024, January, 15)},
+		{"Minus 0 weeks", MustLocalDateOf(2024, March, 15), 0, MustLocalDateOf(2024, March, 15)},
+		{"Cross month boundary backwards", MustLocalDateOf(2024, February, 5), 1, MustLocalDateOf(2024, January, 29)},
+		{"Cross year boundary backwards", MustLocalDateOf(2025, January, 8), 2, MustLocalDateOf(2024, December, 25)},
+		{"Large number of weeks", MustLocalDateOf(2024, December, 30), 52, MustLocalDateOf(2024, January, 1)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.date.MinusWeeks(tt.weeks)
+			assert.Equal(t, tt.expected, result, "date: %s, weeks: %d", tt.date.String(), tt.weeks)
+		})
+	}
+
+	t.Run("zero value", func(t *testing.T) {
+		var zero LocalDate
+		assert.Equal(t, zero, zero.MinusWeeks(5))
+	})
+}
+
+func TestLocalDate_WithDayOfMonth(t *testing.T) {
+	t.Run("valid day changes", func(t *testing.T) {
+		date := MustLocalDateOf(2024, March, 15)
+
+		result, err := date.WithDayOfMonth(1)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, March, 1), result)
+
+		result, err = date.WithDayOfMonth(31)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, March, 31), result)
+
+		result, err = date.WithDayOfMonth(15)
+		require.NoError(t, err)
+		assert.Equal(t, date, result)
+	})
+
+	t.Run("February in leap year", func(t *testing.T) {
+		date := MustLocalDateOf(2024, February, 15)
+
+		result, err := date.WithDayOfMonth(29)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, February, 29), result)
+
+		_, err = date.WithDayOfMonth(30)
+		assert.Error(t, err)
+	})
+
+	t.Run("February in non-leap year", func(t *testing.T) {
+		date := MustLocalDateOf(2023, February, 15)
+
+		result, err := date.WithDayOfMonth(28)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2023, February, 28), result)
+
+		_, err = date.WithDayOfMonth(29)
+		assert.Error(t, err)
+	})
+
+	t.Run("invalid day values", func(t *testing.T) {
+		date := MustLocalDateOf(2024, April, 15)
+
+		_, err := date.WithDayOfMonth(0)
+		assert.Error(t, err)
+
+		_, err = date.WithDayOfMonth(31) // April has 30 days
+		assert.Error(t, err)
+
+		_, err = date.WithDayOfMonth(-1)
+		assert.Error(t, err)
+
+		_, err = date.WithDayOfMonth(100)
+		assert.Error(t, err)
+	})
+
+	t.Run("various months", func(t *testing.T) {
+		// 31-day month
+		date := MustLocalDateOf(2024, January, 1)
+		result, err := date.WithDayOfMonth(31)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, January, 31), result)
+
+		// 30-day month
+		date = MustLocalDateOf(2024, April, 1)
+		result, err = date.WithDayOfMonth(30)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, April, 30), result)
+
+		_, err = date.WithDayOfMonth(31)
+		assert.Error(t, err)
+	})
+}
+
+func TestLocalDate_MustWithDayOfMonth(t *testing.T) {
+	t.Run("valid day", func(t *testing.T) {
+		date := MustLocalDateOf(2024, March, 15)
+		assert.NotPanics(t, func() {
+			result := date.MustWithDayOfMonth(20)
+			assert.Equal(t, MustLocalDateOf(2024, March, 20), result)
+		})
+	})
+
+	t.Run("invalid day panics", func(t *testing.T) {
+		date := MustLocalDateOf(2024, April, 15)
+		assert.Panics(t, func() {
+			date.MustWithDayOfMonth(31) // April has only 30 days
+		})
+
+		assert.Panics(t, func() {
+			date.MustWithDayOfMonth(0)
+		})
+	})
+}
+
+func TestLocalDate_WithDayOfYear(t *testing.T) {
+	t.Run("valid day of year changes", func(t *testing.T) {
+		date := MustLocalDateOf(2024, March, 15)
+
+		// Day 1 of year = January 1
+		result, err := date.WithDayOfYear(1)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, January, 1), result)
+
+		// Day 32 of year = February 1
+		result, err = date.WithDayOfYear(32)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, February, 1), result)
+
+		// Day 60 of leap year = February 29
+		result, err = date.WithDayOfYear(60)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, February, 29), result)
+
+		// Day 61 of leap year = March 1
+		result, err = date.WithDayOfYear(61)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, March, 1), result)
+
+		// Last day of leap year
+		result, err = date.WithDayOfYear(366)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2024, December, 31), result)
+	})
+
+	t.Run("non-leap year", func(t *testing.T) {
+		date := MustLocalDateOf(2023, June, 15)
+
+		// Day 59 of non-leap year = February 28
+		result, err := date.WithDayOfYear(59)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2023, February, 28), result)
+
+		// Day 60 of non-leap year = March 1
+		result, err = date.WithDayOfYear(60)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2023, March, 1), result)
+
+		// Last day of non-leap year
+		result, err = date.WithDayOfYear(365)
+		require.NoError(t, err)
+		assert.Equal(t, MustLocalDateOf(2023, December, 31), result)
+
+		// Day 366 is invalid for non-leap year
+		_, err = date.WithDayOfYear(366)
+		assert.Error(t, err)
+	})
+
+	t.Run("zero value", func(t *testing.T) {
+		var zero LocalDate
+		result, err := zero.WithDayOfYear(100)
+		require.NoError(t, err)
+		assert.True(t, result.IsZero())
+	})
+
+	t.Run("invalid day of year values", func(t *testing.T) {
+		date := MustLocalDateOf(2024, March, 15)
+
+		_, err := date.WithDayOfYear(0)
+		assert.Error(t, err)
+
+		_, err = date.WithDayOfYear(-1)
+		assert.Error(t, err)
+
+		_, err = date.WithDayOfYear(367) // Even leap years only have 366 days
+		assert.Error(t, err)
+
+		// Non-leap year specific
+		dateNonLeap := MustLocalDateOf(2023, March, 15)
+		_, err = dateNonLeap.WithDayOfYear(366)
+		assert.Error(t, err)
+	})
+
+	t.Run("all months in leap year", func(t *testing.T) {
+		date := MustLocalDateOf(2024, January, 1)
+		tests := []struct {
+			dayOfYear int
+			expected  LocalDate
+		}{
+			{1, MustLocalDateOf(2024, January, 1)},
+			{31, MustLocalDateOf(2024, January, 31)},
+			{32, MustLocalDateOf(2024, February, 1)},
+			{60, MustLocalDateOf(2024, February, 29)},
+			{91, MustLocalDateOf(2024, March, 31)},
+			{121, MustLocalDateOf(2024, April, 30)},
+			{152, MustLocalDateOf(2024, May, 31)},
+			{182, MustLocalDateOf(2024, June, 30)},
+			{213, MustLocalDateOf(2024, July, 31)},
+			{244, MustLocalDateOf(2024, August, 31)},
+			{274, MustLocalDateOf(2024, September, 30)},
+			{305, MustLocalDateOf(2024, October, 31)},
+			{335, MustLocalDateOf(2024, November, 30)},
+			{366, MustLocalDateOf(2024, December, 31)},
+		}
+
+		for _, tt := range tests {
+			result, err := date.WithDayOfYear(tt.dayOfYear)
+			require.NoError(t, err, "dayOfYear: %d", tt.dayOfYear)
+			assert.Equal(t, tt.expected, result, "dayOfYear: %d", tt.dayOfYear)
+		}
+	})
+}
+
+func TestLocalDate_MustWithDayOfYear(t *testing.T) {
+	t.Run("valid day of year", func(t *testing.T) {
+		date := MustLocalDateOf(2024, March, 15)
+		assert.NotPanics(t, func() {
+			result := date.MustWithDayOfYear(100)
+			assert.Equal(t, MustLocalDateOf(2024, April, 9), result)
+		})
+	})
+
+	t.Run("invalid day of year panics", func(t *testing.T) {
+		date := MustLocalDateOf(2024, March, 15)
+		assert.Panics(t, func() {
+			date.MustWithDayOfYear(367)
+		})
+
+		assert.Panics(t, func() {
+			date.MustWithDayOfYear(0)
+		})
+
+		assert.Panics(t, func() {
+			date.MustWithDayOfYear(-1)
+		})
+	})
+
+	t.Run("non-leap year day 366 panics", func(t *testing.T) {
+		date := MustLocalDateOf(2023, June, 15)
+		assert.Panics(t, func() {
+			date.MustWithDayOfYear(366)
+		})
+	})
+}
+
+func TestLocalDate_LengthOfMonth(t *testing.T) {
+	t.Run("31-day months", func(t *testing.T) {
+		months31 := []Month{January, March, May, July, August, October, December}
+		for _, month := range months31 {
+			date := MustLocalDateOf(2024, month, 1)
+			assert.Equal(t, 31, date.LengthOfMonth(), "month: %d", month)
+		}
+	})
+
+	t.Run("30-day months", func(t *testing.T) {
+		months30 := []Month{April, June, September, November}
+		for _, month := range months30 {
+			date := MustLocalDateOf(2024, month, 1)
+			assert.Equal(t, 30, date.LengthOfMonth(), "month: %d", month)
+		}
+	})
+
+	t.Run("February in leap year", func(t *testing.T) {
+		date := MustLocalDateOf(2024, February, 1)
+		assert.Equal(t, 29, date.LengthOfMonth())
+	})
+
+	t.Run("February in non-leap year", func(t *testing.T) {
+		date := MustLocalDateOf(2023, February, 1)
+		assert.Equal(t, 28, date.LengthOfMonth())
+	})
+
+	t.Run("various leap years", func(t *testing.T) {
+		tests := []struct {
+			year     Year
+			expected int
+		}{
+			{2000, 29}, // divisible by 400
+			{2004, 29}, // divisible by 4
+			{2100, 28}, // divisible by 100 but not 400
+			{2023, 28}, // not divisible by 4
+		}
+
+		for _, tt := range tests {
+			date := MustLocalDateOf(tt.year, February, 1)
+			assert.Equal(t, tt.expected, date.LengthOfMonth(), "year: %d", tt.year)
+		}
+	})
+}
+
+func TestLocalDate_LengthOfYear(t *testing.T) {
+	t.Run("leap years", func(t *testing.T) {
+		leapYears := []Year{2000, 2004, 2024, 2400}
+		for _, year := range leapYears {
+			date := MustLocalDateOf(year, January, 1)
+			assert.Equal(t, 366, date.LengthOfYear(), "year: %d", year)
+		}
+	})
+
+	t.Run("non-leap years", func(t *testing.T) {
+		nonLeapYears := []Year{1900, 2001, 2023, 2100}
+		for _, year := range nonLeapYears {
+			date := MustLocalDateOf(year, January, 1)
+			assert.Equal(t, 365, date.LengthOfYear(), "year: %d", year)
+		}
+	})
+
+	t.Run("century years", func(t *testing.T) {
+		tests := []struct {
+			year     Year
+			expected int
+		}{
+			{1600, 366}, // divisible by 400
+			{1700, 365}, // divisible by 100 but not 400
+			{1800, 365}, // divisible by 100 but not 400
+			{1900, 365}, // divisible by 100 but not 400
+			{2000, 366}, // divisible by 400
+			{2100, 365}, // divisible by 100 but not 400
+			{2400, 366}, // divisible by 400
+		}
+
+		for _, tt := range tests {
+			date := MustLocalDateOf(tt.year, June, 15)
+			assert.Equal(t, tt.expected, date.LengthOfYear(), "year: %d", tt.year)
+		}
+	})
+}

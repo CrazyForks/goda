@@ -320,6 +320,46 @@ func (d LocalDate) MinusYears(years int) LocalDate {
 	return d.PlusYears(-years)
 }
 
+func (d LocalDate) PlusWeeks(weeks int) LocalDate {
+	return d.PlusDays(7 * weeks)
+}
+
+func (d LocalDate) MinusWeeks(weeks int) LocalDate {
+	return d.MinusDays(7 * weeks)
+}
+
+func (d LocalDate) WithDayOfMonth(dayOfMonth int) (r LocalDate, e error) {
+	if d.IsZero() {
+		return
+	}
+	r, e = LocalDateOf(d.Year(), d.Month(), dayOfMonth)
+	if e != nil {
+		e = newError("dayOfMonth %d out of range", dayOfMonth)
+	}
+	return
+}
+
+func (d LocalDate) MustWithDayOfMonth(dayOfMonth int) LocalDate {
+	return mustValue(d.WithDayOfMonth(dayOfMonth))
+}
+
+func (d LocalDate) WithDayOfYear(dayOfYear int) (r LocalDate, e error) {
+	if d.IsZero() {
+		return
+	}
+	for m := December; m > 0; m-- {
+		if dayOfYear >= m.FirstDayOfYear(d.Year().IsLeapYear()) {
+			return LocalDateOf(d.Year(), m, dayOfYear-m.FirstDayOfYear(d.Year().IsLeapYear())+1)
+		}
+	}
+	e = newError("dayOfYear %d out of range", dayOfYear)
+	return
+}
+
+func (d LocalDate) MustWithDayOfYear(dayOfYear int) LocalDate {
+	return mustValue(d.WithDayOfYear(dayOfYear))
+}
+
 // Compare compares this date with another date.
 // Returns -1 if this date is before other, 0 if equal, and 1 if after.
 // Zero values are considered less than non-zero values.
@@ -392,6 +432,14 @@ func (d LocalDate) AtTime(time LocalTime) LocalDateTime {
 		date: d,
 		time: time,
 	}
+}
+
+func (d LocalDate) LengthOfMonth() int {
+	return d.Month().Length(d.Year().IsLeapYear())
+}
+
+func (d LocalDate) LengthOfYear() int {
+	return d.Year().Length()
 }
 
 // IsZero returns true if this is the zero value of LocalDate.
