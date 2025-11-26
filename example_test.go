@@ -971,8 +971,7 @@ func ExampleOffsetDateTime_WithOffsetSameLocal() {
 	fmt.Println("Same local (PST):", odtPST)
 
 	// Note: These represent different instants in time!
-	fmt.Printf("Different instants: %v\n",
-		odtEST.EpochSecond() != odtPST.EpochSecond())
+	fmt.Printf("Different instants: %v\n", odtEST.EpochSecond() != odtPST.EpochSecond())
 
 	// Output:
 	// Original (EST): 2024-03-15T14:30:45-05:00
@@ -994,8 +993,7 @@ func ExampleOffsetDateTime_WithOffsetSameInstant() {
 	fmt.Println("Same instant (PST):", odtPST)
 
 	// The local time is adjusted: 14:30 EST = 11:30 PST
-	fmt.Printf("Same instant: %v\n",
-		odtEST.EpochSecond() == odtPST.EpochSecond())
+	fmt.Printf("Same instant: %v\n", odtEST.EpochSecond() == odtPST.EpochSecond())
 
 	// Output:
 	// Original (EST): 2024-03-15T14:30:45-05:00
@@ -1510,4 +1508,22 @@ func ExampleLocalDate_LengthOfYear() {
 	// Year 2023: 365 days
 	// Year 2000: 366 days
 	// Year 1900: 365 days
+}
+
+// ExampleLocalTime_WithTemporal demonstrates mutating LocalTime components using WithTemporal.
+func ExampleLocalTime_WithTemporal() {
+	morning := goda.MustLocalTimeOf(7, 30, 45, 123000000)
+
+	toEvening, _ := morning.WithTemporal(goda.FieldAmPmOfDay, goda.TemporalValueOf(1))
+	withDifferentNanos, _ := morning.WithTemporal(goda.FieldNanoOfSecond, goda.TemporalValueOf(987654321))
+	exactTime, _ := morning.WithTemporal(goda.FieldNanoOfDay, goda.TemporalValueOf(int64(22*time.Hour+1*time.Minute)))
+
+	fmt.Println(toEvening)
+	fmt.Println(withDifferentNanos)
+	fmt.Println(exactTime)
+
+	// Output:
+	// 19:30:45.123
+	// 07:30:45.987654321
+	// 22:01:00
 }

@@ -100,3 +100,14 @@ func mustValue[T any](v T, err error) T {
 	}
 	return v
 }
+
+func checkTemporalInRange(field Field, from, to int64, value TemporalValue) (e error) {
+	return checkInRange(field.String(), from, to, value.Int64())
+}
+
+func checkInRange(field string, from, to, value int64) (e error) {
+	if value < from || value > to {
+		return newError("%s out of range: %d", field, value)
+	}
+	return nil
+}

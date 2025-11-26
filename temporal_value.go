@@ -25,3 +25,9 @@ func (t TemporalValue) Unsupported() bool {
 func (t TemporalValue) Valid() bool {
 	return !t.unsupported && !t.overflow
 }
+
+func TemporalValueOf[T interface {
+	int | int64 | int32 | int16 | int8
+}](v T) TemporalValue {
+	return TemporalValue{v: int64(v)}
+}

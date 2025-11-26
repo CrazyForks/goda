@@ -1452,16 +1452,162 @@ func TestLocalTimeOfDay_Consistency(t *testing.T) {
 			// Test nano of day round trip
 			nanoOfDay := original.GetField(FieldNanoOfDay).Int64()
 			fromNano := MustLocalTimeOfNanoOfDay(nanoOfDay)
-			assert.Equal(t, original, fromNano, "nano of day round trip failed for %02d:%02d:%02d.%09d",
-				tc.hour, tc.minute, tc.second, tc.nano)
+			assert.Equal(t, original, fromNano, "nano of day round trip failed for %02d:%02d:%02d.%09d", tc.hour, tc.minute, tc.second, tc.nano)
 
 			// Test second of day round trip (only if no nanoseconds)
 			if tc.nano == 0 {
 				secondOfDay := int(original.GetField(FieldSecondOfDay).Int64())
 				fromSecond := MustLocalTimeOfSecondOfDay(secondOfDay)
-				assert.Equal(t, original, fromSecond, "second of day round trip failed for %02d:%02d:%02d",
-					tc.hour, tc.minute, tc.second)
+				assert.Equal(t, original, fromSecond, "second of day round trip failed for %02d:%02d:%02d", tc.hour, tc.minute, tc.second)
 			}
 		}
+	})
+}
+
+func TestLocalTime_WithTemporal(t *testing.T) {
+	nanoOfDay := int64(1*time.Hour + 2*time.Minute + 3*time.Second + 4)
+	base := MustLocalTimeOf(15, 20, 30, 123456789)
+
+	tests := []struct {
+		name  string
+		base  LocalTime
+		field Field
+		value int64
+		want  LocalTime
+	}{
+		{
+			name:  "nano_of_second",
+			base:  base,
+			field: FieldNanoOfSecond,
+			value: 987654321,
+			want:  MustLocalTimeOf(15, 20, 30, 987654321),
+		},
+		{
+			name:  "nano_of_day",
+			base:  base,
+			field: FieldNanoOfDay,
+			value: nanoOfDay,
+			want:  MustLocalTimeOf(1, 2, 3, 4),
+		},
+		{
+			name:  "micro_of_second",
+			base:  base,
+			field: FieldMicroOfSecond,
+			value: 456789,
+			want:  MustLocalTimeOf(15, 20, 30, 456789000),
+		},
+		{
+			name:  "micro_of_day",
+			base:  base,
+			field: FieldMicroOfDay,
+			value: int64((2*time.Hour + 3*time.Minute + 4*time.Second + 500*time.Microsecond) / time.Microsecond),
+			want:  MustLocalTimeOf(2, 3, 4, int(500*time.Microsecond)),
+		},
+		{
+			name:  "milli_of_second",
+			base:  base,
+			field: FieldMilliOfSecond,
+			value: 777,
+			want:  MustLocalTimeOf(15, 20, 30, 777000000),
+		},
+		{
+			name:  "milli_of_day",
+			base:  base,
+			field: FieldMilliOfDay,
+			value: int64((5*time.Hour + 6*time.Minute + 7*time.Second + 8*time.Millisecond) / time.Millisecond),
+			want:  MustLocalTimeOf(5, 6, 7, 8000000),
+		},
+		{
+			name:  "second_of_minute",
+			base:  base,
+			field: FieldSecondOfMinute,
+			value: 45,
+			want:  MustLocalTimeOf(15, 20, 45, 123456789),
+		},
+		{
+			name:  "second_of_day",
+			base:  base,
+			field: FieldSecondOfDay,
+			value: 3661,
+			want:  MustLocalTimeOf(1, 1, 1, 123456789),
+		},
+		{
+			name:  "minute_of_hour",
+			base:  base,
+			field: FieldMinuteOfHour,
+			value: 5,
+			want:  MustLocalTimeOf(15, 5, 30, 123456789),
+		},
+		{
+			name:  "minute_of_day",
+			base:  base,
+			field: FieldMinuteOfDay,
+			value: 70,
+			want:  MustLocalTimeOf(1, 10, 30, 123456789),
+		},
+		{
+			name:  "hour_of_ampm",
+			base:  MustLocalTimeOf(19, 10, 20, 123000000),
+			field: FieldHourOfAmPm,
+			value: 3,
+			want:  MustLocalTimeOf(15, 10, 20, 123000000),
+		},
+		{
+			name:  "clock_hour_of_ampm",
+			base:  MustLocalTimeOf(3, 10, 20, 0),
+			field: FieldClockHourOfAmPm,
+			value: 12,
+			want:  MustLocalTimeOf(0, 10, 20, 0),
+		},
+		{
+			name:  "hour_of_day",
+			base:  base,
+			field: FieldHourOfDay,
+			value: 22,
+			want:  MustLocalTimeOf(22, 20, 30, 123456789),
+		},
+		{
+			name:  "clock_hour_of_day",
+			base:  MustLocalTimeOf(10, 5, 6, 700000000),
+			field: FieldClockHourOfDay,
+			value: 24,
+			want:  MustLocalTimeOf(0, 5, 6, 700000000),
+		},
+		{
+			name:  "ampm_of_day",
+			base:  MustLocalTimeOf(9, 15, 30, 111000000),
+			field: FieldAmPmOfDay,
+			value: 1,
+			want:  MustLocalTimeOf(21, 15, 30, 111000000),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.base.WithTemporal(tt.field, TemporalValue{v: tt.value})
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got, "want %s got %s", tt.want, got)
+		})
+	}
+}
+
+func TestLocalTime_WithTemporal_errors(t *testing.T) {
+	t.Run("zero value returns zero", func(t *testing.T) {
+		var zero LocalTime
+		got, err := zero.WithTemporal(FieldHourOfDay, TemporalValue{v: 5})
+		require.NoError(t, err)
+		assert.True(t, got.IsZero())
+	})
+
+	t.Run("invalid range", func(t *testing.T) {
+		base := MustLocalTimeOf(10, 0, 0, 0)
+		_, err := base.WithTemporal(FieldSecondOfMinute, TemporalValue{v: 99})
+		assert.Error(t, err)
+	})
+
+	t.Run("unsupported field", func(t *testing.T) {
+		base := MustLocalTimeOf(10, 0, 0, 0)
+		_, err := base.WithTemporal(FieldDayOfMonth, TemporalValue{v: 10})
+		assert.Error(t, err)
 	})
 }

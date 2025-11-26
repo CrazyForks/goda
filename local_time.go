@@ -468,6 +468,147 @@ func (t LocalTime) plusNanos(nanosToAdd int64) LocalTime {
 	return LocalTime{v: newNanos | localTimeValidBit}
 }
 
+func (t LocalTime) WithHour(hour int) (LocalTime, error) {
+	return t.WithTemporal(FieldHourOfDay, TemporalValue{v: int64(hour)})
+}
+
+func (t LocalTime) WithMinute(minute int) (LocalTime, error) {
+	return t.WithTemporal(FieldMinuteOfHour, TemporalValue{v: int64(minute)})
+}
+
+func (t LocalTime) WithSecond(second int) (LocalTime, error) {
+	return t.WithTemporal(FieldSecondOfMinute, TemporalValue{v: int64(second)})
+}
+
+func (t LocalTime) WithNanosecond(nano int) (LocalTime, error) {
+	return t.WithTemporal(FieldNanoOfSecond, TemporalValue{v: int64(nano)})
+}
+
+func (t LocalTime) MustWithHour(hour int) LocalTime {
+	return mustValue(t.WithHour(hour))
+}
+
+func (t LocalTime) MustWithMinute(minute int) LocalTime {
+	return mustValue(t.WithMinute(minute))
+}
+
+func (t LocalTime) MustWithSecond(second int) LocalTime {
+	return mustValue(t.WithSecond(second))
+}
+
+func (t LocalTime) MustWithNanosecond(nano int) LocalTime {
+	return mustValue(t.WithNanosecond(nano))
+}
+
+// WithTemporal returns a copy of this LocalTime with the specified field replaced.
+// Zero values return zero immediately.
+//
+// Supported fields mirror Java's LocalTime#with(TemporalField, long):
+//   - FieldNanoOfSecond: sets the nano-of-second while keeping hour, minute, and second.
+//   - FieldNanoOfDay: replaces the entire time using the provided nano-of-day (equivalent to LocalTimeOfNanoOfDay).
+//   - FieldMicroOfSecond: replaces the nano-of-second with micro-of-second × 1,000; hour, minute, and second stay the same.
+//   - FieldMicroOfDay: replaces the entire time using micro-of-day × 1,000 (equivalent to LocalTimeOfNanoOfDay).
+//   - FieldMilliOfSecond: replaces the nano-of-second with milli-of-second × 1,000,000; hour, minute, and second stay the same.
+//   - FieldMilliOfDay: replaces the entire time using milli-of-day × 1,000,000 (equivalent to LocalTimeOfNanoOfDay).
+//   - FieldSecondOfMinute: sets the second-of-minute while leaving hour, minute, and nano-of-second untouched.
+//   - FieldSecondOfDay: replaces hour, minute, and second based on the provided second-of-day while keeping nano-of-second.
+//   - FieldMinuteOfHour: sets the minute-of-hour; hour, second, and nano-of-second stay unchanged.
+//   - FieldMinuteOfDay: replaces hour and minute based on the minute-of-day; second and nano-of-second stay unchanged.
+//   - FieldHourOfAmPm: sets the hour within AM/PM while keeping the current half of day, minute, second, and nano-of-second.
+//   - FieldClockHourOfAmPm: sets the 1-12 clock hour within AM/PM while keeping the current half of day, minute, second, and nano-of-second.
+//   - FieldHourOfDay: sets the hour-of-day while leaving minute, second, and nano-of-second untouched.
+//   - FieldClockHourOfDay: sets the 1-24 clock hour-of-day (24 → 0) while leaving minute, second, and nano-of-second untouched.
+//   - FieldAmPmOfDay: toggles AM/PM while preserving the hour-of-am-pm, minute, second, and nano-of-second.
+//
+// Fields outside this list return an error. Range violations propagate the validation error.
+func (t LocalTime) WithTemporal(field Field, value TemporalValue) (r LocalTime, e error) {
+	if t.IsZero() {
+		return t, nil
+	}
+
+	h := t.GetField(FieldHourOfDay).Int64()
+	m := t.GetField(FieldMinuteOfHour).Int64()
+	s := t.GetField(FieldSecondOfMinute).Int64()
+	n := t.GetField(FieldNanoOfSecond).Int64()
+	v := value.Int64()
+
+	switch field {
+	case FieldNanoOfSecond:
+		e = checkTemporalInRange(FieldNanoOfSecond, 0, 999_999_999, value)
+		n = v
+	case FieldNanoOfDay:
+		e = checkTemporalInRange(FieldNanoOfDay, 0, 86_399_999_999_999, value)
+		return LocalTimeOfNanoOfDay(v)
+	case FieldMicroOfSecond:
+		e = checkTemporalInRange(FieldMicroOfSecond, 0, 999_999, value)
+		n = v * 1_000
+	case FieldMicroOfDay:
+		e = checkTemporalInRange(FieldMicroOfDay, 0, 86_399_999_999, value)
+		return LocalTimeOfNanoOfDay(v * 1_000)
+	case FieldMilliOfSecond:
+		e = checkTemporalInRange(FieldMilliOfSecond, 0, 999, value)
+		n = v * 1_000_000
+	case FieldMilliOfDay:
+		e = checkTemporalInRange(FieldMilliOfDay, 0, 86_399_999, value)
+		return LocalTimeOfNanoOfDay(v * 1_000_000)
+	case FieldSecondOfMinute:
+		e = checkTemporalInRange(FieldSecondOfMinute, 0, 59, value)
+		s = v
+	case FieldSecondOfDay:
+		e = checkTemporalInRange(FieldSecondOfDay, 0, 86_399, value)
+		h = v / 3600
+		m = (v / 60) % 60
+		s = v % 60
+		// nano unchanged
+	case FieldMinuteOfHour:
+		e = checkTemporalInRange(FieldMinuteOfHour, 0, 59, value)
+		m = v
+	case FieldMinuteOfDay:
+		e = checkTemporalInRange(FieldMinuteOfDay, 0, 1_439, value)
+		h = v / 60
+		m = v % 60
+	case FieldHourOfAmPm:
+		e = checkTemporalInRange(FieldHourOfAmPm, 0, 11, value)
+		if h >= 12 { // PM
+			h = v + 12
+		} else {
+			h = v
+		}
+	case FieldClockHourOfAmPm:
+		e = checkTemporalInRange(FieldClockHourOfAmPm, 1, 12, value)
+		tmp := v % 12 // 12 → 0
+		if h >= 12 {  // PM
+			h = tmp + 12
+		} else { // AM
+			h = tmp
+		}
+	case FieldHourOfDay:
+		e = checkTemporalInRange(FieldHourOfDay, 0, 23, value)
+		h = v
+	case FieldClockHourOfDay:
+		e = checkTemporalInRange(FieldClockHourOfDay, 1, 24, value)
+		if v == 24 {
+			h = 0
+		} else {
+			h = v
+		}
+	case FieldAmPmOfDay:
+		e = checkTemporalInRange(FieldAmPmOfDay, 0, 1, value)
+		if v == 0 && h >= 12 { // to AM
+			h -= 12
+		}
+		if v == 1 && h < 12 { // to PM
+			h += 12
+		}
+	default:
+		return t, newError("unsupported field: %v", field)
+	}
+	if e != nil {
+		return
+	}
+	return localTimeOf(h, m, s, n)
+}
+
 // LocalTimeOf creates a new LocalTime from the specified hour, minute, second, and nanosecond.
 // Returns an error if any component is out of range:
 // - hour must be 0-23
@@ -475,22 +616,29 @@ func (t LocalTime) plusNanos(nanosToAdd int64) LocalTime {
 // - second must be 0-59
 // - nanosecond must be 0-999999999
 func LocalTimeOf(hour, minute, second, nanosecond int) (LocalTime, error) {
+	return localTimeOf(int64(hour), int64(minute), int64(second), int64(nanosecond))
+}
+
+func localTimeOf(hour, minute, second, nanosecond int64) (r LocalTime, e error) {
 	if hour < 0 || hour >= 24 {
-		return LocalTime{}, newError("hour %d out of range", hour)
+		e = newError("hour %d out of range", hour)
 	}
 	if minute < 0 || minute >= 60 {
-		return LocalTime{}, newError("minute %d out of range", minute)
+		e = newError("minute %d out of range", minute)
 	}
 	if second < 0 || second >= 60 {
-		return LocalTime{}, newError("second %d out of range", second)
+		e = newError("second %d out of range", second)
 	}
 	if nanosecond < 0 || nanosecond >= 1000000000 {
-		return LocalTime{}, newError("nanosecond %d out of range", nanosecond)
+		e = newError("nanosecond %d out of range", nanosecond)
 	}
-	nanos := int64(hour)*int64(time.Hour) +
-		int64(minute)*int64(time.Minute) +
-		int64(second)*int64(time.Second) +
-		int64(nanosecond)
+	if e != nil {
+		return
+	}
+	nanos := hour*int64(time.Hour) +
+		minute*int64(time.Minute) +
+		second*int64(time.Second) +
+		nanosecond
 	return LocalTime{
 		v: nanos | localTimeValidBit,
 	}, nil
