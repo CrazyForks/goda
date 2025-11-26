@@ -320,14 +320,23 @@ func (d LocalDate) MinusYears(years int) LocalDate {
 	return d.PlusYears(-years)
 }
 
+// PlusWeeks returns a copy of this date with the specified number of weeks added.
+// Negative values subtract weeks.
+// This is equivalent to PlusDays(weeks * 7).
+// Returns zero value if called on zero value.
 func (d LocalDate) PlusWeeks(weeks int) LocalDate {
 	return d.PlusDays(7 * weeks)
 }
 
+// MinusWeeks returns a copy of this date with the specified number of weeks subtracted.
+// Equivalent to PlusWeeks(-weeks).
 func (d LocalDate) MinusWeeks(weeks int) LocalDate {
 	return d.MinusDays(7 * weeks)
 }
 
+// WithDayOfMonth returns a copy of this date with the day-of-month altered.
+// If the day-of-month is invalid for the month and year, an error is returned.
+// Returns zero value without error if called on zero value.
 func (d LocalDate) WithDayOfMonth(dayOfMonth int) (r LocalDate, e error) {
 	if d.IsZero() {
 		return
@@ -339,10 +348,16 @@ func (d LocalDate) WithDayOfMonth(dayOfMonth int) (r LocalDate, e error) {
 	return
 }
 
+// MustWithDayOfMonth returns a copy of this date with the day-of-month altered.
+// Panics if the day-of-month is invalid.
+// Use WithDayOfMonth for error handling.
 func (d LocalDate) MustWithDayOfMonth(dayOfMonth int) LocalDate {
 	return mustValue(d.WithDayOfMonth(dayOfMonth))
 }
 
+// WithDayOfYear returns a copy of this date with the day-of-year altered.
+// The day-of-year must be valid for the year (1-365 for non-leap years, 1-366 for leap years).
+// Returns zero value without error if called on zero value.
 func (d LocalDate) WithDayOfYear(dayOfYear int) (r LocalDate, e error) {
 	if d.IsZero() {
 		return
@@ -356,8 +371,52 @@ func (d LocalDate) WithDayOfYear(dayOfYear int) (r LocalDate, e error) {
 	return
 }
 
+// MustWithDayOfYear returns a copy of this date with the day-of-year altered.
+// Panics if the day-of-year is invalid.
+// Use WithDayOfYear for error handling.
 func (d LocalDate) MustWithDayOfYear(dayOfYear int) LocalDate {
 	return mustValue(d.WithDayOfYear(dayOfYear))
+}
+
+// WithMonth returns a copy of this date with the month altered.
+// If the resulting day-of-month is invalid for the new month,
+// it is adjusted to the last valid day of the month.
+// For example, January 31 with month set to February becomes February 28/29.
+// Returns zero value without error if called on zero value.
+func (d LocalDate) WithMonth(month Month) (r LocalDate, e error) {
+	if d.IsZero() {
+		return
+	}
+	if month < January || month > December {
+		e = newError("month %d out of range", month)
+		return
+	}
+	return LocalDateOf(d.Year(), month, min(d.DayOfMonth(), month.Length(d.Year().IsLeapYear())))
+}
+
+// MustWithMonth returns a copy of this date with the month altered.
+// Panics if the month is invalid.
+// Use WithMonth for error handling.
+func (d LocalDate) MustWithMonth(month Month) LocalDate {
+	return mustValue(d.WithMonth(month))
+}
+
+// WithYear returns a copy of this date with the year altered.
+// If the resulting day-of-month is invalid for the new year
+// (e.g., February 29 in a non-leap year), it is adjusted to the last valid day of the month.
+// Returns zero value without error if called on zero value.
+func (d LocalDate) WithYear(year Year) (r LocalDate, e error) {
+	if d.IsZero() {
+		return
+	}
+	return LocalDateOf(year, d.Month(), min(d.DayOfMonth(), d.Month().Length(year.IsLeapYear())))
+}
+
+// MustWithYear returns a copy of this date with the year altered.
+// Panics if the resulting date is invalid.
+// Use WithYear for error handling.
+func (d LocalDate) MustWithYear(year Year) LocalDate {
+	return mustValue(d.WithYear(year))
 }
 
 // Compare compares this date with another date.
@@ -434,11 +493,23 @@ func (d LocalDate) AtTime(time LocalTime) LocalDateTime {
 	}
 }
 
+// LengthOfMonth returns the number of days in the month of this date.
+// Returns 28, 29, 30, or 31 depending on the month and whether it's a leap year.
+// Returns 0 for zero value.
 func (d LocalDate) LengthOfMonth() int {
+	if d.IsZero() {
+		return 0
+	}
 	return d.Month().Length(d.Year().IsLeapYear())
 }
 
+// LengthOfYear returns the number of days in the year of this date.
+// Returns 365 for non-leap years and 366 for leap years.
+// Returns 0 for zero value.
 func (d LocalDate) LengthOfYear() int {
+	if d.IsZero() {
+		return 0
+	}
 	return d.Year().Length()
 }
 

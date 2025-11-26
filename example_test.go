@@ -1282,3 +1282,232 @@ func ExampleZoneId_roundTrip() {
 	// Restored: Pacific/Auckland
 	// Same: true
 }
+
+// ExampleLocalDate_PlusWeeks demonstrates adding weeks to a date.
+func ExampleLocalDate_PlusWeeks() {
+	date := goda.MustLocalDateOf(2024, goda.January, 15)
+	fmt.Println("Original:", date)
+	fmt.Println("Plus 2 weeks:", date.PlusWeeks(2))
+	fmt.Println("Minus 1 week:", date.PlusWeeks(-1))
+
+	// Output:
+	// Original: 2024-01-15
+	// Plus 2 weeks: 2024-01-29
+	// Minus 1 week: 2024-01-08
+}
+
+// ExampleLocalDate_MinusWeeks demonstrates subtracting weeks from a date.
+func ExampleLocalDate_MinusWeeks() {
+	date := goda.MustLocalDateOf(2024, goda.February, 15)
+	fmt.Println("Original:", date)
+	fmt.Println("Minus 2 weeks:", date.MinusWeeks(2))
+
+	// Output:
+	// Original: 2024-02-15
+	// Minus 2 weeks: 2024-02-01
+}
+
+// ExampleLocalDate_WithDayOfMonth demonstrates changing the day of month.
+func ExampleLocalDate_WithDayOfMonth() {
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
+
+	// Change to the 1st of the month
+	date2, err := date.WithDayOfMonth(1)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("First of month:", date2)
+
+	// Change to the last day of the month
+	date3, err := date.WithDayOfMonth(31)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Last of month:", date3)
+
+	// Output:
+	// First of month: 2024-03-01
+	// Last of month: 2024-03-31
+}
+
+// ExampleLocalDate_MustWithDayOfMonth demonstrates changing the day of month (panic version).
+func ExampleLocalDate_MustWithDayOfMonth() {
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
+
+	// Change to the 20th
+	date2 := date.MustWithDayOfMonth(20)
+	fmt.Println(date2)
+
+	// Output:
+	// 2024-03-20
+}
+
+// ExampleLocalDate_WithDayOfYear demonstrates changing the day of year.
+func ExampleLocalDate_WithDayOfYear() {
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
+	fmt.Println("Original:", date)
+
+	// Change to the 100th day of the year
+	date2, err := date.WithDayOfYear(100)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Day 100:", date2)
+
+	// Change to the 1st day of the year
+	date3, err := date.WithDayOfYear(1)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Day 1:", date3)
+
+	// Output:
+	// Original: 2024-03-15
+	// Day 100: 2024-04-09
+	// Day 1: 2024-01-01
+}
+
+// ExampleLocalDate_MustWithDayOfYear demonstrates changing the day of year (panic version).
+func ExampleLocalDate_MustWithDayOfYear() {
+	date := goda.MustLocalDateOf(2024, goda.June, 15)
+
+	// Change to the 200th day of the year
+	date2 := date.MustWithDayOfYear(200)
+	fmt.Println(date2)
+
+	// Output:
+	// 2024-07-18
+}
+
+// ExampleLocalDate_WithMonth demonstrates changing the month.
+func ExampleLocalDate_WithMonth() {
+	date := goda.MustLocalDateOf(2024, goda.January, 31)
+	fmt.Println("Original:", date)
+
+	// Change to February (day will be clamped to 29 in leap year)
+	date2, err := date.WithMonth(goda.February)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("February:", date2)
+
+	// Change to March (day 31 is valid)
+	date3, err := date.WithMonth(goda.March)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("March:", date3)
+
+	// Output:
+	// Original: 2024-01-31
+	// February: 2024-02-29
+	// March: 2024-03-31
+}
+
+// ExampleLocalDate_MustWithMonth demonstrates changing the month (panic version).
+func ExampleLocalDate_MustWithMonth() {
+	date := goda.MustLocalDateOf(2024, goda.January, 15)
+
+	// Change to June
+	date2 := date.MustWithMonth(goda.June)
+	fmt.Println(date2)
+
+	// Output:
+	// 2024-06-15
+}
+
+// ExampleLocalDate_WithYear demonstrates changing the year.
+func ExampleLocalDate_WithYear() {
+	// Leap year date (Feb 29)
+	date := goda.MustLocalDateOf(2024, goda.February, 29)
+	fmt.Println("Original (leap year):", date)
+
+	// Change to non-leap year (day will be clamped to 28)
+	date2, err := date.WithYear(2023)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Non-leap year:", date2)
+
+	// Change to another leap year (day 29 is valid)
+	date3, err := date.WithYear(2020)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Another leap year:", date3)
+
+	// Output:
+	// Original (leap year): 2024-02-29
+	// Non-leap year: 2023-02-28
+	// Another leap year: 2020-02-29
+}
+
+// ExampleLocalDate_MustWithYear demonstrates changing the year (panic version).
+func ExampleLocalDate_MustWithYear() {
+	date := goda.MustLocalDateOf(2024, goda.March, 15)
+
+	// Change to 2025
+	date2 := date.MustWithYear(2025)
+	fmt.Println(date2)
+
+	// Output:
+	// 2025-03-15
+}
+
+// ExampleLocalDate_LengthOfMonth demonstrates getting the month length.
+func ExampleLocalDate_LengthOfMonth() {
+	// February in leap year
+	date1 := goda.MustLocalDateOf(2024, goda.February, 15)
+	fmt.Printf("February 2024: %d days\n", date1.LengthOfMonth())
+
+	// February in non-leap year
+	date2 := goda.MustLocalDateOf(2023, goda.February, 15)
+	fmt.Printf("February 2023: %d days\n", date2.LengthOfMonth())
+
+	// April (30-day month)
+	date3 := goda.MustLocalDateOf(2024, goda.April, 15)
+	fmt.Printf("April 2024: %d days\n", date3.LengthOfMonth())
+
+	// March (31-day month)
+	date4 := goda.MustLocalDateOf(2024, goda.March, 15)
+	fmt.Printf("March 2024: %d days\n", date4.LengthOfMonth())
+
+	// Output:
+	// February 2024: 29 days
+	// February 2023: 28 days
+	// April 2024: 30 days
+	// March 2024: 31 days
+}
+
+// ExampleLocalDate_LengthOfYear demonstrates getting the year length.
+func ExampleLocalDate_LengthOfYear() {
+	// Leap year
+	date1 := goda.MustLocalDateOf(2024, goda.March, 15)
+	fmt.Printf("Year 2024: %d days\n", date1.LengthOfYear())
+
+	// Non-leap year
+	date2 := goda.MustLocalDateOf(2023, goda.March, 15)
+	fmt.Printf("Year 2023: %d days\n", date2.LengthOfYear())
+
+	// Century year divisible by 400 (leap year)
+	date3 := goda.MustLocalDateOf(2000, goda.June, 15)
+	fmt.Printf("Year 2000: %d days\n", date3.LengthOfYear())
+
+	// Century year not divisible by 400 (non-leap year)
+	date4 := goda.MustLocalDateOf(1900, goda.June, 15)
+	fmt.Printf("Year 1900: %d days\n", date4.LengthOfYear())
+
+	// Output:
+	// Year 2024: 366 days
+	// Year 2023: 365 days
+	// Year 2000: 366 days
+	// Year 1900: 365 days
+}
