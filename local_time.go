@@ -534,48 +534,48 @@ func (t LocalTime) WithTemporal(field Field, value TemporalValue) (r LocalTime, 
 
 	switch field {
 	case FieldNanoOfSecond:
-		e = checkTemporalInRange(FieldNanoOfSecond, 0, 999_999_999, value)
+		e = checkTemporalInRange(FieldNanoOfSecond, 0, 999_999_999, value, e)
 		n = v
 	case FieldNanoOfDay:
-		e = checkTemporalInRange(FieldNanoOfDay, 0, 86_399_999_999_999, value)
+		e = checkTemporalInRange(FieldNanoOfDay, 0, 86_399_999_999_999, value, e)
 		return LocalTimeOfNanoOfDay(v)
 	case FieldMicroOfSecond:
-		e = checkTemporalInRange(FieldMicroOfSecond, 0, 999_999, value)
+		e = checkTemporalInRange(FieldMicroOfSecond, 0, 999_999, value, e)
 		n = v * 1_000
 	case FieldMicroOfDay:
-		e = checkTemporalInRange(FieldMicroOfDay, 0, 86_399_999_999, value)
+		e = checkTemporalInRange(FieldMicroOfDay, 0, 86_399_999_999, value, e)
 		return LocalTimeOfNanoOfDay(v * 1_000)
 	case FieldMilliOfSecond:
-		e = checkTemporalInRange(FieldMilliOfSecond, 0, 999, value)
+		e = checkTemporalInRange(FieldMilliOfSecond, 0, 999, value, e)
 		n = v * 1_000_000
 	case FieldMilliOfDay:
-		e = checkTemporalInRange(FieldMilliOfDay, 0, 86_399_999, value)
+		e = checkTemporalInRange(FieldMilliOfDay, 0, 86_399_999, value, e)
 		return LocalTimeOfNanoOfDay(v * 1_000_000)
 	case FieldSecondOfMinute:
-		e = checkTemporalInRange(FieldSecondOfMinute, 0, 59, value)
+		e = checkTemporalInRange(FieldSecondOfMinute, 0, 59, value, e)
 		s = v
 	case FieldSecondOfDay:
-		e = checkTemporalInRange(FieldSecondOfDay, 0, 86_399, value)
+		e = checkTemporalInRange(FieldSecondOfDay, 0, 86_399, value, e)
 		h = v / 3600
 		m = (v / 60) % 60
 		s = v % 60
 		// nano unchanged
 	case FieldMinuteOfHour:
-		e = checkTemporalInRange(FieldMinuteOfHour, 0, 59, value)
+		e = checkTemporalInRange(FieldMinuteOfHour, 0, 59, value, e)
 		m = v
 	case FieldMinuteOfDay:
-		e = checkTemporalInRange(FieldMinuteOfDay, 0, 1_439, value)
+		e = checkTemporalInRange(FieldMinuteOfDay, 0, 1_439, value, e)
 		h = v / 60
 		m = v % 60
 	case FieldHourOfAmPm:
-		e = checkTemporalInRange(FieldHourOfAmPm, 0, 11, value)
+		e = checkTemporalInRange(FieldHourOfAmPm, 0, 11, value, e)
 		if h >= 12 { // PM
 			h = v + 12
 		} else {
 			h = v
 		}
 	case FieldClockHourOfAmPm:
-		e = checkTemporalInRange(FieldClockHourOfAmPm, 1, 12, value)
+		e = checkTemporalInRange(FieldClockHourOfAmPm, 1, 12, value, e)
 		tmp := v % 12 // 12 → 0
 		if h >= 12 {  // PM
 			h = tmp + 12
@@ -583,17 +583,17 @@ func (t LocalTime) WithTemporal(field Field, value TemporalValue) (r LocalTime, 
 			h = tmp
 		}
 	case FieldHourOfDay:
-		e = checkTemporalInRange(FieldHourOfDay, 0, 23, value)
+		e = checkTemporalInRange(FieldHourOfDay, 0, 23, value, e)
 		h = v
 	case FieldClockHourOfDay:
-		e = checkTemporalInRange(FieldClockHourOfDay, 1, 24, value)
+		e = checkTemporalInRange(FieldClockHourOfDay, 1, 24, value, e)
 		if v == 24 {
 			h = 0
 		} else {
 			h = v
 		}
 	case FieldAmPmOfDay:
-		e = checkTemporalInRange(FieldAmPmOfDay, 0, 1, value)
+		e = checkTemporalInRange(FieldAmPmOfDay, 0, 1, value, e)
 		if v == 0 && h >= 12 { // to AM
 			h -= 12
 		}
