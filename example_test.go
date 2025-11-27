@@ -1557,13 +1557,13 @@ func ExampleLocalDate_LengthOfYear() {
 	// Year 1900: 365 days
 }
 
-// ExampleLocalTime_WithTemporal demonstrates mutating LocalTime components using WithTemporal.
-func ExampleLocalTime_WithTemporal() {
+// ExampleLocalTime_WithField demonstrates mutating LocalTime components using WithField.
+func ExampleLocalTime_WithField() {
 	morning := goda.MustLocalTimeOf(7, 30, 45, 123000000)
 
-	toEvening, _ := morning.WithTemporal(goda.FieldAmPmOfDay, goda.TemporalValueOf(1))
-	withDifferentNanos, _ := morning.WithTemporal(goda.FieldNanoOfSecond, goda.TemporalValueOf(987654321))
-	exactTime, _ := morning.WithTemporal(goda.FieldNanoOfDay, goda.TemporalValueOf(int64(22*time.Hour+1*time.Minute)))
+	toEvening, _ := morning.WithField(goda.FieldAmPmOfDay, goda.TemporalValueOf(1))
+	withDifferentNanos, _ := morning.WithField(goda.FieldNanoOfSecond, goda.TemporalValueOf(987654321))
+	exactTime, _ := morning.WithField(goda.FieldNanoOfDay, goda.TemporalValueOf(int64(22*time.Hour+1*time.Minute)))
 
 	fmt.Println(toEvening)
 	fmt.Println(withDifferentNanos)

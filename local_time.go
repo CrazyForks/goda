@@ -469,19 +469,19 @@ func (t LocalTime) plusNanos(nanosToAdd int64) LocalTime {
 }
 
 func (t LocalTime) WithHour(hour int) (LocalTime, error) {
-	return t.WithTemporal(FieldHourOfDay, TemporalValue{v: int64(hour)})
+	return t.WithField(FieldHourOfDay, TemporalValue{v: int64(hour)})
 }
 
 func (t LocalTime) WithMinute(minute int) (LocalTime, error) {
-	return t.WithTemporal(FieldMinuteOfHour, TemporalValue{v: int64(minute)})
+	return t.WithField(FieldMinuteOfHour, TemporalValue{v: int64(minute)})
 }
 
 func (t LocalTime) WithSecond(second int) (LocalTime, error) {
-	return t.WithTemporal(FieldSecondOfMinute, TemporalValue{v: int64(second)})
+	return t.WithField(FieldSecondOfMinute, TemporalValue{v: int64(second)})
 }
 
 func (t LocalTime) WithNanosecond(nano int) (LocalTime, error) {
-	return t.WithTemporal(FieldNanoOfSecond, TemporalValue{v: int64(nano)})
+	return t.WithField(FieldNanoOfSecond, TemporalValue{v: int64(nano)})
 }
 
 func (t LocalTime) MustWithHour(hour int) LocalTime {
@@ -500,7 +500,7 @@ func (t LocalTime) MustWithNanosecond(nano int) LocalTime {
 	return mustValue(t.WithNanosecond(nano))
 }
 
-// WithTemporal returns a copy of this LocalTime with the specified field replaced.
+// WithField returns a copy of this LocalTime with the specified field replaced.
 // Zero values return zero immediately.
 //
 // Supported fields mirror Java's LocalTime#with(TemporalField, long):
@@ -521,7 +521,7 @@ func (t LocalTime) MustWithNanosecond(nano int) LocalTime {
 //   - FieldAmPmOfDay: toggles AM/PM while preserving the hour-of-am-pm, minute, second, and nano-of-second.
 //
 // Fields outside this list return an error. Range violations propagate the validation error.
-func (t LocalTime) WithTemporal(field Field, value TemporalValue) (r LocalTime, e error) {
+func (t LocalTime) WithField(field Field, value TemporalValue) (r LocalTime, e error) {
 	if t.IsZero() {
 		return t, nil
 	}

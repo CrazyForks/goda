@@ -46,12 +46,15 @@ func bytes2string(b []byte) string {
 	return string(b)
 }
 
-func floorMod(a, b int64) int64 {
-	r := a % b
-	if (r < 0 && b > 0) || (r > 0 && b < 0) {
-		r += b
+func floorDiv(a, b int64) int64 {
+	if a >= 0 {
+		return a / b
 	}
-	return r
+	return -((-a + b - 1) / b)
+}
+
+func floorMod(a, b int64) int64 {
+	return a - floorDiv(a, b)*b
 }
 
 type comparable0[T any] interface {

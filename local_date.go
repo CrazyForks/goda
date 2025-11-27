@@ -335,7 +335,7 @@ func (d LocalDate) MinusWeeks(weeks int) LocalDate {
 	return d.MinusDays(7 * weeks)
 }
 
-// WithTemporal returns a copy of this LocalDate with the specified field replaced.
+// WithField returns a copy of this LocalDate with the specified field replaced.
 // Zero values return zero immediately.
 //
 // Supported fields mirror Java's LocalDate#with(TemporalField, long):
@@ -349,7 +349,7 @@ func (d LocalDate) MinusWeeks(weeks int) LocalDate {
 //   - FieldProlepticMonth: sets the date based on months since year 0.
 //
 // Fields outside this list return an error. Range violations propagate the validation error.
-func (d LocalDate) WithTemporal(field Field, value TemporalValue) (LocalDate, error) {
+func (d LocalDate) WithField(field Field, value TemporalValue) (LocalDate, error) {
 	if d.IsZero() {
 		return d, nil
 	}
@@ -418,14 +418,22 @@ func (d LocalDate) WithTemporal(field Field, value TemporalValue) (LocalDate, er
 	case FieldProlepticMonth:
 		// Convert proleptic month back to year and month
 		// Proleptic month = year * 12 + (month - 1)
-		year := v / 12
-		month := v%12 + 1
+		//year := v / 12
+		year := floorDiv(v, 12)
+		//month := v%12 + 1
+		month := floorMod(v, 12) + 1
 		// Ensure year fits in our Year type
 		if year < math.MinInt || year > math.MaxInt {
 			return d, newError("proleptic month %d results in year out of range", v)
 		}
 		result, err := LocalDateOf(Year(year), Month(month), d.DayOfMonth())
 		return result, err
+	case FieldDayOfWeek:
+		e := checkTemporalInRange(field, 1, 7, value, nil)
+		if e != nil {
+			return d, e
+		}
+		return d.PlusDays(int(v - int64(d.DayOfWeek()))), nil
 	default:
 		return d, newError("unsupported field: %v", field)
 	}

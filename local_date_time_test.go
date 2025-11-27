@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -463,11 +464,11 @@ func TestLocalDateTime_IsLeapYear(t *testing.T) {
 }
 
 //go:embed TestFieldGetter.txt
-var TestFieldGetterData string
+var TestlocaldatetimeGetfieldJavamatchdata string
 
-func TestFieldGetter(t *testing.T) {
+func TestLocalDateTime_GetField_JavaMatch(t *testing.T) {
 	var fields = []Field{FieldNanoOfSecond, FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay, FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay, FieldMinuteOfHour, FieldMinuteOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldHourOfDay, FieldClockHourOfDay, FieldAmPmOfDay, FieldDayOfWeek, FieldAlignedDayOfWeekInMonth, FieldAlignedDayOfWeekInYear, FieldDayOfMonth, FieldDayOfYear, FieldEpochDay, FieldAlignedWeekOfMonth, FieldAlignedWeekOfYear, FieldMonthOfYear, FieldProlepticMonth, FieldYearOfEra, FieldYear, FieldEra}
-	for _, line := range strings.Split(TestFieldGetterData, "\n") {
+	for _, line := range strings.Split(TestlocaldatetimeGetfieldJavamatchdata, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
@@ -487,6 +488,60 @@ func TestFieldGetter(t *testing.T) {
 				return
 			}
 		}
+	}
+}
+
+func TestLocalDateTime_WithField_JavaMatch(t *testing.T) {
+	var fields = []Field{FieldNanoOfSecond, FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay, FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay, FieldMinuteOfHour, FieldMinuteOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldHourOfDay, FieldClockHourOfDay, FieldAmPmOfDay, FieldDayOfWeek, FieldAlignedDayOfWeekInMonth, FieldAlignedDayOfWeekInYear, FieldDayOfMonth, FieldDayOfYear, FieldEpochDay, FieldAlignedWeekOfMonth, FieldAlignedWeekOfYear, FieldMonthOfYear, FieldProlepticMonth, FieldYearOfEra, FieldYear, FieldEra}
+	for lineNumber, line := range strings.Split(TestlocaldatetimeGetfieldJavamatchdata, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		cols := strings.Split(line, ",")
+		dt, e := LocalDateTimeParse(cols[0])
+		if e != nil {
+			t.Fatal(e)
+		}
+		t.Run(fmt.Sprintf("line_%d", lineNumber+1), func(t *testing.T) {
+			for i, v := range cols[1:] {
+				var field = fields[i]
+				if dt.GetField(field).Unsupported() {
+					continue
+				}
+				switch field {
+				case FieldMicroOfSecond, FieldMilliOfSecond, FieldMilliOfDay, FieldMicroOfDay:
+					// subfield cannot be tested by this testcase
+					continue
+				}
+				t.Run(field.String(), func(t *testing.T) {
+					var ndt LocalDateTime
+					ndt, e = dt.WithField(field, TemporalValueOf(1))
+					if e != nil {
+						t.Fatal(e)
+					}
+					if ndt == dt && v != "1" {
+						t.Fatalf("data unchanged, %s, %s", dt, v)
+					}
+					var nv int
+					nv, e = strconv.Atoi(v)
+					if e != nil {
+						t.Fatal(e)
+					}
+					if fmt.Sprint(nv) != v {
+						panic("invalid value: " + v)
+					}
+					ndt, e = ndt.WithField(field, TemporalValueOf(nv))
+					if e != nil {
+						t.Fatal(e)
+					}
+					if ndt != dt {
+						t.Fatalf("%s != %s (%s)", ndt, dt, v)
+						return
+					}
+				})
+			}
+		})
 	}
 }
 

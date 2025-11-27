@@ -1584,7 +1584,7 @@ func TestLocalTime_WithTemporal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.base.WithTemporal(tt.field, TemporalValue{v: tt.value})
+			got, err := tt.base.WithField(tt.field, TemporalValue{v: tt.value})
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got, "want %s got %s", tt.want, got)
 		})
@@ -1594,20 +1594,20 @@ func TestLocalTime_WithTemporal(t *testing.T) {
 func TestLocalTime_WithTemporal_errors(t *testing.T) {
 	t.Run("zero value returns zero", func(t *testing.T) {
 		var zero LocalTime
-		got, err := zero.WithTemporal(FieldHourOfDay, TemporalValue{v: 5})
+		got, err := zero.WithField(FieldHourOfDay, TemporalValue{v: 5})
 		require.NoError(t, err)
 		assert.True(t, got.IsZero())
 	})
 
 	t.Run("invalid range", func(t *testing.T) {
 		base := MustLocalTimeOf(10, 0, 0, 0)
-		_, err := base.WithTemporal(FieldSecondOfMinute, TemporalValue{v: 99})
+		_, err := base.WithField(FieldSecondOfMinute, TemporalValue{v: 99})
 		assert.Error(t, err)
 	})
 
 	t.Run("unsupported field", func(t *testing.T) {
 		base := MustLocalTimeOf(10, 0, 0, 0)
-		_, err := base.WithTemporal(FieldDayOfMonth, TemporalValue{v: 10})
+		_, err := base.WithField(FieldDayOfMonth, TemporalValue{v: 10})
 		assert.Error(t, err)
 	})
 }

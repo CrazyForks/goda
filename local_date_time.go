@@ -164,16 +164,7 @@ func (dt LocalDateTime) GoTime() time.Time {
 	if dt.IsZero() {
 		return time.Time{}
 	}
-	return time.Date(
-		int(dt.Year()),
-		time.Month(dt.Month()),
-		dt.DayOfMonth(),
-		dt.Hour(),
-		dt.Minute(),
-		dt.Second(),
-		dt.Nanosecond(),
-		time.UTC,
-	)
+	return time.Date(int(dt.Year()), time.Month(dt.Month()), dt.DayOfMonth(), dt.Hour(), dt.Minute(), dt.Second(), dt.Nanosecond(), time.UTC)
 }
 
 // Compare compares this date-time with another.
@@ -318,6 +309,26 @@ func (dt LocalDateTime) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return dt.String(), nil
+}
+
+func (dt LocalDateTime) WithField(field Field, value TemporalValue) (r LocalDateTime, e error) {
+	if dt.IsZero() {
+		return
+	}
+	if dt.date.IsSupportedField(field) {
+		r.date, e = dt.date.WithField(field, value)
+		if e != nil {
+			return
+		}
+		r.time = dt.time
+	} else {
+		r.time, e = dt.time.WithField(field, value)
+		if e != nil {
+			return
+		}
+		r.date = dt.date
+	}
+	return
 }
 
 // LocalDateTimeOf creates a new LocalDateTime from individual components.
