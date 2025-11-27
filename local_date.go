@@ -401,7 +401,7 @@ func (d LocalDate) WithTemporal(field Field, value TemporalValue) (LocalDate, er
 		if e != nil {
 			return d, e
 		}
-		var y int64 = int64(d.Year())
+		var y = int64(d.Year())
 		if v == 0 && d.Year() > 0 {
 			// Switch from CE to BCE
 			y = -int64(d.Year()) + 1
