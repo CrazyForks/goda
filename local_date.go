@@ -6,6 +6,7 @@ import (
 	"encoding"
 	"encoding/json"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -332,6 +333,102 @@ func (d LocalDate) PlusWeeks(weeks int) LocalDate {
 // Equivalent to PlusWeeks(-weeks).
 func (d LocalDate) MinusWeeks(weeks int) LocalDate {
 	return d.MinusDays(7 * weeks)
+}
+
+// WithTemporal returns a copy of this LocalDate with the specified field replaced.
+// Zero values return zero immediately.
+//
+// Supported fields mirror Java's LocalDate#with(TemporalField, long):
+//   - FieldDayOfMonth: sets the day-of-month while keeping year and month.
+//   - FieldDayOfYear: sets the day-of-year while keeping year.
+//   - FieldMonthOfYear: sets the month-of-year while keeping year and day-of-month (adjusted if necessary).
+//   - FieldYear: sets the year while keeping month and day-of-month (adjusted if necessary).
+//   - FieldYearOfEra: sets the year within the current era (same as FieldYear for CE dates).
+//   - FieldEra: switches between BCE/CE eras while preserving year, month, and day.
+//   - FieldEpochDay: sets the date based on days since Unix epoch (1970-01-01).
+//   - FieldProlepticMonth: sets the date based on months since year 0.
+//
+// Fields outside this list return an error. Range violations propagate the validation error.
+func (d LocalDate) WithTemporal(field Field, value TemporalValue) (LocalDate, error) {
+	if d.IsZero() {
+		return d, nil
+	}
+
+	v := value.Int64()
+
+	switch field {
+	case FieldDayOfMonth:
+		e := checkTemporalInRange(FieldDayOfMonth, 1, 31, value, nil)
+		if e != nil {
+			return d, e
+		}
+		return d.WithDayOfMonth(int(v))
+	case FieldDayOfYear:
+		e := checkTemporalInRange(FieldDayOfYear, 1, 366, value, nil)
+		if e != nil {
+			return d, e
+		}
+		return d.WithDayOfYear(int(v))
+	case FieldMonthOfYear:
+		e := checkTemporalInRange(FieldMonthOfYear, 1, 12, value, nil)
+		if e != nil {
+			return d, e
+		}
+		return d.WithMonth(Month(v))
+	case FieldYear:
+		// Year can be any int value, no range check needed for the field itself
+		// LocalDateOf will validate the resulting date
+		return d.WithYear(Year(v))
+	case FieldYearOfEra:
+		// For CE (positive years), YearOfEra equals Year
+		// For BCE (negative years), YearOfEra = -Year + 1
+		e := checkTemporalInRange(FieldYearOfEra, 1, math.MaxInt, value, nil)
+		if e != nil {
+			return d, e
+		}
+		var y int64
+		if d.Year() >= 1 {
+			// CE
+			y = v
+		} else {
+			// BCE: convert YearOfEra back to negative year
+			y = -(v - 1)
+		}
+		result, err := LocalDateOf(Year(y), d.Month(), d.DayOfMonth())
+		return result, err
+	case FieldEra:
+		e := checkTemporalInRange(FieldEra, 0, 1, value, nil)
+		if e != nil {
+			return d, e
+		}
+		var y int64 = int64(d.Year())
+		if v == 0 && d.Year() > 0 {
+			// Switch from CE to BCE
+			y = -int64(d.Year()) + 1
+		} else if v == 1 && d.Year() < 0 {
+			// Switch from BCE to CE
+			y = -int64(d.Year()) + 1
+		}
+		// If already in the correct era, do nothing
+		result, err := LocalDateOf(Year(y), d.Month(), d.DayOfMonth())
+		return result, err
+	case FieldEpochDay:
+		// Convert epoch days back to LocalDate
+		return LocalDateOfUnixEpochDays(v), nil
+	case FieldProlepticMonth:
+		// Convert proleptic month back to year and month
+		// Proleptic month = year * 12 + (month - 1)
+		year := v / 12
+		month := v%12 + 1
+		// Ensure year fits in our Year type
+		if year < math.MinInt || year > math.MaxInt {
+			return d, newError("proleptic month %d results in year out of range", v)
+		}
+		result, err := LocalDateOf(Year(year), Month(month), d.DayOfMonth())
+		return result, err
+	default:
+		return d, newError("unsupported field: %v", field)
+	}
 }
 
 // WithDayOfMonth returns a copy of this date with the day-of-month altered.
