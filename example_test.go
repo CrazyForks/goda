@@ -15,20 +15,67 @@ func Example() {
 	fmt.Println("LocalDate:", date)
 
 	// Create a specific time
-	timeOfDay := goda.MustLocalTimeOf(14, 30, 45, 123456789)
+	timeOfDay := goda.MustLocalTimeOf(14, 30, 45, 0)
 	fmt.Println("LocalTime:", timeOfDay)
 
-	// Get current date and time
-	today := goda.LocalDateNow()
-	now := goda.LocalTimeNow()
-	fmt.Printf("Type of today: %T\n", today)
-	fmt.Printf("Type of now: %T\n", now)
+	// Combine date and time
+	datetime := date.AtTime(timeOfDay)
+	fmt.Println("LocalDateTime:", datetime)
+
+	// With timezone offset
+	offset := goda.MustZoneOffsetOfHours(8) // +08:00
+	offsetDateTime := datetime.AtOffset(offset)
+	fmt.Println("OffsetDateTime:", offsetDateTime)
+
+	// Parse from string
+	parsedDate := goda.MustLocalDateParse("2024-03-15")
+	parsedTime := goda.MustLocalTimeParse("14:30:45.123456789")
+	parsedDateTime := goda.MustLocalDateTimeParse("2024-03-15T14:30:45.123456789")
+	parsedOffsetDateTime := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
+
+	fmt.Println("Parsed LocalDate:", parsedDate)
+	fmt.Println("Parsed LocalTime:", parsedTime)
+	fmt.Println("Parsed LocalDateTime:", parsedDateTime)
+	fmt.Println("Parsed OffsetDateTime:", parsedOffsetDateTime)
+
+	// LocalDate arithmetic
+	tomorrow := date.PlusDays(1)
+	nextMonth := date.PlusMonths(1)
+	nextYear := date.PlusYears(1)
+
+	fmt.Println("Tomorrow:", tomorrow)
+	fmt.Println("Next month:", nextMonth)
+	fmt.Println("Next year:", nextYear)
+
+	// Comparisons
+	date1 := goda.MustLocalDateOf(2024, goda.March, 15)
+	date2 := goda.MustLocalDateOf(2024, goda.March, 20)
+	if date1.IsBefore(date2) {
+		fmt.Println("date1 is before date2")
+	}
+
+	// Serialization
+	jsonBytes, _ := json.Marshal(date)
+	fmt.Println("JSON:", string(jsonBytes))
+
+	str := date.String()
+	fmt.Println("String:", str)
 
 	// Output:
 	// LocalDate: 2024-03-15
-	// LocalTime: 14:30:45.123456789
-	// Type of today: goda.LocalDate
-	// Type of now: goda.LocalTime
+	// LocalTime: 14:30:45
+	// LocalDateTime: 2024-03-15T14:30:45
+	// OffsetDateTime: 2024-03-15T14:30:45+08:00
+	// Parsed LocalDate: 2024-03-15
+	// Parsed LocalTime: 14:30:45.123456789
+	// Parsed LocalDateTime: 2024-03-15T14:30:45.123456789
+	// Parsed OffsetDateTime: 2024-03-15T14:30:45+08:00
+	// Tomorrow: 2024-03-16
+	// Next month: 2024-04-15
+	// Next year: 2025-03-15
+	// date1 is before date2
+	// JSON: "2024-03-15"
+	// String: 2024-03-15
 }
 
 // ExampleLocalDateNow demonstrates how to get the current date.

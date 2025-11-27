@@ -19,50 +19,7 @@
 //
 // # Quick Start
 //
-// Creating dates and times:
-//
-//	// Specific date and time
-//	date := goda.MustLocalDateOf(2024, goda.March, 15)
-//	time := goda.MustLocalTimeOf(14, 30, 45, 0)
-//	datetime := date.AtTime(time)  // Combine date and time
-//
-//	// With timezone offset
-//	offset := goda.MustZoneOffsetOfHours(8)  // +08:00
-//	offsetDateTime := datetime.AtOffset(offset)
-//
-//	// Current date and time
-//	today := goda.LocalDateNow()
-//	now := goda.LocalTimeNow()
-//	currentDateTime := goda.LocalDateTimeNow()
-//	currentOffsetDateTime := goda.OffsetDateTimeNow()
-//
-//	// Parse from string
-//	date = goda.MustLocalDateParse("2024-03-15")
-//	time = goda.MustLocalTimeParse("14:30:45.123456789")
-//	datetime = goda.MustLocalDateTimeParse("2024-03-15T14:30:45.123456789")
-//	offsetDateTime = goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
-//
-// LocalDate arithmetic:
-//
-//	tomorrow := today.PlusDays(1)
-//	nextMonth := today.PlusMonths(1)
-//	nextYear := today.PlusYears(1)
-//
-// Comparisons:
-//
-//	if date1.IsBefore(date2) {
-//	    fmt.Println("date1 is earlier")
-//	}
-//
-// Serialization:
-//
-//	// JSON
-//	jsonBytes, _ := json.Marshal(date)  // "2024-03-15"
-//	json.Unmarshal(jsonBytes, &date)
-//
-//	// String format (ISO 8601)
-//	str := date.String()  // "2024-03-15"
-//	str := time.String()  // "14:30:45.123456789"
+// See the Example function for comprehensive usage examples.
 //
 // # Design Philosophy
 //
