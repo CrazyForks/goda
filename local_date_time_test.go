@@ -468,26 +468,30 @@ var TestlocaldatetimeGetfieldJavamatchdata string
 
 func TestLocalDateTime_GetField_JavaMatch(t *testing.T) {
 	var fields = []Field{FieldNanoOfSecond, FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay, FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay, FieldMinuteOfHour, FieldMinuteOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldHourOfDay, FieldClockHourOfDay, FieldAmPmOfDay, FieldDayOfWeek, FieldAlignedDayOfWeekInMonth, FieldAlignedDayOfWeekInYear, FieldDayOfMonth, FieldDayOfYear, FieldEpochDay, FieldAlignedWeekOfMonth, FieldAlignedWeekOfYear, FieldMonthOfYear, FieldProlepticMonth, FieldYearOfEra, FieldYear, FieldEra}
-	for _, line := range strings.Split(TestlocaldatetimeGetfieldJavamatchdata, "\n") {
+	for lineNumber, line := range strings.Split(TestlocaldatetimeGetfieldJavamatchdata, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
 		cols := strings.Split(line, ",")
-		dt, e := LocalDateTimeParse(cols[0])
-		if e != nil {
-			t.Fatal(e)
-		}
-		for i, v := range cols[1:] {
-			if dt.GetField(fields[i]).Unsupported() {
-				continue
+		t.Run(fmt.Sprintf("line_%d", lineNumber+1), func(t *testing.T) {
+			dt, e := LocalDateTimeParse(cols[0])
+			if e != nil {
+				t.Fatal(e)
 			}
-			if !assert.Equal(t, v, fmt.Sprint(dt.GetField(fields[i]).Int64())) {
-				t.Log(fields[i].String(), line)
-				t.Failed()
-				return
+			for i, v := range cols[1:] {
+				if dt.GetField(fields[i]).Unsupported() {
+					continue
+				}
+				t.Run(fields[i].String(), func(t *testing.T) {
+					if !assert.Equal(t, v, fmt.Sprint(dt.GetField(fields[i]).Int64())) {
+						t.Log(fields[i].String(), line)
+						t.Failed()
+						return
+					}
+				})
 			}
-		}
+		})
 	}
 }
 
