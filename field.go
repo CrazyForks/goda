@@ -111,48 +111,50 @@ type fieldRange struct {
 type fieldDescriptor struct {
 	name     string
 	javaName string
-	//min int64
-	//max int64
-	timeBased bool
-	dateBased bool
+	based    int8
 	fieldRange
 }
+
+const (
+	timeBased = iota + 1
+	dateBased
+)
 
 func makeRange(min, max int64) fieldRange {
 	return fieldRange{min, max, true}
 }
 
 var fieldDescriptors = []fieldDescriptor{
-	FieldNanoOfSecond:            {name: "NanoOfSecond", javaName: "NANO_OF_SECOND", timeBased: true, dateBased: false, fieldRange: makeRange(0, 999_999_999)},
-	FieldNanoOfDay:               {name: "NanoOfDay", javaName: "NANO_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399_999_999_999)},
-	FieldMicroOfSecond:           {name: "MicroOfSecond", javaName: "MICRO_OF_SECOND", timeBased: true, dateBased: false, fieldRange: makeRange(0, 999_999)},
-	FieldMicroOfDay:              {name: "MicroOfDay", javaName: "MICRO_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399_999_999)},
-	FieldMilliOfSecond:           {name: "MilliOfSecond", javaName: "MILLI_OF_SECOND", timeBased: true, dateBased: false, fieldRange: makeRange(0, 999)},
-	FieldMilliOfDay:              {name: "MilliOfDay", javaName: "MILLI_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399_999)},
-	FieldSecondOfMinute:          {name: "SecondOfMinute", javaName: "SECOND_OF_MINUTE", timeBased: true, dateBased: false, fieldRange: makeRange(0, 59)},
-	FieldSecondOfDay:             {name: "SecondOfDay", javaName: "SECOND_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399)},
-	FieldMinuteOfHour:            {name: "MinuteOfHour", javaName: "MINUTE_OF_HOUR", timeBased: true, dateBased: false, fieldRange: makeRange(0, 59)},
-	FieldMinuteOfDay:             {name: "MinuteOfDay", javaName: "MINUTE_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 60*24-1)},
-	FieldHourOfAmPm:              {name: "HourOfAmPm", javaName: "HOUR_OF_AMPM", timeBased: true, dateBased: false, fieldRange: makeRange(0, 11)},
-	FieldClockHourOfAmPm:         {name: "ClockHourOfAmPm", javaName: "CLOCK_HOUR_OF_AMPM", timeBased: true, dateBased: false, fieldRange: makeRange(1, 12)},
-	FieldHourOfDay:               {name: "HourOfDay", javaName: "HOUR_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 23)},
-	FieldClockHourOfDay:          {name: "ClockHourOfDay", javaName: "CLOCK_HOUR_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(1, 24)},
-	FieldAmPmOfDay:               {name: "AmPmOfDay", javaName: "AMPM_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 1)},
-	FieldDayOfWeek:               {name: "DayOfWeek", javaName: "DAY_OF_WEEK", timeBased: false, dateBased: true, fieldRange: makeRange(1, 7)},
-	FieldAlignedDayOfWeekInMonth: {name: "AlignedDayOfWeekInMonth", javaName: "ALIGNED_DAY_OF_WEEK_IN_MONTH", timeBased: false, dateBased: true},
-	FieldAlignedDayOfWeekInYear:  {name: "AlignedDayOfWeekInYear", javaName: "ALIGNED_DAY_OF_WEEK_IN_YEAR", timeBased: false, dateBased: true},
-	FieldDayOfMonth:              {name: "DayOfMonth", javaName: "DAY_OF_MONTH", timeBased: false, dateBased: true, fieldRange: makeRange(1, 31)},
-	FieldDayOfYear:               {name: "DayOfYear", javaName: "DAY_OF_YEAR", timeBased: false, dateBased: true, fieldRange: makeRange(1, 366)},
-	FieldEpochDay:                {name: "EpochDay", javaName: "EPOCH_DAY", timeBased: false, dateBased: true},
-	FieldAlignedWeekOfMonth:      {name: "AlignedWeekOfMonth", javaName: "ALIGNED_WEEK_OF_MONTH", timeBased: false, dateBased: true},
-	FieldAlignedWeekOfYear:       {name: "AlignedWeekOfYear", javaName: "ALIGNED_WEEK_OF_YEAR", timeBased: false, dateBased: true},
-	FieldMonthOfYear:             {name: "MonthOfYear", javaName: "MONTH_OF_YEAR", timeBased: false, dateBased: true, fieldRange: makeRange(1, 12)},
-	FieldProlepticMonth:          {name: "ProlepticMonth", javaName: "PROLEPTIC_MONTH", timeBased: false, dateBased: true, fieldRange: makeRange(YearMin*12, YearMax*12+11)},
-	FieldYearOfEra:               {name: "YearOfEra", javaName: "YEAR_OF_ERA", timeBased: false, dateBased: true, fieldRange: makeRange(1, math.MaxInt64)},
-	FieldYear:                    {name: "Year", javaName: "YEAR", timeBased: false, dateBased: true, fieldRange: makeRange(YearMin, YearMax)},
-	FieldEra:                     {name: "Era", javaName: "ERA", timeBased: false, dateBased: true, fieldRange: makeRange(1, 2)},
-	FieldInstantSeconds:          {name: "InstantSeconds", javaName: "INSTANT_SECONDS", timeBased: false, dateBased: false},
-	FieldOffsetSeconds:           {name: "OffsetSeconds", javaName: "OFFSET_SECONDS", timeBased: false, dateBased: false},
+	FieldNanoOfSecond:            {name: "NanoOfSecond", javaName: "NANO_OF_SECOND", based: timeBased, fieldRange: makeRange(0, 999_999_999)},
+	FieldNanoOfDay:               {name: "NanoOfDay", javaName: "NANO_OF_DAY", based: timeBased, fieldRange: makeRange(0, 86_399_999_999_999)},
+	FieldMicroOfSecond:           {name: "MicroOfSecond", javaName: "MICRO_OF_SECOND", based: timeBased, fieldRange: makeRange(0, 999_999)},
+	FieldMicroOfDay:              {name: "MicroOfDay", javaName: "MICRO_OF_DAY", based: timeBased, fieldRange: makeRange(0, 86_399_999_999)},
+	FieldMilliOfSecond:           {name: "MilliOfSecond", javaName: "MILLI_OF_SECOND", based: timeBased, fieldRange: makeRange(0, 999)},
+	FieldMilliOfDay:              {name: "MilliOfDay", javaName: "MILLI_OF_DAY", based: timeBased, fieldRange: makeRange(0, 86_399_999)},
+	FieldSecondOfMinute:          {name: "SecondOfMinute", javaName: "SECOND_OF_MINUTE", based: timeBased, fieldRange: makeRange(0, 59)},
+	FieldSecondOfDay:             {name: "SecondOfDay", javaName: "SECOND_OF_DAY", based: timeBased, fieldRange: makeRange(0, 86_399)},
+	FieldMinuteOfHour:            {name: "MinuteOfHour", javaName: "MINUTE_OF_HOUR", based: timeBased, fieldRange: makeRange(0, 59)},
+	FieldMinuteOfDay:             {name: "MinuteOfDay", javaName: "MINUTE_OF_DAY", based: timeBased, fieldRange: makeRange(0, 60*24-1)},
+	FieldHourOfAmPm:              {name: "HourOfAmPm", javaName: "HOUR_OF_AMPM", based: timeBased, fieldRange: makeRange(0, 11)},
+	FieldClockHourOfAmPm:         {name: "ClockHourOfAmPm", javaName: "CLOCK_HOUR_OF_AMPM", based: timeBased, fieldRange: makeRange(1, 12)},
+	FieldHourOfDay:               {name: "HourOfDay", javaName: "HOUR_OF_DAY", based: timeBased, fieldRange: makeRange(0, 23)},
+	FieldClockHourOfDay:          {name: "ClockHourOfDay", javaName: "CLOCK_HOUR_OF_DAY", based: timeBased, fieldRange: makeRange(1, 24)},
+	FieldAmPmOfDay:               {name: "AmPmOfDay", javaName: "AMPM_OF_DAY", based: timeBased, fieldRange: makeRange(0, 1)},
+	FieldDayOfWeek:               {name: "DayOfWeek", javaName: "DAY_OF_WEEK", based: dateBased, fieldRange: makeRange(1, 7)},
+	FieldAlignedDayOfWeekInMonth: {name: "AlignedDayOfWeekInMonth", javaName: "ALIGNED_DAY_OF_WEEK_IN_MONTH", based: dateBased},
+	FieldAlignedDayOfWeekInYear:  {name: "AlignedDayOfWeekInYear", javaName: "ALIGNED_DAY_OF_WEEK_IN_YEAR", based: dateBased},
+	FieldDayOfMonth:              {name: "DayOfMonth", javaName: "DAY_OF_MONTH", based: dateBased, fieldRange: makeRange(1, 31)},
+	FieldDayOfYear:               {name: "DayOfYear", javaName: "DAY_OF_YEAR", based: dateBased, fieldRange: makeRange(1, 366)},
+	FieldEpochDay:                {name: "EpochDay", javaName: "EPOCH_DAY", based: dateBased},
+	FieldAlignedWeekOfMonth:      {name: "AlignedWeekOfMonth", javaName: "ALIGNED_WEEK_OF_MONTH", based: dateBased},
+	FieldAlignedWeekOfYear:       {name: "AlignedWeekOfYear", javaName: "ALIGNED_WEEK_OF_YEAR", based: dateBased},
+	FieldMonthOfYear:             {name: "MonthOfYear", javaName: "MONTH_OF_YEAR", based: dateBased, fieldRange: makeRange(1, 12)},
+	FieldProlepticMonth:          {name: "ProlepticMonth", javaName: "PROLEPTIC_MONTH", based: dateBased, fieldRange: makeRange(YearMin*12, YearMax*12+11)},
+	FieldYearOfEra:               {name: "YearOfEra", javaName: "YEAR_OF_ERA", based: dateBased, fieldRange: makeRange(1, math.MaxInt64)},
+	FieldYear:                    {name: "Year", javaName: "YEAR", based: dateBased, fieldRange: makeRange(YearMin, YearMax)},
+	FieldEra:                     {name: "Era", javaName: "ERA", based: dateBased, fieldRange: makeRange(1, 2)},
+	FieldInstantSeconds:          {name: "InstantSeconds", javaName: "INSTANT_SECONDS"},
+	FieldOffsetSeconds:           {name: "OffsetSeconds", javaName: "OFFSET_SECONDS"},
 }
 
 func (f Field) check(value int64) error {
@@ -197,7 +199,7 @@ func (f Field) String() string {
 //
 // Returns true if this field is a component of a date.
 func (f Field) IsDateBased() bool {
-	return f.Valid() && fieldDescriptors[f].dateBased
+	return f.Valid() && fieldDescriptors[f].based == dateBased
 }
 
 // IsTimeBased checks if this field represents a component of a time.
@@ -208,7 +210,7 @@ func (f Field) IsDateBased() bool {
 //
 // Returns true if this field is a component of a time.
 func (f Field) IsTimeBased() bool {
-	return f.Valid() && fieldDescriptors[f].timeBased
+	return f.Valid() && fieldDescriptors[f].based == timeBased
 }
 
 func (f Field) JavaName() string {
