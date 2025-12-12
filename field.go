@@ -1,5 +1,10 @@
 package goda
 
+import (
+	"math"
+	"strconv"
+)
+
 // Field represents a date-time field, such as month-of-year or hour-of-day.
 // This is similar to Java's ChronoField.
 type Field int
@@ -97,72 +102,91 @@ const (
 	FieldOffsetSeconds
 )
 
+type fieldRange struct {
+	Min   int64
+	Max   int64
+	Valid bool
+}
+
+type fieldDescriptor struct {
+	name     string
+	javaName string
+	//min int64
+	//max int64
+	timeBased bool
+	dateBased bool
+	fieldRange
+}
+
+func makeRange(min, max int64) fieldRange {
+	return fieldRange{min, max, true}
+}
+
+var fieldDescriptors = []fieldDescriptor{
+	FieldNanoOfSecond:            {name: "NanoOfSecond", javaName: "NANO_OF_SECOND", timeBased: true, dateBased: false, fieldRange: makeRange(0, 999_999_999)},
+	FieldNanoOfDay:               {name: "NanoOfDay", javaName: "NANO_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399_999_999_999)},
+	FieldMicroOfSecond:           {name: "MicroOfSecond", javaName: "MICRO_OF_SECOND", timeBased: true, dateBased: false, fieldRange: makeRange(0, 999_999)},
+	FieldMicroOfDay:              {name: "MicroOfDay", javaName: "MICRO_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399_999_999)},
+	FieldMilliOfSecond:           {name: "MilliOfSecond", javaName: "MILLI_OF_SECOND", timeBased: true, dateBased: false, fieldRange: makeRange(0, 999)},
+	FieldMilliOfDay:              {name: "MilliOfDay", javaName: "MILLI_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399_999)},
+	FieldSecondOfMinute:          {name: "SecondOfMinute", javaName: "SECOND_OF_MINUTE", timeBased: true, dateBased: false, fieldRange: makeRange(0, 59)},
+	FieldSecondOfDay:             {name: "SecondOfDay", javaName: "SECOND_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 86_399)},
+	FieldMinuteOfHour:            {name: "MinuteOfHour", javaName: "MINUTE_OF_HOUR", timeBased: true, dateBased: false, fieldRange: makeRange(0, 59)},
+	FieldMinuteOfDay:             {name: "MinuteOfDay", javaName: "MINUTE_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 60*24-1)},
+	FieldHourOfAmPm:              {name: "HourOfAmPm", javaName: "HOUR_OF_AMPM", timeBased: true, dateBased: false, fieldRange: makeRange(0, 11)},
+	FieldClockHourOfAmPm:         {name: "ClockHourOfAmPm", javaName: "CLOCK_HOUR_OF_AMPM", timeBased: true, dateBased: false, fieldRange: makeRange(1, 12)},
+	FieldHourOfDay:               {name: "HourOfDay", javaName: "HOUR_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 23)},
+	FieldClockHourOfDay:          {name: "ClockHourOfDay", javaName: "CLOCK_HOUR_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(1, 24)},
+	FieldAmPmOfDay:               {name: "AmPmOfDay", javaName: "AMPM_OF_DAY", timeBased: true, dateBased: false, fieldRange: makeRange(0, 1)},
+	FieldDayOfWeek:               {name: "DayOfWeek", javaName: "DAY_OF_WEEK", timeBased: false, dateBased: true, fieldRange: makeRange(1, 7)},
+	FieldAlignedDayOfWeekInMonth: {name: "AlignedDayOfWeekInMonth", javaName: "ALIGNED_DAY_OF_WEEK_IN_MONTH", timeBased: false, dateBased: true},
+	FieldAlignedDayOfWeekInYear:  {name: "AlignedDayOfWeekInYear", javaName: "ALIGNED_DAY_OF_WEEK_IN_YEAR", timeBased: false, dateBased: true},
+	FieldDayOfMonth:              {name: "DayOfMonth", javaName: "DAY_OF_MONTH", timeBased: false, dateBased: true, fieldRange: makeRange(1, 31)},
+	FieldDayOfYear:               {name: "DayOfYear", javaName: "DAY_OF_YEAR", timeBased: false, dateBased: true, fieldRange: makeRange(1, 366)},
+	FieldEpochDay:                {name: "EpochDay", javaName: "EPOCH_DAY", timeBased: false, dateBased: true},
+	FieldAlignedWeekOfMonth:      {name: "AlignedWeekOfMonth", javaName: "ALIGNED_WEEK_OF_MONTH", timeBased: false, dateBased: true},
+	FieldAlignedWeekOfYear:       {name: "AlignedWeekOfYear", javaName: "ALIGNED_WEEK_OF_YEAR", timeBased: false, dateBased: true},
+	FieldMonthOfYear:             {name: "MonthOfYear", javaName: "MONTH_OF_YEAR", timeBased: false, dateBased: true, fieldRange: makeRange(1, 12)},
+	FieldProlepticMonth:          {name: "ProlepticMonth", javaName: "PROLEPTIC_MONTH", timeBased: false, dateBased: true, fieldRange: makeRange(YearMin*12, YearMax*12+11)},
+	FieldYearOfEra:               {name: "YearOfEra", javaName: "YEAR_OF_ERA", timeBased: false, dateBased: true, fieldRange: makeRange(1, math.MaxInt64)},
+	FieldYear:                    {name: "Year", javaName: "YEAR", timeBased: false, dateBased: true, fieldRange: makeRange(YearMin, YearMax)},
+	FieldEra:                     {name: "Era", javaName: "ERA", timeBased: false, dateBased: true, fieldRange: makeRange(1, 2)},
+	FieldInstantSeconds:          {name: "InstantSeconds", javaName: "INSTANT_SECONDS", timeBased: false, dateBased: false},
+	FieldOffsetSeconds:           {name: "OffsetSeconds", javaName: "OFFSET_SECONDS", timeBased: false, dateBased: false},
+}
+
+func (f Field) check(value int64) error {
+	if !f.Valid() {
+		return newError("Invalid field: %d", f)
+	}
+	var r = fieldDescriptors[f].fieldRange
+	if r.Valid && (value < r.Min || value > r.Max) {
+		return &Error{
+			outOfRange:      &r,
+			outOfRangeValue: value,
+		}
+	}
+	return nil
+}
+
+func (f Field) checkSetE(value int64, e *error) {
+	if *e != nil {
+		return
+	}
+	*e = f.check(value)
+	return
+}
+
+func (f Field) Valid() bool {
+	return f > 0 && int(f) < len(fieldDescriptors)
+}
+
 // String returns the name of the field.
 func (f Field) String() string {
-	switch f {
-	case FieldNanoOfSecond:
-		return "NanoOfSecond"
-	case FieldNanoOfDay:
-		return "NanoOfDay"
-	case FieldMicroOfSecond:
-		return "MicroOfSecond"
-	case FieldMicroOfDay:
-		return "MicroOfDay"
-	case FieldMilliOfSecond:
-		return "MilliOfSecond"
-	case FieldMilliOfDay:
-		return "MilliOfDay"
-	case FieldSecondOfMinute:
-		return "SecondOfMinute"
-	case FieldSecondOfDay:
-		return "SecondOfDay"
-	case FieldMinuteOfHour:
-		return "MinuteOfHour"
-	case FieldMinuteOfDay:
-		return "MinuteOfDay"
-	case FieldHourOfAmPm:
-		return "HourOfAmPm"
-	case FieldClockHourOfAmPm:
-		return "ClockHourOfAmPm"
-	case FieldHourOfDay:
-		return "HourOfDay"
-	case FieldClockHourOfDay:
-		return "ClockHourOfDay"
-	case FieldAmPmOfDay:
-		return "AmPmOfDay"
-	case FieldDayOfWeek:
-		return "DayOfWeek"
-	case FieldAlignedDayOfWeekInMonth:
-		return "AlignedDayOfWeekInMonth"
-	case FieldAlignedDayOfWeekInYear:
-		return "AlignedDayOfWeekInYear"
-	case FieldDayOfMonth:
-		return "DayOfMonth"
-	case FieldDayOfYear:
-		return "DayOfYear"
-	case FieldEpochDay:
-		return "EpochDay"
-	case FieldAlignedWeekOfMonth:
-		return "AlignedWeekOfMonth"
-	case FieldAlignedWeekOfYear:
-		return "AlignedWeekOfYear"
-	case FieldMonthOfYear:
-		return "MonthOfYear"
-	case FieldProlepticMonth:
-		return "ProlepticMonth"
-	case FieldYearOfEra:
-		return "YearOfEra"
-	case FieldYear:
-		return "Year"
-	case FieldEra:
-		return "Era"
-	case FieldInstantSeconds:
-		return "InstantSeconds"
-	case FieldOffsetSeconds:
-		return "OffsetSeconds"
-	default:
-		return ""
+	if f.Valid() {
+		return fieldDescriptors[f].name
 	}
+	return "UnknownField(" + strconv.Itoa(int(f)) + ")"
 }
 
 // IsDateBased checks if this field represents a component of a date.
@@ -173,12 +197,7 @@ func (f Field) String() string {
 //
 // Returns true if this field is a component of a date.
 func (f Field) IsDateBased() bool {
-	switch f {
-	case FieldDayOfWeek, FieldAlignedDayOfWeekInMonth, FieldAlignedDayOfWeekInYear, FieldDayOfMonth, FieldDayOfYear, FieldEpochDay, FieldAlignedWeekOfMonth, FieldAlignedWeekOfYear, FieldMonthOfYear, FieldProlepticMonth, FieldYearOfEra, FieldYear, FieldEra:
-		return true
-	default:
-		return false
-	}
+	return f.Valid() && fieldDescriptors[f].dateBased
 }
 
 // IsTimeBased checks if this field represents a component of a time.
@@ -189,114 +208,13 @@ func (f Field) IsDateBased() bool {
 //
 // Returns true if this field is a component of a time.
 func (f Field) IsTimeBased() bool {
-	switch f {
-	case FieldNanoOfSecond, FieldNanoOfDay, FieldMicroOfSecond, FieldMicroOfDay, FieldMilliOfSecond, FieldMilliOfDay, FieldSecondOfMinute, FieldSecondOfDay, FieldMinuteOfHour, FieldMinuteOfDay, FieldHourOfAmPm, FieldClockHourOfAmPm, FieldHourOfDay, FieldClockHourOfDay, FieldAmPmOfDay:
-		return true
-	default:
-		return false
-	}
-}
-
-func GetAllFields() []Field {
-	return []Field{
-		FieldNanoOfSecond,
-		FieldNanoOfDay,
-		FieldMicroOfSecond,
-		FieldMicroOfDay,
-		FieldMilliOfSecond,
-		FieldMilliOfDay,
-		FieldSecondOfMinute,
-		FieldSecondOfDay,
-		FieldMinuteOfHour,
-		FieldMinuteOfDay,
-		FieldHourOfAmPm,
-		FieldClockHourOfAmPm,
-		FieldHourOfDay,
-		FieldClockHourOfDay,
-		FieldAmPmOfDay,
-		FieldDayOfWeek,
-		FieldAlignedDayOfWeekInMonth,
-		FieldAlignedDayOfWeekInYear,
-		FieldDayOfMonth,
-		FieldDayOfYear,
-		FieldEpochDay,
-		FieldAlignedWeekOfMonth,
-		FieldAlignedWeekOfYear,
-		FieldMonthOfYear,
-		FieldProlepticMonth,
-		FieldYearOfEra,
-		FieldYear,
-		FieldEra,
-		FieldInstantSeconds,
-		FieldOffsetSeconds,
-	}
+	return f.Valid() && fieldDescriptors[f].timeBased
 }
 
 func (f Field) JavaName() string {
-	var j string
-	switch f {
-	case FieldNanoOfSecond:
-		j = "NANO_OF_SECOND"
-	case FieldNanoOfDay:
-		j = "NANO_OF_DAY"
-	case FieldMicroOfSecond:
-		j = "MICRO_OF_SECOND"
-	case FieldMicroOfDay:
-		j = "MICRO_OF_DAY"
-	case FieldMilliOfSecond:
-		j = "MILLI_OF_SECOND"
-	case FieldMilliOfDay:
-		j = "MILLI_OF_DAY"
-	case FieldSecondOfMinute:
-		j = "SECOND_OF_MINUTE"
-	case FieldSecondOfDay:
-		j = "SECOND_OF_DAY"
-	case FieldMinuteOfHour:
-		j = "MINUTE_OF_HOUR"
-	case FieldMinuteOfDay:
-		j = "MINUTE_OF_DAY"
-	case FieldHourOfAmPm:
-		j = "HOUR_OF_AMPM"
-	case FieldClockHourOfAmPm:
-		j = "CLOCK_HOUR_OF_AMPM"
-	case FieldHourOfDay:
-		j = "HOUR_OF_DAY"
-	case FieldClockHourOfDay:
-		j = "CLOCK_HOUR_OF_DAY"
-	case FieldAmPmOfDay:
-		j = "AMPM_OF_DAY"
-	case FieldDayOfWeek:
-		j = "DAY_OF_WEEK"
-	case FieldAlignedDayOfWeekInMonth:
-		j = "ALIGNED_DAY_OF_WEEK_IN_MONTH"
-	case FieldAlignedDayOfWeekInYear:
-		j = "ALIGNED_DAY_OF_WEEK_IN_YEAR"
-	case FieldDayOfMonth:
-		j = "DAY_OF_MONTH"
-	case FieldDayOfYear:
-		j = "DAY_OF_YEAR"
-	case FieldEpochDay:
-		j = "EPOCH_DAY"
-	case FieldAlignedWeekOfMonth:
-		j = "ALIGNED_WEEK_OF_MONTH"
-	case FieldAlignedWeekOfYear:
-		j = "ALIGNED_WEEK_OF_YEAR"
-	case FieldMonthOfYear:
-		j = "MONTH_OF_YEAR"
-	case FieldProlepticMonth:
-		j = "PROLEPTIC_MONTH"
-	case FieldYearOfEra:
-		j = "YEAR_OF_ERA"
-	case FieldYear:
-		j = "YEAR"
-	case FieldEra:
-		j = "ERA"
-	case FieldInstantSeconds:
-		j = "INSTANT_SECONDS"
-	case FieldOffsetSeconds:
-		j = "OFFSET_SECONDS"
-	default:
+	if !f.Valid() {
 		return ""
 	}
+	var j = fieldDescriptors[f].javaName
 	return "ChronoField." + j
 }
