@@ -3,6 +3,7 @@ package goda
 import (
 	"cmp"
 	"encoding"
+	"math"
 	"strconv"
 )
 
@@ -10,13 +11,14 @@ func parseInt64(input []byte) (int64, error) {
 	return strconv.ParseInt(string(input), 10, 64)
 }
 
-func parseInt(input []byte) (int, error) {
-	return strconv.Atoi(string(input))
+func parseInt(input []byte) (i int, e error) {
+	i, e = strconv.Atoi(string(input))
+	return
 }
 
 func unmarshalJsonImpl[T encoding.TextUnmarshaler](ref T, data []byte) error {
 	if len(data) < 2 || data[0] != '"' || data[len(data)-1] != '"' {
-		return newError("expect a JSON string")
+		return parseFailedError(data)
 	}
 	return ref.UnmarshalText(data[1 : len(data)-1])
 }
@@ -46,15 +48,20 @@ func bytes2string(b []byte) string {
 	return string(b)
 }
 
-func floorDiv(a, b int64) int64 {
-	if a >= 0 {
-		return a / b
+func floorDiv(x, y int64) (q int64) {
+	q = x / y
+	if (x^y) < 0 && (q*y != x) {
+		q = q - 1
 	}
-	return -((-a + b - 1) / b)
+	return
 }
 
-func floorMod(a, b int64) int64 {
-	return a - floorDiv(a, b)*b
+func floorMod(x, y int64) (r int64) {
+	r = x % y
+	if (x^y) < 0 && r != 0 {
+		r = r + y
+	}
+	return
 }
 
 type comparable0[T any] interface {
@@ -104,16 +111,14 @@ func mustValue[T any](v T, err error) T {
 	return v
 }
 
-func checkTemporalInRange(field Field, from, to int64, value TemporalValue, oldError error) (e error) {
-	if oldError != nil {
-		return oldError
-	}
-	return checkInRange(field.String(), from, to, value.Int64())
+func addExactly(x, y int64) (r int64, overflow bool) {
+	r = x + y
+	overflow = ((x ^ r) & (y ^ r)) < 0
+	return
 }
 
-func checkInRange(field string, from, to, value int64) (e error) {
-	if value < from || value > to {
-		return newError("%s out of range: %d", field, value)
-	}
-	return nil
+func mulExact(x, y int64) (r int64, overflow bool) {
+	r = x * y
+	overflow = ((y != 0) && (r/y != x)) || (x == math.MinInt64 && y == -1)
+	return
 }

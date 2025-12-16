@@ -18,7 +18,7 @@
 - 📅 **LocalDate**：不含时间的日期（例如：`2024-03-15`）
 - ⏰ **LocalTime**：不含日期的时间（例如：`14:30:45.123456789`）
 - 📆 **LocalDateTime**：不含时区的日期时间（例如：`2024-03-15T14:30:45.123456789`）
-- 🌐 **ZoneOffset**：相对于格林威治/UTC 的时区偏移（例如：`+08:00`）
+- 🌐 **ZoneOffset**：相对于格林威治/UTC 的时区偏移（例如：`+08:00`、`-05:00`、`Z`）
 - 🌍 **OffsetDateTime**：带偏移的日期时间（例如：`2024-03-15T14:30:45.123456789+01:00`）
 - 🔢 **Field**：日期时间字段枚举（类似 Java 的 `ChronoField`）
 - 🔍 **TemporalAccessor**：用于查询时间对象的通用接口
@@ -32,7 +32,7 @@
 - ✅ **日期运算**：支持溢出处理的天、月、年加减
 - ✅ **类型安全的字段访问**：使用 `TemporalValue` 返回类型查询任何字段，验证支持和溢出
 - ✅ **TemporalAccessor 接口**：跨所有时间类型的通用查询模式
-- ✅ **零拷贝文本序列化**，使用 `encoding.TextAppender`
+- ✅ **链式操作**：流畅 API 配合错误处理进行复杂变更
 - ✅ **不可变**：所有操作返回新值
 - ✅ **类型安全**：通过不同类型实现编译时安全
 - ✅ **零值友好**：正确处理零值
@@ -57,38 +57,38 @@ import (
 
 func main() {
     // 创建日期和时间
-    date := goda.MustNewLocalDate(2024, goda.March, 15)
-    time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+    date := goda.MustLocalDateOf(2024, goda.March, 15)
+    time := goda.MustLocalTimeOf(14, 30, 45, 123456789)
     datetime := date.AtTime(time)  // 或 time.AtDate(date)
-    
+
     fmt.Println(date)     // 2024-03-15
     fmt.Println(time)     // 14:30:45.123456789
     fmt.Println(datetime) // 2024-03-15T14:30:45.123456789
-    
+
     // 直接从组件创建
-    datetime2 := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
-    
+    datetime2 := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 123456789)
+
     // 带时区偏移
     offset := goda.MustZoneOffsetOfHours(1)  // +01:00
     offsetDateTime := datetime.AtOffset(offset)
     fmt.Println(offsetDateTime) // 2024-03-15T14:30:45.123456789+01:00
-    
+
     // 从字符串解析
-    date, _ = goda.ParseLocalDate("2024-03-15")
-    time = goda.MustParseLocalTime("14:30:45.123456789")
-    datetime = goda.MustParseLocalDateTime("2024-03-15T14:30:45")
-    
+    date, _ = goda.LocalDateParse("2024-03-15")
+    time = goda.MustLocalTimeParse("14:30:45.123456789")
+    datetime = goda.MustLocalDateTimeParse("2024-03-15T14:30:45")
+
     // 获取当前日期/时间
     today := goda.LocalDateNow()
     now := goda.LocalTimeNow()
     currentDateTime := goda.LocalDateTimeNow()
     currentOffsetDateTime := goda.OffsetDateTimeNow()
-    
+
     // 日期运算
-    tomorrow := today.PlusDays(1)
-    nextMonth := today.PlusMonths(1)
-    nextYear := today.PlusYears(1)
-    
+    tomorrow := today.Chain().PlusDays(1).MustGet()
+    nextMonth := today.Chain().PlusMonths(1).MustGet()
+    nextYear := today.Chain().PlusYears(1).MustGet()
+
     // 比较
     if tomorrow.IsAfter(today) {
         fmt.Println("明天在今天之后！")
@@ -138,37 +138,37 @@ if odt1.IsBefore(odt2) {
 使用 `Field` 枚举访问单个日期时间字段，返回类型安全的 `TemporalValue`：
 
 ```go
-date := goda.MustNewLocalDate(2024, goda.March, 15)
+date := goda.MustLocalDateOf(2024, goda.March, 15)
 
 // 检查字段支持
-fmt.Println(date.IsSupportedField(goda.DayOfMonth))  // true
-fmt.Println(date.IsSupportedField(goda.HourOfDay))   // false
+fmt.Println(date.IsSupportedField(goda.FieldDayOfMonth))  // true
+fmt.Println(date.IsSupportedField(goda.FieldHourOfDay))   // false
 
 // 获取带验证的字段值
-year := date.GetField(goda.YearField)
+year := date.GetField(goda.FieldYear)
 if year.Valid() {
     fmt.Println("年份：", year.Int64())  // 2024
 }
 
-dayOfWeek := date.GetField(goda.DayOfWeekField)
+dayOfWeek := date.GetField(goda.FieldDayOfWeek)
 if dayOfWeek.Valid() {
     fmt.Println("星期：", dayOfWeek.Int())  // 5（星期五）
 }
 
 // 不支持的字段返回 unsupported 的 TemporalValue
-hourOfDay := date.GetField(goda.HourOfDay)
+hourOfDay := date.GetField(goda.FieldHourOfDay)
 if hourOfDay.Unsupported() {
     fmt.Println("LocalDate 不支持小时字段")
 }
 
 // 时间字段
-time := goda.MustNewLocalTime(14, 30, 45, 123456789)
-hour := time.GetField(goda.HourOfDay)
+time := goda.MustLocalTimeOf(14, 30, 45, 123456789)
+hour := time.GetField(goda.FieldHourOfDay)
 if hour.Valid() {
     fmt.Println("小时：", hour.Int())  // 14
 }
 
-nanoOfDay := time.GetField(goda.NanoOfDay)
+nanoOfDay := time.GetField(goda.FieldNanoOfDay)
 if nanoOfDay.Valid() {
     fmt.Println("自午夜以来的纳秒：", nanoOfDay.Int64())
 }
@@ -213,6 +213,41 @@ printYear(goda.LocalDateNow())
 printYear(goda.LocalDateTimeNow())
 ```
 
+### 链式操作
+
+所有时间类型都支持链式操作，用于流畅且带错误处理的复杂变更。链式操作允许你在单个表达式中执行多个修改，并进行适当的错误处理：
+
+```go
+// 流畅地链式多个操作
+dt := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 123456789)
+
+// 链式日期和时间修改
+meetingTime := dt.Chain().
+    PlusDays(7).              // 下周
+    WithHour(16).             // 下午 4 点
+    WithMinute(0).            // 整点
+    WithSecond(0).            // 无秒
+    WithNano(0).              // 无纳秒
+    MustGet()                 // 获取结果（出错时 panic）
+
+fmt.Println("会议安排在：", meetingTime)
+
+// 链式操作中的错误处理
+result, err := dt.Chain().
+    PlusMonths(1).
+    WithDayOfMonth(32).       // 无效日期 - 会导致错误
+    GetResult()               // 返回（零值，错误）
+
+if err != nil {
+    fmt.Println("无效操作：", err)
+    // 使用后备方案
+    validTime := dt.Chain().
+        PlusMonths(1).
+        WithDayOfMonth(31).   // 有效日期
+        GetOrElse(dt)         // 出错时返回原始值
+}
+```
+
 ### JSON 序列化
 
 ```go
@@ -226,10 +261,10 @@ type Event struct {
 
 event := Event{
     Name:        "会议",
-    Date:        goda.MustNewLocalDate(2024, goda.March, 15),
-    Time:        goda.MustNewLocalTime(14, 30, 0, 0),
-    CreatedAt:   goda.MustParseLocalDateTime("2024-03-15T14:30:00"),
-    ScheduledAt: goda.MustParseOffsetDateTime("2024-03-15T14:30:00+08:00"),
+    Date:        goda.MustLocalDateOf(2024, goda.March, 15),
+    Time:        goda.MustLocalTimeOf(14, 30, 0, 0),
+    CreatedAt:   goda.MustLocalDateTimeParse("2024-03-15T14:30:00"),
+    ScheduledAt: goda.MustOffsetDateTimeParse("2024-03-15T14:30:00+08:00"),
 }
 
 jsonData, _ := json.Marshal(event)
@@ -276,6 +311,30 @@ db.Exec("INSERT INTO records (created_at, updated_at) VALUES (?, ?)",
 | `Field`             | 日期时间字段枚举                        | `HourOfDay`、`DayOfMonth`              |
 | `TemporalAccessor`  | 用于查询时间对象的接口                  | 所有时间类型都实现了此接口             |
 | `TemporalValue`     | 带验证的类型安全字段值                  | 由 `GetField()` 返回                   |
+| `Error`             | 带上下文的结构化错误                    | 提供详细的错误信息                     |
+| `LocalDateChain`    | LocalDate 的链式操作                    | `date.Chain().PlusDays(1).MustGet()`   |
+| `LocalTimeChain`    | LocalTime 的链式操作                    | `time.Chain().PlusHours(1).MustGet()`  |
+| `LocalDateTimeChain`| LocalDateTime 的链式操作                | `dt.Chain().PlusDays(1).MustGet()`     |
+| `OffsetDateTimeChain`| OffsetDateTime 的链式操作               | `odt.Chain().PlusHours(1).MustGet()`   |
+
+### 格式规范
+
+此包使用 ISO 8601 基本日历日期和时间格式（不是完整规范）：
+
+**LocalDate**：`yyyy-MM-dd`（例如："2024-03-15"）  
+仅限格里高利历日期。不支持周日期（YYYY-Www-D）或序数日期（YYYY-DDD）。
+
+**LocalTime**：`HH:mm:ss[.nnnnnnnnn]`（例如："14:30:45.123456789"）  
+24 小时格式。小数秒最多到纳秒。小数秒与 3 位数边界对齐（毫秒、微秒、纳秒），以实现 Java.time 兼容性：100ms → "14:30:45.100"，123.4ms → "14:30:45.123400"。解析接受任何长度的小数秒（例如："14:30:45.1" → 100ms）。
+
+**LocalDateTime**：`yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]`（例如："2024-03-15T14:30:45.123456789"）  
+使用 'T' 分隔符连接（解析时接受小写 't'）。
+
+**ZoneOffset**：`±HH:mm[:ss]` 或 `Z` 表示 UTC（例如："+08:00"、" -05:30"、"Z"）  
+小时数范围必须为 [-18, 18]，分钟和秒为 [0, 59]。还支持紧凑格式（±HH、±HHMM、±HHMMSS）。
+
+**OffsetDateTime**：`yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]±HH:mm[:ss]`（例如："2024-03-15T14:30:45+08:00"）  
+结合 LocalDateTime 和 ZoneOffset。接受 'Z' 作为 UTC 偏移。
 
 ### 时间格式化
 
@@ -304,7 +363,7 @@ db.Exec("INSERT INTO records (created_at, updated_at) VALUES (?, ?)",
 - `TemporalAccessor`：通用查询接口，使用 `GetField(field Field) TemporalValue`
 - `fmt.Stringer`
 - `encoding.TextMarshaler` / `encoding.TextUnmarshaler`
-- `encoding.TextAppender`（零拷贝文本序列化）
+- `encoding.TextAppender`
 - `json.Marshaler` / `json.Unmarshaler`
 - `sql.Scanner` / `driver.Valuer`
 
