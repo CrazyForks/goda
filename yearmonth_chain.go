@@ -9,7 +9,7 @@ type YearMonthChain struct {
 }
 
 func (y YearMonthChain) PlusMonths(months int64) YearMonthChain {
-	defer y.leaveFunction(y.enterFunction("YearMonth", "PlusMonths"))
+	defer y.leaveFunction(tyYearMonth, fnPlusMonths)
 	if !y.ok() {
 		return y
 	}
@@ -29,7 +29,7 @@ func (y YearMonthChain) PlusMonths(months int64) YearMonthChain {
 }
 
 func (y YearMonthChain) MinusMonths(months int64) YearMonthChain {
-	defer y.leaveFunction(y.enterFunction("YearMonth", "MinusMonths"))
+	defer y.leaveFunction(tyYearMonth, fnMinusMonths)
 	if months == math.MinInt64 {
 		return y.PlusMonths(math.MaxInt64).PlusMonths(1)
 	}
@@ -37,7 +37,7 @@ func (y YearMonthChain) MinusMonths(months int64) YearMonthChain {
 }
 
 func (y YearMonthChain) PlusYears(years int64) YearMonthChain {
-	defer y.leaveFunction(y.enterFunction("YearMonth", "PlusYears"))
+	defer y.leaveFunction(tyYearMonth, fnPlusYears)
 	if !y.ok() {
 		return y
 	}
@@ -49,7 +49,7 @@ func (y YearMonthChain) PlusYears(years int64) YearMonthChain {
 }
 
 func (y YearMonthChain) MinusYears(years int64) YearMonthChain {
-	defer y.leaveFunction(y.enterFunction("YearMonth", "MinusYears"))
+	defer y.leaveFunction(tyYearMonth, fnMinusYears)
 	if years == math.MinInt64 {
 		return y.PlusYears(math.MaxInt64).PlusYears(1)
 	}
@@ -57,17 +57,17 @@ func (y YearMonthChain) MinusYears(years int64) YearMonthChain {
 }
 
 func (y YearMonthChain) WithMonth(month Month) YearMonthChain {
-	defer y.leaveFunction(y.enterFunction("YearMonth", "WithMonth"))
+	defer y.leaveFunction(tyYearMonth, fnWithMonth)
 	return y.WithField(FieldMonthOfYear, TemporalValueOf(int64(month)))
 }
 
 func (y YearMonthChain) WithYear(year Year) YearMonthChain {
-	defer y.leaveFunction(y.enterFunction("YearMonth", "WithYear"))
+	defer y.leaveFunction(tyYearMonth, fnWithYear)
 	return y.WithField(FieldYear, TemporalValueOf(int64(year)))
 }
 
 func (y YearMonthChain) WithField(field Field, value TemporalValue) YearMonthChain {
-	defer y.leaveFunction(y.enterFunction("YearMonth", "WithField"))
+	defer y.leaveFunction(tyYearMonth, fnWithField)
 	field.checkSetE(value.Int64(), &y.eError)
 	if !y.ok() {
 		return y

@@ -5,7 +5,7 @@ type LocalTimeChain struct {
 }
 
 func (l LocalTimeChain) PlusHours(hours int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusHours"))
+	defer l.leaveFunction(tyLocalTime, fnPlusHours)
 	if hours == 0 {
 		return l
 	}
@@ -18,12 +18,12 @@ func (l LocalTimeChain) PlusHours(hours int64) LocalTimeChain {
 }
 
 func (l LocalTimeChain) MinusHours(hoursToSubtract int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusHours"))
+	defer l.leaveFunction(tyLocalTime, fnMinusHours)
 	return l.PlusHours(-(hoursToSubtract % 24))
 }
 
 func (l LocalTimeChain) PlusMinutes(minutesToAdd int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusMinutes"))
+	defer l.leaveFunction(tyLocalTime, fnPlusMinutes)
 	if minutesToAdd == 0 {
 		return l
 	}
@@ -37,12 +37,12 @@ func (l LocalTimeChain) PlusMinutes(minutesToAdd int64) LocalTimeChain {
 }
 
 func (l LocalTimeChain) MinusMinutes(minutesToSubtract int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusMinutes"))
+	defer l.leaveFunction(tyLocalTime, fnMinusMinutes)
 	return l.PlusMinutes(-(minutesToSubtract % 1440))
 }
 
 func (l LocalTimeChain) PlusSeconds(secondsToAdd int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusSeconds"))
+	defer l.leaveFunction(tyLocalTime, fnPlusSeconds)
 	if secondsToAdd == 0 {
 		return l
 	}
@@ -56,12 +56,12 @@ func (l LocalTimeChain) PlusSeconds(secondsToAdd int64) LocalTimeChain {
 }
 
 func (l LocalTimeChain) MinusSeconds(secondsToSubtract int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusSeconds"))
+	defer l.leaveFunction(tyLocalTime, fnMinusSeconds)
 	return l.PlusSeconds(-(secondsToSubtract % 86400))
 }
 
-func (l LocalTimeChain) PlusNano(nanosToAdd int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusNano"))
+func (l LocalTimeChain) PlusNanos(nanosToAdd int64) LocalTimeChain {
+	defer l.leaveFunction(tyLocalTime, fnPlusNanos)
 	if nanosToAdd == 0 {
 		return l
 	}
@@ -81,13 +81,13 @@ func (l LocalTimeChain) PlusNano(nanosToAdd int64) LocalTimeChain {
 	return l
 }
 
-func (l LocalTimeChain) MinusNano(nanosToSubtract int64) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusNano"))
-	return l.PlusNano(-(nanosToSubtract % 86400_000_000_000))
+func (l LocalTimeChain) MinusNanos(nanosToSubtract int64) LocalTimeChain {
+	defer l.leaveFunction(tyLocalTime, fnMinusNanos)
+	return l.PlusNanos(-(nanosToSubtract % 86400_000_000_000))
 }
 
 func (l LocalTimeChain) WithNano(nanoOfSecond int) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "WithNano"))
+	defer l.leaveFunction(tyLocalTime, fnWithNano)
 	FieldNanoOfSecond.checkSetE(int64(nanoOfSecond), &l.eError)
 	if !l.ok() {
 		return l
@@ -97,7 +97,7 @@ func (l LocalTimeChain) WithNano(nanoOfSecond int) LocalTimeChain {
 }
 
 func (l LocalTimeChain) WithSecond(second int) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "WithSecond"))
+	defer l.leaveFunction(tyLocalTime, fnWithSecond)
 	FieldSecondOfMinute.checkSetE(int64(second), &l.eError)
 	if !l.ok() {
 		return l
@@ -107,7 +107,7 @@ func (l LocalTimeChain) WithSecond(second int) LocalTimeChain {
 }
 
 func (l LocalTimeChain) WithMinute(minute int) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "WithMinute"))
+	defer l.leaveFunction(tyLocalTime, fnWithMinute)
 	FieldMinuteOfHour.checkSetE(int64(minute), &l.eError)
 	if !l.ok() {
 		return l
@@ -117,7 +117,7 @@ func (l LocalTimeChain) WithMinute(minute int) LocalTimeChain {
 }
 
 func (l LocalTimeChain) WithHour(hour int) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "WithHour"))
+	defer l.leaveFunction(tyLocalTime, fnWithHour)
 	FieldHourOfDay.checkSetE(int64(hour), &l.eError)
 	if !l.ok() {
 		return l
@@ -148,7 +148,7 @@ func (l LocalTimeChain) WithHour(hour int) LocalTimeChain {
 //
 // Fields outside this list return an error. Range violations propagate the validation error.
 func (l LocalTimeChain) WithField(field Field, value TemporalValue) LocalTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalTime", "WithField"))
+	defer l.leaveFunction(tyLocalTime, fnWithField)
 	field.checkSetE(value.Int64(), &l.eError)
 	if !l.ok() {
 		return l

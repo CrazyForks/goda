@@ -12,7 +12,7 @@ var localDateMaxEpoch = LocalDateMax().UnixEpochDays()
 var localDateMinEpoch = LocalDateMin().UnixEpochDays()
 
 func (l LocalDateChain) PlusDays(days int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "PlusDays"))
+	defer l.leaveFunction(tyLocalDate, fnPlusDays)
 	if !l.ok() {
 		return l
 	}
@@ -29,7 +29,7 @@ func (l LocalDateChain) PlusDays(days int64) LocalDateChain {
 }
 
 func (l LocalDateChain) MinusDays(days int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "MinusDays"))
+	defer l.leaveFunction(tyLocalDate, fnMinusDays)
 	if days == math.MinInt64 {
 		return l.PlusDays(math.MaxInt64).PlusDays(1)
 	}
@@ -37,7 +37,7 @@ func (l LocalDateChain) MinusDays(days int64) LocalDateChain {
 }
 
 func (l LocalDateChain) PlusMonths(months int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "PlusMonths"))
+	defer l.leaveFunction(tyLocalDate, fnPlusMonths)
 	if !l.ok() {
 		return l
 	}
@@ -53,7 +53,7 @@ func (l LocalDateChain) PlusMonths(months int64) LocalDateChain {
 }
 
 func (l LocalDateChain) MinusMonths(months int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "MinusMonths"))
+	defer l.leaveFunction(tyLocalDate, fnMinusMonths)
 	if months == math.MinInt64 {
 		return l.PlusMonths(math.MaxInt64).PlusMonths(1)
 	}
@@ -61,7 +61,7 @@ func (l LocalDateChain) MinusMonths(months int64) LocalDateChain {
 }
 
 func (l LocalDateChain) PlusYears(years int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "PlusYears"))
+	defer l.leaveFunction(tyLocalDate, fnPlusYears)
 	if !l.ok() {
 		return l
 	}
@@ -77,7 +77,7 @@ func (l LocalDateChain) PlusYears(years int64) LocalDateChain {
 }
 
 func (l LocalDateChain) MinusYears(years int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "MinusYears"))
+	defer l.leaveFunction(tyLocalDate, fnMinusYears)
 	if years == math.MinInt64 {
 		return l.PlusYears(math.MaxInt64).PlusYears(1)
 	}
@@ -85,7 +85,7 @@ func (l LocalDateChain) MinusYears(years int64) LocalDateChain {
 }
 
 func (l LocalDateChain) PlusWeeks(weeks int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "PlusWeeks"))
+	defer l.leaveFunction(tyLocalDate, fnPlusWeeks)
 	if !l.ok() {
 		return l
 	}
@@ -101,7 +101,7 @@ func (l LocalDateChain) PlusWeeks(weeks int64) LocalDateChain {
 }
 
 func (l LocalDateChain) MinusWeeks(weeks int64) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "MinusWeeks"))
+	defer l.leaveFunction(tyLocalDate, fnMinusWeeks)
 	if weeks == math.MinInt64 {
 		return l.PlusWeeks(math.MaxInt64).PlusWeeks(1)
 	}
@@ -109,7 +109,7 @@ func (l LocalDateChain) MinusWeeks(weeks int64) LocalDateChain {
 }
 
 func (l LocalDateChain) WithDayOfMonth(dayOfMonth int) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "WithDayOfMonth"))
+	defer l.leaveFunction(tyLocalDate, fnWithDayOfMonth)
 	if !l.ok() {
 		return l
 	}
@@ -118,7 +118,7 @@ func (l LocalDateChain) WithDayOfMonth(dayOfMonth int) LocalDateChain {
 }
 
 func (l LocalDateChain) WithDayOfYear(dayOfYear int) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "WithDayOfYear"))
+	defer l.leaveFunction(tyLocalDate, fnWithDayOfYear)
 	if !l.ok() {
 		return l
 	}
@@ -127,7 +127,7 @@ func (l LocalDateChain) WithDayOfYear(dayOfYear int) LocalDateChain {
 }
 
 func (l LocalDateChain) WithMonth(month Month) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "WithMonth"))
+	defer l.leaveFunction(tyLocalDate, fnWithMonth)
 	l.eError = FieldMonthOfYear.check(int64(month))
 	if !l.ok() {
 		return l
@@ -137,7 +137,7 @@ func (l LocalDateChain) WithMonth(month Month) LocalDateChain {
 }
 
 func (l LocalDateChain) WithYear(year Year) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "WithYear"))
+	defer l.leaveFunction(tyLocalDate, fnWithYear)
 	l.eError = FieldYear.check(int64(year))
 	if !l.ok() {
 		return l
@@ -161,7 +161,7 @@ func (l LocalDateChain) WithYear(year Year) LocalDateChain {
 //
 // Fields outside this list return an error. Range violations propagate the validation error.
 func (l LocalDateChain) WithField(field Field, value TemporalValue) LocalDateChain {
-	defer l.leaveFunction(l.enterFunction("LocalDate", "WithField"))
+	defer l.leaveFunction(tyLocalDate, fnWithField)
 	field.checkSetE(value.Int64(), &l.eError)
 	if !l.ok() {
 		return l

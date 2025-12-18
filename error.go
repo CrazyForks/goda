@@ -17,7 +17,7 @@ func sqlScannerDefaultBranch(value any) error {
 }
 
 const (
-	errReasonInvalidField int = iota + 1
+	errReasonInvalidField = iota + 1
 	errReasonUnsupportedField
 	errReasonOutOfRange
 	errReasonArithmeticOverflow
@@ -27,13 +27,13 @@ const (
 // Error is the error type used by this package.
 // It wraps error messages with the "goda: " prefix.
 type Error struct {
-	reason     int
 	field      Field
 	int64Value int64
 	message    string
 	cause      error
-	typeName   string
-	funcName   string
+	typeNameId int8
+	funcNameId int8
+	reason     int8
 }
 
 // Error implements the error interface.
@@ -54,8 +54,8 @@ func (e Error) Error() string {
 	default:
 		text = "goda: " + e.message
 	}
-	if e.typeName != "" {
-		text += " at " + e.typeName + "/" + e.funcName
+	if e.typeNameId != 0 {
+		text += " at " + tyNames[e.typeNameId] + "/" + fnNames[e.funcNameId]
 	}
 	if e.cause != nil {
 		text += ", caused by: " + e.cause.Error()

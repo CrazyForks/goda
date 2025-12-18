@@ -7,95 +7,94 @@ type LocalDateTimeChain struct {
 }
 
 func (l LocalDateTimeChain) PlusYears(years int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusYears"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusYears)
 	l.value.date = l.value.date.chainWithError(l.eError).PlusYears(years).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) MinusYears(years int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusYears"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusYears)
 	l.value.date = l.value.date.chainWithError(l.eError).MinusYears(years).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) PlusMonths(months int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusMonths"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusMonths)
 	l.value.date = l.value.date.chainWithError(l.eError).PlusMonths(months).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) MinusMonths(months int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusMonths"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusMonths)
 	l.value.date = l.value.date.chainWithError(l.eError).MinusMonths(months).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) PlusWeeks(weeks int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusWeeks"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusWeeks)
 	l.value.date = l.value.date.chainWithError(l.eError).PlusWeeks(weeks).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) MinusWeeks(weeks int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusWeeks"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusWeeks)
 	l.value.date = l.value.date.chainWithError(l.eError).MinusWeeks(weeks).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) PlusDays(days int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusDays"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusDays)
 	l.value.date = l.value.date.chainWithError(l.eError).PlusDays(days).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) MinusDays(days int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusDays"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusDays)
 	l.value.date = l.value.date.chainWithError(l.eError).MinusDays(days).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) PlusHours(hours int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusHours"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusHours)
 	return l.plusWithOverflow(l.value.date, hours, 0, 0, 0, 1)
 }
 
 func (l LocalDateTimeChain) MinusHours(hours int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusHours"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusHours)
 	return l.plusWithOverflow(l.value.date, hours, 0, 0, 0, -1)
 }
 
 func (l LocalDateTimeChain) PlusMinutes(minutes int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusMinutes"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusMinutes)
 	return l.plusWithOverflow(l.value.date, 0, minutes, 0, 0, 1)
 }
 
 func (l LocalDateTimeChain) MinusMinutes(minutes int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusMinutes"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusMinutes)
 	return l.plusWithOverflow(l.value.date, 0, minutes, 0, 0, -1)
 }
 
 func (l LocalDateTimeChain) PlusSeconds(seconds int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusSeconds"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusSeconds)
 	return l.plusWithOverflow(l.value.date, 0, 0, seconds, 0, 1)
 }
 
 func (l LocalDateTimeChain) MinusSeconds(seconds int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusSeconds"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusSeconds)
 	return l.plusWithOverflow(l.value.date, 0, 0, seconds, 0, -1)
 }
 
 func (l LocalDateTimeChain) PlusNanos(nanos int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "PlusNanos"))
+	defer l.leaveFunction(tyLocalDateTime, fnPlusNanos)
 	return l.plusWithOverflow(l.value.date, 0, 0, 0, nanos, 1)
 }
 
 func (l LocalDateTimeChain) MinusNanos(nanos int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "MinusNanos"))
+	defer l.leaveFunction(tyLocalDateTime, fnMinusNanos)
 	return l.plusWithOverflow(l.value.date, 0, 0, 0, nanos, -1)
 }
 
 func (l LocalDateTimeChain) plusWithOverflow(newDate LocalDate, hours, minutes, seconds, nanos, sign int64) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "plusWithOverflow"))
 	if !l.ok() {
 		return l
 	}
@@ -134,55 +133,55 @@ func (l LocalDateTimeChain) plusWithOverflow(newDate LocalDate, hours, minutes, 
 }
 
 func (l LocalDateTimeChain) WithYear(year Year) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithYear"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithYear)
 	l.value.date = l.value.date.chainWithError(l.eError).WithYear(year).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithMonth(month Month) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithMonth"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithMonth)
 	l.value.date = l.value.date.chainWithError(l.eError).WithMonth(month).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithDayOfMonth(dayOfMonth int) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithDayOfMonth"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithDayOfMonth)
 	l.value.date = l.value.date.chainWithError(l.eError).WithDayOfMonth(dayOfMonth).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithDayOfYear(dayOfYear int) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithDayOfYear"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithDayOfYear)
 	l.value.date = l.value.date.chainWithError(l.eError).WithDayOfYear(dayOfYear).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithHour(hour int) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithHour"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithHour)
 	l.value.time = l.value.time.chainWithError(l.eError).WithHour(hour).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithMinute(minute int) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithMinute"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithMinute)
 	l.value.time = l.value.time.chainWithError(l.eError).WithMinute(minute).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithSecond(second int) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithSecond"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithSecond)
 	l.value.time = l.value.time.chainWithError(l.eError).WithSecond(second).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithNano(nanoOfSecond int) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithNano"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithNano)
 	l.value.time = l.value.time.chainWithError(l.eError).WithNano(nanoOfSecond).mergeError(&l.eError)
 	return l
 }
 
 func (l LocalDateTimeChain) WithField(field Field, value TemporalValue) LocalDateTimeChain {
-	defer l.leaveFunction(l.enterFunction("LocalDateTime", "WithField"))
+	defer l.leaveFunction(tyLocalDateTime, fnWithField)
 	if field.IsTimeBased() {
 		l.value.time = l.value.time.chainWithError(l.eError).WithField(field, value).mergeError(&l.eError)
 	} else {

@@ -3,8 +3,6 @@ package goda
 type Chain[T interface{ IsZero() bool }] struct {
 	value  T
 	eError error
-	eType  string
-	eFunc  string
 }
 
 func (c Chain[T]) ok() bool {
@@ -51,27 +49,10 @@ func (c Chain[T]) mergeError(e *error) T {
 	return c.value
 }
 
-func (c *Chain[T]) enterFunction(typeName string, funcName string) bool {
-	if !c.ok() || c.eType != "" {
-		return false
-	}
-	c.eType = typeName
-	c.eFunc = funcName
-	return true
-}
-
-func (c *Chain[T]) leaveFunction(flag bool) {
-	if !flag {
-		return
-	}
-	if c.eError == nil {
-		c.eType = ""
-		c.eFunc = ""
-		return
-	}
+func (c *Chain[T]) leaveFunction(typeNameId int8, funcNameId int8) {
 	//goland:noinspection GoTypeAssertionOnErrors
 	if ce, ok := c.eError.(*Error); ok {
-		ce.typeName = c.eType
-		ce.funcName = c.eFunc
+		ce.typeNameId = typeNameId
+		ce.funcNameId = funcNameId
 	}
 }

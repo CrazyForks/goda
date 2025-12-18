@@ -5,7 +5,7 @@ type OffsetDateTimeChain struct {
 }
 
 func (o OffsetDateTimeChain) WithField(field Field, value TemporalValue) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithField"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithField)
 	newValue := value.Int64()
 	field.checkSetE(newValue, &o.eError)
 	if !o.ok() {
@@ -23,122 +23,122 @@ func (o OffsetDateTimeChain) WithField(field Field, value TemporalValue) OffsetD
 }
 
 func (o OffsetDateTimeChain) PlusYears(years int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusYears"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusYears)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusYears(years).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusYears(years int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusYears"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusYears)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusYears(years).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) PlusMonths(months int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusMonths"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusMonths)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusMonths(months).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusMonths(months int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusMonths"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusMonths)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusMonths(months).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) PlusWeeks(weeks int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusWeeks"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusWeeks)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusWeeks(weeks).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusWeeks(weeks int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusWeeks"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusWeeks)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusWeeks(weeks).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) PlusDays(days int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusDays"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusDays)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusDays(days).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusDays(days int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusDays"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusDays)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusDays(days).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) PlusHours(hours int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusHours"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusHours)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusHours(hours).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusHours(hours int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusHours"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusHours)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusHours(hours).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) PlusMinutes(minutes int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusMinutes"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusMinutes)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusMinutes(minutes).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusMinutes(minutes int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusMinutes"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusMinutes)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusMinutes(minutes).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) PlusSeconds(seconds int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusSeconds"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusSeconds)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusSeconds(seconds).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusSeconds(seconds int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusSeconds"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusSeconds)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusSeconds(seconds).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) PlusNanos(nanos int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "PlusNanos"))
+	defer o.leaveFunction(tyOffsetDateTime, fnPlusNanos)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).PlusNanos(nanos).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) MinusNanos(nanos int64) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "MinusNanos"))
+	defer o.leaveFunction(tyOffsetDateTime, fnMinusNanos)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).MinusNanos(nanos).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithYear(year Year) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithYear"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithYear)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithYear(year).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithMonth(month Month) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithMonth"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithMonth)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithMonth(month).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithDayOfMonth(dayOfMonth int) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithDayOfMonth"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithDayOfMonth)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithDayOfMonth(dayOfMonth).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithDayOfYear(dayOfYear int) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithDayOfYear"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithDayOfYear)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithDayOfYear(dayOfYear).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithHour(hour int) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithHour"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithHour)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithHour(hour).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithMinute(minute int) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithMinute"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithMinute)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithMinute(minute).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithSecond(second int) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithSecond"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithSecond)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithSecond(second).mergeError(&o.eError)
 	return o
 }
 func (o OffsetDateTimeChain) WithNano(nanoOfSecond int) OffsetDateTimeChain {
-	defer o.leaveFunction(o.enterFunction("OffsetDateTime", "WithNano"))
+	defer o.leaveFunction(tyOffsetDateTime, fnWithNano)
 	o.value.datetime = o.value.datetime.chainWithError(o.eError).WithNano(nanoOfSecond).mergeError(&o.eError)
 	return o
 }
