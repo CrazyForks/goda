@@ -79,6 +79,10 @@ type ZoneId struct {
 // ZoneIdOf creates a ZoneId from a time zone identifier string.
 func ZoneIdOf(id string) (r ZoneId, e error) {
 	defer func() { r.valid = e == nil }()
+	if id == "" {
+		e = &Error{reason: errReasonInvalidZoneId}
+		return
+	}
 	if id == "Z" || id == "UT" || id == "UTC" || id == "GMT" {
 		return ZoneIdUTC(), nil
 	}
