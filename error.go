@@ -22,6 +22,7 @@ const (
 	errReasonOutOfRange
 	errReasonArithmeticOverflow
 	errReasonParseFailed
+	errReasonInvalidZoneId
 )
 
 // Error is the error type used by this package.
@@ -51,6 +52,8 @@ func (e Error) Error() string {
 		text = "goda: arithmetic overflow"
 	case errReasonParseFailed:
 		text = "goda: parse user input failed"
+	case errReasonInvalidZoneId:
+		text = "goda: invalid zone id"
 	default:
 		text = "goda: " + e.message
 	}

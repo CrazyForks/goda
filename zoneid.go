@@ -6,6 +6,7 @@ import (
 	"encoding"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
@@ -25,6 +26,37 @@ func loadLocation(id string) (l *time.Location, e error) {
 	return
 }
 
+var builtinZoneShortIdMap = map[string]string{
+	"ACT": "Australia/Darwin",
+	"AET": "Australia/Sydney",
+	"AGT": "America/Argentina/Buenos_Aires",
+	"ART": "Africa/Cairo",
+	"AST": "America/Anchorage",
+	"BET": "America/Sao_Paulo",
+	"BST": "Asia/Dhaka",
+	"CAT": "Africa/Harare",
+	"CNT": "America/St_Johns",
+	"CST": "America/Chicago",
+	"CTT": "Asia/Shanghai",
+	"EAT": "Africa/Addis_Ababa",
+	"ECT": "Europe/Paris",
+	"IET": "America/Indiana/Indianapolis",
+	"IST": "Asia/Kolkata",
+	"JST": "Asia/Tokyo",
+	"MIT": "Pacific/Apia",
+	"NET": "Asia/Yerevan",
+	"NST": "Pacific/Auckland",
+	"PLT": "Asia/Karachi",
+	"PNT": "America/Phoenix",
+	"PRT": "America/Puerto_Rico",
+	"PST": "America/Los_Angeles",
+	"SST": "Pacific/Guadalcanal",
+	"VST": "Asia/Ho_Chi_Minh",
+	"EST": "America/Panama",
+	"MST": "America/Phoenix",
+	"HST": "Pacific/Honolulu",
+}
+
 // ZoneId represents a time zone identifier such as "America/New_York" or "Asia/Tokyo".
 // It wraps a time.Location and provides serialization support for JSON, text, and SQL.
 //
@@ -39,24 +71,40 @@ func loadLocation(id string) (l *time.Location, e error) {
 // Format: Uses IANA Time Zone Database names (e.g., "America/New_York", "Europe/London", "UTC").
 // The string representation matches Go's time.Location.String() format.
 type ZoneId struct {
-	loc *time.Location
+	loc   *time.Location
+	zo    ZoneOffset
+	valid bool
 }
 
 // ZoneIdOf creates a ZoneId from a time zone identifier string.
-// The identifier must be a valid IANA Time Zone Database name (e.g., "America/New_York", "Asia/Tokyo").
-// Returns an error if the zone ID is not found in the system's time zone database.
-//
-// Example zone IDs:
-//   - "America/New_York" - Eastern Time
-//   - "Europe/London" - British Time
-//   - "Asia/Tokyo" - Japan Standard Time
-//   - "UTC" - Coordinated Universal Time
-func ZoneIdOf(id string) (ZoneId, error) {
-	r, e := loadLocation(id)
-	if e != nil {
-		return ZoneId{}, e
+func ZoneIdOf(id string) (r ZoneId, e error) {
+	defer func() { r.valid = e == nil }()
+	if id == "Z" || id == "UT" || id == "UTC" || id == "GMT" {
+		return ZoneIdUTC(), nil
 	}
-	return ZoneId{loc: r}, nil
+	{
+		var id = id
+		if strings.HasPrefix(id, "UTC") || strings.HasPrefix(id, "GMT") {
+			id = id[3:]
+		} else if strings.HasPrefix(id, "UT") {
+			id = id[2:]
+		}
+		if len(id) > 0 && id[0] == '+' || id[0] == '-' {
+			r.zo, e = ZoneOffsetParse(id)
+			if e == nil {
+				return
+			}
+		}
+	}
+	r.loc, e = loadLocation(id)
+	if e != nil {
+		key := builtinZoneShortIdMap[id]
+		if key != "" && key != id && strings.Contains(e.Error(), "unknown time zone") {
+			return ZoneIdOf(key)
+		}
+		e = &Error{reason: errReasonInvalidZoneId}
+	}
+	return
 }
 
 // MustZoneIdOf creates a ZoneId from a time zone identifier string.
@@ -67,13 +115,13 @@ func MustZoneIdOf(id string) ZoneId {
 
 // ZoneIdUTC returns a ZoneId representing UTC (Coordinated Universal Time).
 func ZoneIdUTC() ZoneId {
-	return ZoneId{time.UTC}
+	return ZoneId{zo: ZoneOffsetUTC(), valid: true}
 }
 
 // ZoneIdOfGoLocation creates a ZoneId from a Go time.Location.
 // This allows interoperability with Go's standard time package.
 func ZoneIdOfGoLocation(l *time.Location) ZoneId {
-	return ZoneId{l}
+	return ZoneId{loc: l, valid: true}
 }
 
 // ZoneIdDefault returns the system's default time zone.
@@ -83,92 +131,12 @@ func ZoneIdDefault() ZoneId {
 	if time.Local == nil {
 		return ZoneIdUTC()
 	}
-	return ZoneId{time.Local}
+	return ZoneId{loc: time.Local, valid: true}
 }
 
 // IsZero returns true if this is the zero value of ZoneId (no location set).
 func (z ZoneId) IsZero() bool {
-	return z.loc == nil
-}
-
-// String returns the zone ID as a string, or empty string for zero value.
-func (z ZoneId) String() string {
-	if z.IsZero() {
-		return ""
-	}
-	return z.loc.String()
-}
-
-// Scan implements the sql.Scanner interface.
-// It supports scanning from nil, string, and []byte.
-// Nil values are converted to the zero value of ZoneId.
-func (z *ZoneId) Scan(src any) error {
-	switch v := src.(type) {
-	case nil:
-		*z = ZoneId{}
-		return nil
-	case string:
-		return z.UnmarshalText([]byte(v))
-	case []byte:
-		return z.UnmarshalText(v)
-	default:
-		return sqlScannerDefaultBranch(v)
-	}
-}
-
-// Value implements the driver.Valuer interface.
-// It returns nil for zero values, otherwise returns the zone ID as a string.
-func (z ZoneId) Value() (driver.Value, error) {
-	if z.IsZero() {
-		return nil, nil
-	}
-	return z.String(), nil
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface.
-// It accepts JSON strings representing a zone ID or JSON null.
-func (z *ZoneId) UnmarshalJSON(bytes []byte) error {
-	if len(bytes) == 4 && string(bytes) == "null" {
-		*z = ZoneId{}
-		return nil
-	}
-	return unmarshalJsonImpl(z, bytes)
-}
-
-// UnmarshalText implements the encoding.TextUnmarshaler interface.
-// It parses zone IDs. Empty input is treated as zero value.
-func (z *ZoneId) UnmarshalText(text []byte) error {
-	if len(text) == 0 {
-		*z = ZoneId{}
-		return nil
-	}
-	zoneId, err := ZoneIdOf(string(text))
-	if err != nil {
-		return err
-	}
-	*z = zoneId
-	return nil
-}
-
-// MarshalText implements the encoding.TextMarshaler interface.
-// It returns the zone ID as text, or empty for zero value.
-func (z ZoneId) MarshalText() (text []byte, err error) {
-	return marshalTextImpl(z)
-}
-
-// MarshalJSON implements the json.Marshaler interface.
-// It returns the zone ID as a JSON string, or empty string for zero value.
-func (z ZoneId) MarshalJSON() ([]byte, error) {
-	return marshalJsonImpl(z)
-}
-
-// AppendText implements the encoding.TextAppender interface.
-// It appends the zone ID to b and returns the extended buffer.
-func (z ZoneId) AppendText(b []byte) ([]byte, error) {
-	if z.IsZero() {
-		return b, nil
-	}
-	return append(b, z.String()...), nil
+	return !z.valid
 }
 
 // Compile-time interface checks

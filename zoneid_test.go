@@ -363,3 +363,41 @@ func TestZoneId_ConcurrentLoadLocation(t *testing.T) {
 		<-done
 	}
 }
+
+func TestZoneId_OfShort(t *testing.T) {
+	var a = []struct{ name, zone string }{
+		{"ACT", "Australia/Darwin"},
+		{"AET", "Australia/Sydney"},
+		{"AGT", "America/Argentina/Buenos_Aires"},
+		{"ART", "Africa/Cairo"},
+		{"AST", "America/Anchorage"},
+		{"BET", "America/Sao_Paulo"},
+		{"BST", "Asia/Dhaka"},
+		{"CAT", "Africa/Harare"},
+		{"CNT", "America/St_Johns"},
+		{"CST", "America/Chicago"},
+		{"CTT", "Asia/Shanghai"},
+		{"EAT", "Africa/Addis_Ababa"},
+		{"ECT", "Europe/Paris"},
+		{"IET", "America/Indiana/Indianapolis"},
+		{"IST", "Asia/Kolkata"},
+		{"JST", "Asia/Tokyo"},
+		{"MIT", "Pacific/Apia"},
+		{"NET", "Asia/Yerevan"},
+		{"NST", "Pacific/Auckland"},
+		{"PLT", "Asia/Karachi"},
+		{"PNT", "America/Phoenix"},
+		{"PRT", "America/Puerto_Rico"},
+		{"PST", "America/Los_Angeles"},
+		{"SST", "Pacific/Guadalcanal"},
+		{"VST", "Asia/Ho_Chi_Minh"},
+	}
+	for _, it := range a {
+		t.Run(it.name, func(t *testing.T) {
+			z, e := ZoneIdOf(it.name)
+			assert.NoError(t, e)
+			assert.Equal(t, it.zone, z.String())
+		})
+	}
+
+}
