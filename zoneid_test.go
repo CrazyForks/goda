@@ -33,12 +33,9 @@ func TestZoneIdOf(t *testing.T) {
 	})
 
 	t.Run("empty zone ID", func(t *testing.T) {
-		// On Windows, empty string is treated as Local time, so this may not error
 		z, err := ZoneIdOf("")
-		if err == nil {
-			// If no error, it should return Local
-			assert.False(t, z.IsZero())
-		}
+		assert.Error(t, err)
+		assert.True(t, z.IsZero())
 	})
 }
 
