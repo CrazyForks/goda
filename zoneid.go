@@ -103,7 +103,7 @@ func ZoneIdOf(id string) (r ZoneId, e error) {
 	r.loc, e = loadLocation(id)
 	if e != nil {
 		key := builtinZoneShortIdMap[id]
-		if key != "" && key != id && strings.Contains(e.Error(), "unknown time zone") {
+		if key != "" && strings.Contains(e.Error(), "unknown time zone") {
 			return ZoneIdOf(key)
 		}
 		e = &Error{reason: errReasonInvalidZoneId}
