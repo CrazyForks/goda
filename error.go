@@ -5,6 +5,15 @@ import (
 	"fmt"
 )
 
+// ErrUnsupported indicates that the specified operation or field is not supported.
+var ErrUnsupported = errors.ErrUnsupported
+
+// ErrOutOfRange indicates that the specified value is out of range.
+var ErrOutOfRange = errors.New("out of range")
+
+// ErrArithmeticOverflow indicates that the result of an arithmetic operation overflows.
+var ErrArithmeticOverflow = errors.New("arithmetic overflow")
+
 // newError creates a new Error with the given format and arguments.
 // All error messages are prefixed with "goda: ".
 func newError(format string, a ...any) error {
@@ -67,8 +76,15 @@ func (e Error) Error() string {
 }
 
 func (e Error) Unwrap() error {
-	if e.cause == nil && e.reason == errReasonUnsupportedField {
-		return errors.ErrUnsupported
+	if e.cause == nil {
+		switch e.reason {
+		case errReasonOutOfRange:
+			return ErrOutOfRange
+		case errReasonArithmeticOverflow:
+			return ErrArithmeticOverflow
+		case errReasonUnsupportedField:
+			return ErrUnsupported
+		}
 	}
 	return e.cause
 }
