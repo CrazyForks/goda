@@ -89,7 +89,7 @@ func ZoneIdOf(id string) (r ZoneId, e error) {
 		} else if strings.HasPrefix(id, "UT") {
 			id = id[2:]
 		}
-		if len(id) > 0 && id[0] == '+' || id[0] == '-' {
+		if len(id) > 0 && (id[0] == '+' || id[0] == '-') {
 			r.zo, e = ZoneOffsetParse(id)
 			if e == nil {
 				return
