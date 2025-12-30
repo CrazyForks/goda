@@ -5,6 +5,7 @@ import (
 	"encoding"
 	"math"
 	"strconv"
+	"time"
 )
 
 func parseInt64(input []byte) (int64, error) {
@@ -121,4 +122,49 @@ func mulExact(x, y int64) (r int64, overflow bool) {
 	r = x * y
 	overflow = ((y != 0) && (r/y != x)) || (x == math.MinInt64 && y == -1)
 	return
+}
+
+func minOf[T interface{ Compare(T) int }](a, b T) T {
+	if a.Compare(b) <= 0 {
+		return a
+	}
+	return b
+}
+
+func maxOf[T interface{ Compare(T) int }](a, b T) T {
+	if a.Compare(b) >= 0 {
+		return a
+	}
+	return b
+}
+
+func localDateTimeToGoTime(ldt LocalDateTime, loc *time.Location) time.Time {
+	return time.Date(
+		int(ldt.Year()),
+		time.Month(ldt.Month()),
+		ldt.DayOfMonth(),
+		ldt.Hour(),
+		ldt.Minute(),
+		ldt.Second(),
+		ldt.Nanosecond(),
+		loc,
+	)
+}
+
+func classifyZoneBoundsMode(
+	tbBoundsBegin, tbBoundsEnd time.Time,
+	taBoundsBegin, taBoundsEnd time.Time,
+	now time.Time,
+) int {
+	inTb := !now.Before(tbBoundsBegin) && now.Before(tbBoundsEnd)
+	inTa := !now.Before(taBoundsBegin) && now.Before(taBoundsEnd)
+
+	switch {
+	case inTb && inTa:
+		return zoneOffsetModeOverlap
+	case !inTb && !inTa:
+		return zoneOffsetModeGap
+	default:
+		return zoneOffsetModeNormal
+	}
 }

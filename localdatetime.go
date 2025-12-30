@@ -300,3 +300,5 @@ var _ = _assertLocalDateTimeIsComparable[LocalDateTime]
 
 var localDateTimeMinEpochSecond = mustValue(LocalDateTimeOfEpochSecond(math.MinInt64, 0, ZoneOffsetUTC()))
 var localDateTimeMaxEpochSecond = mustValue(LocalDateTimeOfEpochSecond(math.MaxInt64, 0, ZoneOffsetUTC()))
+var localDateTimeMinEpochSecondOneDay = mustValue(LocalDateTimeOfEpochSecond(math.MinInt64+48*86400, 0, ZoneOffsetUTC()))
+var localDateTimeMaxEpochSecondOneDay = mustValue(LocalDateTimeOfEpochSecond(math.MaxInt64-48*86400, 0, ZoneOffsetUTC()))

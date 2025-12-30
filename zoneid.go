@@ -76,6 +76,66 @@ type ZoneId struct {
 	valid bool
 }
 
+const (
+	zoneOffsetModeGap     = -1
+	zoneOffsetModeNormal  = 0
+	zoneOffsetModeOverlap = 1
+)
+
+func (z ZoneId) getOffsets(ldt LocalDateTime) (previous, after ZoneOffset, mode int) {
+	if z.IsZero() {
+		return
+	}
+	if ldt.IsZero() {
+		return
+	}
+	if z.loc == nil {
+		previous = z.zo
+		after = z.zo
+		return
+	}
+	// Clamp dateTime to valid range to avoid overflow
+	ldt = minOf(ldt, localDateTimeMaxEpochSecondOneDay)
+	ldt = maxOf(ldt, localDateTimeMinEpochSecondOneDay)
+
+	t := localDateTimeToGoTime(ldt, z.loc)
+	_, tOffset := t.Zone()
+	tb := localDateTimeToGoTime(ldt.Chain().MinusDays(1).MustGet(), z.loc)
+	_, tbOffset := tb.Zone()
+	ta := localDateTimeToGoTime(ldt.Chain().PlusDays(1).MustGet(), z.loc)
+	_, taOffset := ta.Zone()
+	if tOffset == tbOffset && tOffset == taOffset {
+		previous = MustZoneOffsetOfSeconds(tOffset)
+		after = previous
+		return
+	}
+	tbBoundsBegin, tbBoundsEnd := tb.ZoneBounds()
+	taBoundsBegin, taBoundsEnd := ta.ZoneBounds()
+	mode = classifyZoneBoundsMode(tbBoundsBegin, tbBoundsEnd, taBoundsBegin, taBoundsEnd, t)
+	switch mode {
+	case zoneOffsetModeNormal:
+		previous = MustZoneOffsetOfSeconds(tOffset)
+		after = previous
+	case zoneOffsetModeOverlap, zoneOffsetModeGap:
+		previous = MustZoneOffsetOfSeconds(tbOffset)
+		after = MustZoneOffsetOfSeconds(taOffset)
+	}
+	return
+}
+
+func (z ZoneId) GetOffset(localDateTime LocalDateTime) (o ZoneOffset) {
+	prev, next, mode := z.getOffsets(localDateTime)
+	switch mode {
+	case zoneOffsetModeNormal:
+		return prev
+	case zoneOffsetModeOverlap:
+		return prev
+	case zoneOffsetModeGap:
+		return next
+	}
+	panic("unreachable")
+}
+
 // ZoneIdOf creates a ZoneId from a time zone identifier string.
 func ZoneIdOf(id string) (r ZoneId, e error) {
 	defer func() { r.valid = e == nil }()
