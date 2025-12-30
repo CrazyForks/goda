@@ -49,7 +49,7 @@ func (t *LocalTime) UnmarshalText(text []byte) (e error) {
 		return nil
 	}
 
-	if len(text) < 8 {
+	if len(text) < 5 {
 		return errors.New("invalid format")
 	}
 
@@ -64,31 +64,42 @@ func (t *LocalTime) UnmarshalText(text []byte) (e error) {
 	if err != nil {
 		return err
 	}
-	if text[5] != ':' {
-		return errors.New("expect ':'")
-	}
-	second, err := parseInt(text[6:8])
-	if err != nil {
-		return err
+
+	var second = 0
+	var nano int64 = 0
+
+	// Check if seconds are provided
+	if len(text) > 5 {
+		if text[5] != ':' {
+			return errors.New("expect ':'")
+		}
+		if len(text) < 8 {
+			return errors.New("invalid format")
+		}
+		second, err = parseInt(text[6:8])
+		if err != nil {
+			return err
+		}
+
+		// Check for nanoseconds
+		if len(text) > 8 {
+			if text[8] != '.' {
+				return errors.New("expect '.'")
+			}
+		}
+		if len(text) > 9 {
+			var nanoBuf [9]byte
+			copy(nanoBuf[:], text[9:min(len(text), 18)])
+			for i := 8; i >= 0 && nanoBuf[i] == 0; i-- {
+				nanoBuf[i] = '0'
+			}
+			nano, e = parseInt64(nanoBuf[:])
+			if e != nil {
+				return e
+			}
+		}
 	}
 
-	var nano int64 = 0
-	if len(text) > 8 {
-		if text[8] != '.' {
-			return errors.New("expect '.'")
-		}
-	}
-	if len(text) > 9 {
-		var nanoBuf [9]byte
-		copy(nanoBuf[:], text[9:min(len(text), 18)])
-		for i := 8; i >= 0 && nanoBuf[i] == 0; i-- {
-			nanoBuf[i] = '0'
-		}
-		nano, e = parseInt64(nanoBuf[:])
-		if e != nil {
-			return e
-		}
-	}
 	*t, e = LocalTimeOf(hour, minute, second, int(nano))
 	return e
 }

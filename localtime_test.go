@@ -333,9 +333,6 @@ func TestLocalTime_UnmarshalText(t *testing.T) {
 		err := lt.UnmarshalText([]byte("14-30-45"))
 		assert.Error(t, err)
 
-		err = lt.UnmarshalText([]byte("14:30"))
-		assert.Error(t, err)
-
 		err = lt.UnmarshalText([]byte("not-a-time"))
 		assert.Error(t, err)
 
@@ -707,9 +704,6 @@ func TestParseLocalTime(t *testing.T) {
 
 	t.Run("invalid format", func(t *testing.T) {
 		_, err := LocalTimeParse("14-30-45")
-		assert.Error(t, err)
-
-		_, err = LocalTimeParse("14:30")
 		assert.Error(t, err)
 
 		_, err = LocalTimeParse("not-a-time")
