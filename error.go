@@ -49,6 +49,7 @@ type Error struct {
 // Error implements the error interface.
 func (e Error) Error() string {
 	var text string
+	var cause = e.cause
 	switch e.reason {
 	case errReasonInvalidField:
 		text = fmt.Sprintf("goda: invalid field (value=%d)", int64(e.field))
@@ -61,6 +62,10 @@ func (e Error) Error() string {
 		text = "goda: arithmetic overflow"
 	case errReasonParseFailed:
 		text = "goda: parse user input failed"
+		if cause != nil {
+			text += ", " + cause.Error()
+			cause = nil
+		}
 	case errReasonInvalidZoneId:
 		text = "goda: invalid zone id"
 	default:
@@ -69,8 +74,8 @@ func (e Error) Error() string {
 	if e.typeNameId != 0 {
 		text += " at " + tyNames[e.typeNameId] + "/" + fnNames[e.funcNameId]
 	}
-	if e.cause != nil {
-		text += ", caused by: " + e.cause.Error()
+	if cause != nil {
+		text += ", caused by: " + cause.Error()
 	}
 	return text
 }
